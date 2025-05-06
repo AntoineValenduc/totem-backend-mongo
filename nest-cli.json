@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/totem-api-gateway/src",
+  "compilerOptions": {
+    "deleteOutDir": true,
+    "webpack": true,
+    "tsConfigPath": "apps/totem-api-gateway/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/totem-api-gateway",
+  "projects": {
+    "totem-api-gateway": {
+      "type": "application",
+      "root": "apps/totem-api-gateway",
+      "entryFile": "main",
+      "sourceRoot": "apps/totem-api-gateway/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/totem-api-gateway/tsconfig.app.json"
+      }
+    },
+    "totem-mongo": {
+      "type": "application",
+      "root": "apps/totem-mongo",
+      "entryFile": "main",
+      "sourceRoot": "apps/totem-mongo/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/totem-mongo/tsconfig.app.json"
+      }
+    }
+  }
+}

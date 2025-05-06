@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "declaration": false,
+    "outDir": "../../dist/apps/totem-mongo",
+    "baseUrl": ".",
+    "paths": {
+      "@shared/interfaces/*": ["libs/shared/interfaces/*"],
+      "@shared/dto/*": ["libs/shared/dto/*"],
+      "@shared/schemas/*": ["libs/shared/schemas/*"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
+}
