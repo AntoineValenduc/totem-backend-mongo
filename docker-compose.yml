@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  mongo:
+    image: mongo
+    container_name: totem-mongo-db
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+
+  totem-mongo:
+    build:
+      context: .
+      dockerfile: apps/totem-mongo/Dockerfile
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/totemDB
+    ports:
+      - '3001:3001'
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/totem-api-gateway/Dockerfile
+    depends_on:
+      - totem-mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/totemDB
+    ports:
+      - '3000:3000'
+
+volumes:
+  mongo_data:
