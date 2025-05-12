@@ -1,31 +1,45 @@
-import mongoose, { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Branch } from 'totem-mongo/src/schema/branch.schema';
 
 export type BadgeDocument = HydratedDocument<Badge>;
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: {
+    virtuals: true,
+    versionKey: false,
+    transform: (doc, ret) => {
+      delete ret._id;
+    },
+  },
+})
 export class Badge {
-  @Prop()
+  @Prop({ required: true, trim: true })
   name: string;
 
-  @Prop()
+  @Prop({ trim: true })
   description: string;
 
-  @Prop()
+  @Prop({ trim: true })
   logo_url: string;
 
-  @Prop()
+  @Prop({ min: 0, max: 100, default: 0 }) // Progress between 0-100
   progress: number;
 
-  @Prop()
+  @Prop({ trim: true })
   status: string;
 
-  @Prop()
+  @Prop({ default: null })
   date_earned: Date;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Branch' })
-  branch: Types.ObjectId | Branch;
+  @Prop({ default: null })
+  removed_at: Date;
+
+  @Prop({ default: false })
+  is_deleted: boolean;
+
+  @Prop({ type: Types.ObjectId, ref: 'Branch', required: true })
+  branch: Types.ObjectId;
 }
 
 export const BadgeSchema = SchemaFactory.createForClass(Badge);

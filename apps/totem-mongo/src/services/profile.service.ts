@@ -1,45 +1,60 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Profile } from '../schema/profile.schema';
-import { Model } from 'mongoose';
+import { Model, HydratedDocument } from 'mongoose';
+import { Profile, ProfileDocument } from '../schema/profile.schema';
 import { CreateProfileDto } from '../shared/dto/create-profile.dto';
 
 @Injectable()
 export class ProfileService {
   constructor(
-    @InjectModel(Profile.name) private profileModel: Model<Profile>,
+    @InjectModel(Profile.name) private readonly profileModel: Model<Profile>,
   ) {}
 
-  getHello(): string {
-    return 'Hello World!';
+  async findAll(): Promise<ProfileDocument[]> {
+    return this.profileModel.find({ is_deleted: { $ne: true } }).exec();
   }
 
-  async findAll(): Promise<Profile[]> {
-    return this.profileModel.find().exec();
+  async getById(idProfile: string): Promise<ProfileDocument> {
+    return this.findProfileById(idProfile);
   }
 
-  async getById(id: string) {
-    console.log('Recherche du profil avec ID :', id);
+  async create(createProfileDto: CreateProfileDto): Promise<ProfileDocument> {
+    const createdProfile = new this.profileModel(createProfileDto);
+    return await createdProfile.save();
+  }
 
-    try {
-      const profile = await this.profileModel.findById(id).exec();
-      if (!profile) {
-        throw new NotFoundException(`id_profile ${id} not found`);
-      }
-      return profile;
-    } catch (error) {
-      console.error('Erreur dans getById:', error.message);
-      throw new InternalServerErrorException('Erreur lors de la récupération du profil');
+  async update(
+    idProfile: string,
+    updateProfileDto: CreateProfileDto,
+  ): Promise<ProfileDocument> {
+    const profile = await this.findProfileById(idProfile);
+    Object.assign(profile, updateProfileDto);
+    return await profile.save();
+  }
+
+  async remove(idProfile: string): Promise<ProfileDocument> {
+    const profile = await this.findProfileById(idProfile);
+
+    // Soft delete using a single query
+    profile.is_deleted = true;
+    profile.removed_at = new Date();
+    await profile.save();
+
+    return profile;
+  }
+
+  private async findProfileById(
+    idProfile: string,
+  ): Promise<HydratedDocument<Profile>> {
+    if (!idProfile) {
+      throw new HttpException("ID can't be null", HttpStatus.BAD_REQUEST);
     }
-  }
 
-  async create(createProfileDto: CreateProfileDto): Promise<Profile> {
-    const createdProfile = new this.profileModel(createProfileDto);
-    return await createdProfile.save();
-  }
+    const profile = await this.profileModel.findById(idProfile).exec();
+    if (!profile || profile.is_deleted) {
+      throw new HttpException('Profile not found', HttpStatus.NOT_FOUND);
+    }
 
-  async update(createProfileDto: CreateProfileDto): Promise<Profile> {
-    const createdProfile = new this.profileModel(createProfileDto);
-    return await createdProfile.save();
+    return profile;
   }
 }

@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { TotemApiGatewayModule } from './totem-api-gateway.module';
 import { SwaggerModule } from '@nestjs/swagger/dist/swagger-module';
 import { DocumentBuilder } from '@nestjs/swagger';
+import { CustomHttpExceptionFilter } from 'totem-mongo/src/shared/filters/CustomHttpExceptionFilter.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(TotemApiGatewayModule);
@@ -18,6 +19,8 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
+
+  app.useGlobalFilters(new CustomHttpExceptionFilter());
 
   await app.startAllMicroservices();
   await app.listen(3000);

@@ -25,6 +25,13 @@ export class Branch {
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Badge' })
   badge: Badge[];
 
+  @Prop({ default: null })
+  removed_at: Date;
+
+  @Prop({ default: false })
+  is_deleted: boolean;
+
+
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' })
   profile: Profile[];
 }

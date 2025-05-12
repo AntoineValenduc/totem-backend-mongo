@@ -14,10 +14,21 @@ export class ProfilesService {
   }
 
   getById(id: string) {
-    return this.profilesClient.send(PROFILE_PATTERNS.GET_BY_ID, id);
+    return this.profilesClient.send(PROFILE_PATTERNS.GET_BY_ID, { id });
   }
 
   createProfile(profile: CreateProfileDto) {
     return this.profilesClient.send(PROFILE_PATTERNS.CREATE, profile);
+  }
+
+  updateProfile(idProfile: string, profile: CreateProfileDto) {
+    return this.profilesClient.send(PROFILE_PATTERNS.UPDATE, [
+      idProfile,
+      profile,
+    ]);
+  }
+
+  deleteProfile(id: string) {
+    return this.profilesClient.send(PROFILE_PATTERNS.DELETE, id);
   }
 }

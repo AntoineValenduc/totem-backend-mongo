@@ -34,13 +34,16 @@ export class Profile {
   photo_url: string;
 
   @Prop()
-  creared_at: Date;
+  created_at: Date;
 
   @Prop()
   updated_at: Date;
 
-  @Prop()
-  remove_at: Date;
+  @Prop({ default: null })
+  removed_at: Date;
+
+  @Prop({ default: false })
+  is_deleted: boolean;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Branch' })
   branch: Types.ObjectId | Branch;

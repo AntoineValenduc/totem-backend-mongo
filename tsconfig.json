@@ -18,6 +18,7 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
+      "totem-api-gateway/*": ["apps/totem-api-gateway/*"],
       "totem-mongo/*": ["apps/totem-mongo/*"]
     }
   }
