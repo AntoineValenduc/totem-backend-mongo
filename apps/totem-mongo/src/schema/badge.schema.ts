@@ -1,5 +1,6 @@
-import { HydratedDocument } from 'mongoose';
+import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Branch } from 'totem-mongo/src/schema/branch.schema';
 
 export type BadgeDocument = HydratedDocument<Badge>;
 
@@ -12,7 +13,7 @@ export class Badge {
   description: string;
 
   @Prop()
-  photo: string;
+  logo_url: string;
 
   @Prop()
   progress: number;
@@ -21,7 +22,10 @@ export class Badge {
   status: string;
 
   @Prop()
-  dateEarned: Date;
+  date_earned: Date;
+
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Branch' })
+  branch: Types.ObjectId | Branch;
 }
 
 export const BadgeSchema = SchemaFactory.createForClass(Badge);

@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ProfilesService } from './profiles.service';
-import { ProfilesController } from './profiles.controller';
+import { ProfilesService } from './profiles/profiles.service';
+import { ProfilesController } from './profiles/profiles.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { BranchesService } from '../branches/branches.service';
-import { BranchesController } from '../branches/branches.controller';
-import { BadgesController } from '../badges/badges.controller';
-import { BadgesService } from '../badges/badges.service';
+import { BranchesService } from './branches/branches.service';
+import { BranchesController } from './branches/branches.controller';
+import { BadgesController } from './badges/badges.controller';
+import { BadgesService } from './badges/badges.service';
 
 @Module({
   imports: [
@@ -23,4 +23,4 @@ import { BadgesService } from '../badges/badges.service';
   providers: [ProfilesService, BranchesService, BadgesService],
   controllers: [ProfilesController, BranchesController, BadgesController],
 })
-export class ProfilesModule {}
+export class TotemMongoModule {}

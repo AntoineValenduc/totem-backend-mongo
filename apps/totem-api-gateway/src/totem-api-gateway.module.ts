@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TotemApiGatewayController } from './totem-api-gateway.controller';
 import { TotemApiGatewayService } from './totem-api-gateway.service';
-import { TotemMongoModule } from '../../totem-mongo/src/totem-mongo.module';
-import {ProfilesModule} from "./profiles/profiles.module";
+import { TotemMongoModule } from './totem-mongo.module';
 
 @Module({
-  imports: [ProfilesModule],
+  imports: [TotemMongoModule],
   controllers: [TotemApiGatewayController],
   providers: [TotemApiGatewayService],
 })

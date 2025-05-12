@@ -1,11 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateBadgeDto } from '../../../totem-mongo/src/shared/dto/create-badge.dto';
-import {BADGE_PATTERNS} from "../../../totem-mongo/src/shared/constants/patterns";
+import { CreateBadgeDto } from 'totem-mongo/src/shared/dto/create-badge.dto';
+import { BADGE_PATTERNS } from 'totem-mongo/src/shared/constants/patterns';
 
 @Injectable()
 export class BadgesService {
-  constructor(@Inject('TOTEM_MONGO_CLIENT') private profilesClient: ClientProxy) {}
+  constructor(
+    @Inject('TOTEM_MONGO_CLIENT') private readonly profilesClient: ClientProxy,
+  ) {}
 
   findAll() {
     return this.profilesClient.send(BADGE_PATTERNS.FIND_ALL, {});
