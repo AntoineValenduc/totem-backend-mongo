@@ -1,7 +1,7 @@
 import mongoose, { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Badge } from './badge.schema';
-import { Profile } from 'totem-mongo/src/schema/profile.schema';
+import { Profile } from '../schema/profile.schema';
 
 export type BranchDocument = HydratedDocument<Branch>;
 

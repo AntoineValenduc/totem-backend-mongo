@@ -8,7 +8,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
-import { CreateProfileDto } from 'totem-mongo/src/shared/dto/create-profile.dto';
+import { CreateProfileDto } from '../../../totem-mongo/src/shared/dto/create-profile.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('profiles')

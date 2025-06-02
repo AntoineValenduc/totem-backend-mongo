@@ -1,10 +1,12 @@
-import { Controller, Logger } from '@nestjs/common';
+import { Controller, Logger, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { BadgeService } from '../services/badge.service';
 import { CreateBadgeDto } from '../shared/dto/create-badge.dto';
 import { BADGE_PATTERNS } from '../shared/constants/patterns';
 import { BadgeDocument } from '../schema/badge.schema';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller()
 export class BadgeController {
   private readonly logger = new Logger(BadgeController.name);

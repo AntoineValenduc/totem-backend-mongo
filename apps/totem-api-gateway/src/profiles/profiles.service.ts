@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateProfileDto } from 'totem-mongo/src/shared/dto/create-profile.dto';
-import { PROFILE_PATTERNS } from 'totem-mongo/src/shared/constants/patterns';
+import { CreateProfileDto } from '../../../totem-mongo/src/shared/dto/create-profile.dto';
+import { PROFILE_PATTERNS } from '../../../totem-mongo/src/shared/constants/patterns';
 
 @Injectable()
 export class ProfilesService {
