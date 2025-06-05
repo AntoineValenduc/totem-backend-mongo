@@ -1,12 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { CreateProfileDto } from '../../../totem-mongo/src/shared/dto/create-profile.dto';
-import { PROFILE_PATTERNS } from '../../../totem-mongo/src/shared/constants/patterns';
+import { ClientKafka, ClientProxy } from '@nestjs/microservices';
+import { CreateProfileDto } from 'totem-mongo/src/shared/dto/create-profile.dto';
+import { PROFILE_PATTERNS } from 'totem-mongo/src/shared/constants/patterns';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class ProfilesService {
   constructor(
     @Inject('TOTEM_MONGO_CLIENT') private readonly profilesClient: ClientProxy,
+    //@Inject('KAFKA_SERVICE') private readonly kafkaProducer: ClientKafka,
   ) {}
 
   findAll() {
@@ -17,18 +19,45 @@ export class ProfilesService {
     return this.profilesClient.send(PROFILE_PATTERNS.GET_BY_ID, { id });
   }
 
-  createProfile(profile: CreateProfileDto) {
-    return this.profilesClient.send(PROFILE_PATTERNS.CREATE, profile);
+  async createProfile(profile: CreateProfileDto) {
+    const result = await firstValueFrom(
+      this.profilesClient.send(PROFILE_PATTERNS.CREATE, profile)
+    );
+
+    /*this.kafkaProducer.emit('profile-created', {
+      event: 'ProfileCreated',
+      timestamp: new Date(),
+      data: result,
+    });*/
+
+    return result;
   }
 
-  updateProfile(idProfile: string, profile: CreateProfileDto) {
-    return this.profilesClient.send(PROFILE_PATTERNS.UPDATE, [
-      idProfile,
-      profile,
-    ]);
+  async updateProfile(idProfile: string, profile: CreateProfileDto) {
+    const result = await firstValueFrom(
+      this.profilesClient.send(PROFILE_PATTERNS.UPDATE, [idProfile, profile])
+    );
+
+    /*this.kafkaProducer.emit('profile-updated', {
+      event: 'ProfileUpdated',
+      timestamp: new Date(),
+      data: result,
+    });*/
+
+    return result;
   }
 
-  deleteProfile(id: string) {
-    return this.profilesClient.send(PROFILE_PATTERNS.DELETE, id);
+  async deleteProfile(id: string) {
+    const result = await firstValueFrom(
+      this.profilesClient.send(PROFILE_PATTERNS.DELETE, id)
+    );
+
+    /*this.kafkaProducer.emit('profile-deleted', {
+      event: 'ProfileDeleted',
+      timestamp: new Date(),
+      data: { id },
+    });*/
+
+    return result;
   }
 }

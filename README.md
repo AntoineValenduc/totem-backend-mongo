@@ -96,3 +96,24 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## Docker Kafka
+kafka:
+image: bitnami/kafka:latest
+ports:
+- "9092:9092"
+environment:
+KAFKA_BROKER_ID: 1
+KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+depends_on:
+- zookeeper
+
+zookeeper:
+image: bitnami/zookeeper:latest
+ports:
+- "2181:2181"
+environment:
+ALLOW_ANONYMOUS_LOGIN: yes

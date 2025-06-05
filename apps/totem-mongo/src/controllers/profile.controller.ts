@@ -1,16 +1,23 @@
-import { Controller, Logger } from '@nestjs/common';
+import { Controller, Logger, UseGuards } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { ProfileService } from '../services/profile.service';
 import { CreateProfileDto } from '../shared/dto/create-profile.dto';
 import { PROFILE_PATTERNS } from '../shared/constants/patterns';
 import { ProfileDocument } from '../schema/profile.schema';
+import { JwtAuthGuard } from '../../../../libs/auth/src/jwt.auth.guard';
+import { AuthService } from '../../../../libs/auth/src/auth.service';
 
+@UseGuards(JwtAuthGuard)
 @Controller()
 export class ProfileController {
   private readonly logger = new Logger(ProfileController.name);
 
-  constructor(private readonly profileService: ProfileService) {}
+  constructor(
+    private readonly profileService: ProfileService,
+    private readonly authService: AuthService
+  ) {}
 
+  @Public()
   @MessagePattern(PROFILE_PATTERNS.FIND_ALL)
   async findAll(): Promise<ProfileDocument[]> {
     this.logger.log('✅ Requête reçue => findAll profiles MongoDB');

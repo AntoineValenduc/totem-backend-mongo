@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateBadgeDto } from '../../../totem-mongo/src/shared/dto/create-badge.dto';
-import { BADGE_PATTERNS } from '../../../totem-mongo/src/shared/constants/patterns';
+import { CreateBadgeDto } from 'totem-mongo/src/shared/dto/create-badge.dto';
+import { BADGE_PATTERNS } from 'totem-mongo/src/shared/constants/patterns';
 import { ClientProxy } from '@nestjs/microservices';
 @Injectable()
 export class BadgesService {

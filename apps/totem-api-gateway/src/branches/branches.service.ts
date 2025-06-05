@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateBranchDto } from '../../../totem-mongo/src/shared/dto/create-branch.dto';
-import {BRANCH_PATTERNS} from "../../../totem-mongo/src/shared/constants/patterns";
+import { CreateBranchDto } from 'totem-mongo/src/shared/dto/create-branch.dto';
+import {BRANCH_PATTERNS} from 'totem-mongo/src/shared/constants/patterns';
 
 @Injectable()
 export class BranchesService {

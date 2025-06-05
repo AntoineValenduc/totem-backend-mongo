@@ -1,8 +1,10 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { BranchesService } from './branches.service';
 import { CreateBranchDto } from '../../../totem-mongo/src/shared/dto/create-branch.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../../../../libs/auth/src/jwt.auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @ApiTags('branches')
 @Controller('branches')
 export class BranchesController {

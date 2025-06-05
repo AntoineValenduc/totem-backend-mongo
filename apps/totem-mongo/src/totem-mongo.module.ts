@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as Joi from 'joi';
 import { join } from 'path';
@@ -16,6 +16,9 @@ import { BranchService } from './services/branch.service';
 import { Badge, BadgeSchema } from './schema/badge.schema';
 import { BadgeController } from './controllers/badge.controller';
 import { BadgeService } from './services/badge.service';
+import { AuthModule } from '../../../libs/auth/src/auth.module';
+import { ClientsModule } from '@nestjs/microservices';
+import { getKafkaConfig } from '../../../libs/kafka';
 
 const env = process.env.NODE_ENV || 'development';
 
@@ -27,6 +30,7 @@ const resolvedEnvFilePath = existsSync(envFilePath) ? envFilePath : fallbackEnvF
 
 @Module({
   imports: [
+    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: resolvedEnvFilePath,
@@ -36,6 +40,7 @@ const resolvedEnvFilePath = existsSync(envFilePath) ? envFilePath : fallbackEnvF
           .default('development'),
         PORT: Joi.number().default(3000),
         MONGO_URI: Joi.string().uri().required(),
+        //KAFKA_BROKER: Joi.string().required(),
         JWT_SECRET: Joi.string().min(8).required(),
         JWT_EXPIRES_IN: Joi.string().default('3600s'),
       }),
@@ -46,6 +51,14 @@ const resolvedEnvFilePath = existsSync(envFilePath) ? envFilePath : fallbackEnvF
       { name: Branch.name, schema: BranchSchema },
       { name: Badge.name, schema: BadgeSchema },
     ]),
+    /*ClientsModule.registerAsync([
+      {
+        name: 'KAFKA_SERVICE',
+        imports: [ConfigModule],
+        useFactory: getKafkaConfig,
+        inject: [ConfigService],
+      },
+    ]),*/
   ],
   controllers: [ProfileController, BranchController, BadgeController],
   providers: [ProfileService, BranchService, BadgeService],
