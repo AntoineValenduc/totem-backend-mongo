@@ -7,13 +7,13 @@ export type ProfileDocument = HydratedDocument<Profile>;
 @Schema({ timestamps: true })
 export class Profile {
   @Prop()
-  firstName: string;
+  first_name: string;
 
   @Prop()
-  lastName: string;
+  last_name: string;
 
   @Prop()
-  dateOfBirth: Date;
+  date_of_birth: Date;
 
   @Prop()
   address: string;
@@ -28,7 +28,22 @@ export class Profile {
   mail: string;
 
   @Prop()
-  phoneNumber: string;
+  phone_number: string;
+
+  @Prop()
+  photo_url: string;
+
+  @Prop()
+  created_at: Date;
+
+  @Prop()
+  updated_at: Date;
+
+  @Prop({ default: null })
+  removed_at: Date;
+
+  @Prop({ default: false })
+  is_deleted: boolean;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Branch' })
   branch: Types.ObjectId | Branch;

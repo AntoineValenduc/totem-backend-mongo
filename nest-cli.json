@@ -19,6 +19,15 @@
         "tsConfigPath": "apps/totem-api-gateway/tsconfig.app.json"
       }
     },
+    "totem-auth-sql": {
+      "type": "application",
+      "root": "apps/totem-auth-sql",
+      "entryFile": "main",
+      "sourceRoot": "apps/totem-auth-sql/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/totem-auth-sql/tsconfig.app.json"
+      }
+    },
     "totem-mongo": {
       "type": "application",
       "root": "apps/totem-mongo",

@@ -1,28 +1,45 @@
 import { Module } from '@nestjs/common';
-import { ProfileController } from './controllers/profile.controller';
-import { ProfileService } from './services/profile.service';
-import { Profile, ProfileSchema } from './schema/profile.schema';
-import { Branch, BranchSchema } from './schema/branch.schema';
-import { Badge, BadgeSchema } from './schema/badge.schema';
-import { BranchController } from './controllers/branch.controller';
-import { BranchService } from './services/branch.service';
-import { BadgeController } from './controllers/badge.controller';
-import { BadgeService } from './services/badge.service';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as Joi from 'joi';
+import { join } from 'path';
+import { existsSync } from 'fs';
+
+import { ProfileController } from './controllers/profile.controller';
+import { ProfileService } from './services/profile.service';
+import { Profile, ProfileSchema } from './schema/profile.schema';
+
+import { Branch, BranchSchema } from './schema/branch.schema';
+import { BranchController } from './controllers/branch.controller';
+import { BranchService } from './services/branch.service';
+
+import { Badge, BadgeSchema } from './schema/badge.schema';
+import { BadgeController } from './controllers/badge.controller';
+import { BadgeService } from './services/badge.service';
+
+const env = process.env.NODE_ENV || 'development';
+
+// Construction du chemin vers le fichier .env selon NODE_ENV
+const envFilePath = join(process.cwd(), `.env.${env}`);
+// Vérifie si le fichier existe, sinon fallback sur .env simple
+const fallbackEnvFilePath = join(process.cwd(), '.env');
+const resolvedEnvFilePath = existsSync(envFilePath) ? envFilePath : fallbackEnvFilePath;
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      envFilePath: resolvedEnvFilePath,
       validationSchema: Joi.object({
-        MONGO_URI: Joi.string().required(),
+        validationSchema: Joi.object({
+          TCP_HOST: Joi.string().required(),
+          TCP_PORT: Joi.number().required(),
+          MONGO_URI: Joi.string().required(),
+          NODE_ENV: Joi.string().default('development'),
+        }),
       }),
     }),
-    MongooseModule.forRoot(
-      process.env.MONGO_URI ?? 'mongodb://127.0.0.1:27017/totemDB',
-    ),
+    MongooseModule.forRoot(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/totemDB'),
     MongooseModule.forFeature([
       { name: Profile.name, schema: ProfileSchema },
       { name: Branch.name, schema: BranchSchema },

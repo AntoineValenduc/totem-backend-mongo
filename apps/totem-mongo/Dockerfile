@@ -22,7 +22,7 @@ FROM node:18-alpine
 WORKDIR /usr/src/app
 
 # Copier les fichiers buildés de l'étape précédente
-COPY --from=builder /usr/src/app/dist/apps/totem-mongo ./dist
+COPY --from=builder /usr/src/app/dist ./dist
 COPY package*.json ./
 
 # Installer uniquement les dépendances de production

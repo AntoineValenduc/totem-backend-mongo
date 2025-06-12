@@ -1,12 +1,70 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ClientsModule, Transport } from '@nestjs/microservices';
+
 import { TotemApiGatewayController } from './totem-api-gateway.controller';
 import { TotemApiGatewayService } from './totem-api-gateway.service';
-import { TotemMongoModule } from '../../totem-mongo/src/totem-mongo.module';
-import {ProfilesModule} from "./profiles/profiles.module";
+import { ProfilesService } from './profiles/profiles.service';
+import { BranchesService } from './branches/branches.service';
+import { BadgesService } from './badges/badges.service';
+import { ProfilesController } from './profiles/profiles.controller';
+import { BranchesController } from './branches/branches.controller';
+import { BadgesController } from './badges/badges.controller';
+import * as Joi from 'joi';
+import * as dotenv from 'dotenv';
+import { join } from 'path';
+import { existsSync } from 'fs';
+
+const env = process.env.NODE_ENV || 'development';
+const envPath = join(process.cwd(), `.env.${env}`);
+const fallbackPath = join(process.cwd(), `.env`);
+const resolvedPath = existsSync(envPath) ? envPath : fallbackPath;
+dotenv.config({ path: resolvedPath });
 
 @Module({
-  imports: [ProfilesModule],
-  controllers: [TotemApiGatewayController],
-  providers: [TotemApiGatewayService],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: resolvedPath,
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string()
+          .valid('development', 'production', 'test')
+          .default('development'),
+        TCP_HOST: Joi.string().required(),
+        TCP_PORT: Joi.number().required(),
+        TCP_TIMEOUT: Joi.number().default(5000)
+      })
+
+  }),
+
+  ClientsModule.registerAsync([
+      {
+        name: 'TOTEM_MONGO_CLIENT',
+        imports: [ConfigModule],
+        useFactory: (configService: ConfigService) => ({
+          transport: Transport.TCP,
+          options: {
+            host: configService.get<string>('TCP_HOST'),
+            port: configService.get<number>('TCP_PORT'),
+          },
+          retryAttempts: 5,
+          retryDelay: 3000
+        }),
+        inject: [ConfigService]
+      },
+    ])
+  ],
+  controllers: [
+    TotemApiGatewayController,
+    ProfilesController,
+    BranchesController,
+    BadgesController,
+  ],
+  providers: [
+    TotemApiGatewayService,
+    ProfilesService,
+    BranchesService,
+    BadgesService,
+  ],
 })
 export class TotemApiGatewayModule {}
+console.log("process.env.TCP_HOST => ", process.env.TCP_HOST);

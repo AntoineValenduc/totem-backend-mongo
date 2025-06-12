@@ -10,11 +10,11 @@ COPY package*.json ./
 # Installer les dépendances
 RUN npm install
 
-# Copier tout le projet (pour build)
+# Copier tout le projet
 COPY . .
 
-# Lancer le build de l'application spécifique
-RUN npm run build -- --project=apps/totem-api-gateway
+# Lancer le build de l'application
+RUN npm run build
 
 # Utiliser une image légère pour l'exécution
 FROM node:18-alpine
@@ -22,13 +22,13 @@ FROM node:18-alpine
 WORKDIR /usr/src/app
 
 # Copier les fichiers buildés de l'étape précédente
-COPY --from=builder /usr/src/app/dist/apps/totem-api-gateway ./dist
+COPY --from=builder /usr/src/app/dist ./dist
 COPY package*.json ./
 
 # Installer uniquement les dépendances de production
 RUN npm install --production
 
-# Exposer le port de l'API Gateway
+# Exposer le port
 EXPOSE 3000
 
 # Démarrer l'application

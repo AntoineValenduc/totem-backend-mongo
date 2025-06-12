@@ -1,38 +1,150 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Badge } from '../schema/badge.schema';
-import { CreateBadgeDto } from '../shared/dto/create-badge.dto';
+import { Model, HydratedDocument, isValidObjectId } from 'mongoose';
+import { Badge, BadgeDocument } from '../schema/badge.schema';
+import {
+  BadgeCreateException,
+  BadgeInterneErrorException,
+  BadgeNotFoundException,
+  InvalidBadgeIdException,
+  NullBadgeIdException,
+} from '../shared/exceptions/badge.exception';
+import { BadgeCreateDto } from '../shared/dto/badge-create.dto';
+import { BadgeUpdateDto } from '../shared/dto/badge-update.dto';
 
 @Injectable()
 export class BadgeService {
-  constructor(@InjectModel(Badge.name) private badgeModel: Model<Badge>) {}
+  private readonly logger = new Logger(BadgeService.name);
 
-  async findAll(): Promise<Badge[]> {
-    return this.badgeModel.find().exec();
+  constructor(
+    @InjectModel(Badge.name) private readonly badgeModel: Model<Badge>,
+  ) {}
+
+  /**
+   * Afficher la liste des profiles
+   */
+  async findAll(): Promise<BadgeDocument[]> {
+    this.logger.log('✅ Requête reçue => findAll profiles MongoDB');
+    try {
+      return await this.badgeModel.find({ is_deleted: { $ne: true } }).exec();
+    } catch (err) {
+      this.logger.error('❌ Erreur lors du findAll() dans le service', err);
+      throw new BadgeInterneErrorException("Liste des Profils : " + err.message + "");
+    }
   }
 
-  async getById(idBadge: string): Promise<Badge> {
-    if (!idBadge) {
-      throw new HttpException("ID can't be null", HttpStatus.BAD_REQUEST);
+  /**
+   * Afficher la liste des profiles soft-deleted
+   */
+  async findAllSoftDeleted(): Promise<BadgeDocument[]> {
+    this.logger.log('✅ SERVICE Requête reçue => findAllSoftDeleted badges MongoDB');
+    try {
+      return this.badgeModel.find({ is_deleted: { $ne: false } }).exec();
+    } catch (err) {
+      this.logger.error('❌ Erreur lors du findAllSoftDeleted() dans le service', err);
+      throw new BadgeInterneErrorException("Liste des Badges Soft-Deleted: " + err.message + "");
+    }
+  }
+
+  /**
+   * Afficher un badge à partir de son ID
+   * @param id
+   */
+  async getById(id: string): Promise<BadgeDocument> {
+    this.logger.log("✅ Requête reçue => getById badges MongoDB, avec l'ID: " + id);
+    if (!id) {
+      throw new NullBadgeIdException();
+    } else if (!isValidObjectId(id)) {
+      throw new InvalidBadgeIdException(id);
+    } else {
+      return await this.findBadgeById(id);
+    }
+  }
+
+  /**
+   * Créer un nouveau badge
+   * @param dto
+   */
+  async create(dto: BadgeCreateDto): Promise<BadgeDocument> {
+    this.logger.log("✅ Requête reçue => create badges MongoDB");
+    try {
+      return await this.badgeModel.create(dto);
+    } catch (err) {
+      this.logger.error('Erreur create()', err);
+      throw new BadgeCreateException(err.message);
+    }
+  }
+
+  /**
+   * MAJ un badge existant à partir de son ID
+   * @param id
+   * @param badge
+   */
+  async update(id: string, badge: BadgeUpdateDto): Promise<BadgeDocument> {
+    this.logger.log(`🔄 Mise à jour du badge ${id} avec : ${JSON.stringify(badge)}`);
+
+    if (!id) {
+      throw new NullBadgeIdException();
+    } else if (!isValidObjectId(id)) {
+      throw new InvalidBadgeIdException(id);
     }
 
-    const badgeFounded = await this.badgeModel.findById(idBadge).exec();
+    await this.findBadgeById(id);
 
-    if (!badgeFounded) {
-      throw new HttpException('Badge not found', HttpStatus.NOT_FOUND);
+    try {
+      const updated = await this.badgeModel.findByIdAndUpdate(
+        id,
+        { $set: badge },
+        { new: true },
+      ).exec();
+
+      if (!updated) {
+        throw new BadgeNotFoundException(id);
+      }
+
+      return updated;
+    } catch (err) {
+      this.logger.error('❌ Erreur lors du update() dans le service', err);
+      throw new BadgeInterneErrorException('Update Badge ' + err.message, err);
+    }
+  }
+
+  /**
+   * Supprimer un badge existant à partir de son ID
+   * @param id
+   */
+  async remove(id: string): Promise<BadgeDocument> {
+    this.logger.log("✅ Requête reçue => remove badge MongoDB, avec l'ID: " + id);
+
+    if (!id) {
+      throw new NullBadgeIdException();
+    } else if (!isValidObjectId(id)) {
+      throw new InvalidBadgeIdException(id);
+    } else {
+      const badge = await this.findBadgeById(id);
+      badge.is_deleted = true;
+      badge.removed_at = new Date();
+      return await badge.save();
+    }
+  }
+
+  /**
+   * Mérhode interne - Recherche Badge par ID
+   * @param id
+   * @private
+   */
+  private async findBadgeById(
+    id: string,
+  ): Promise<HydratedDocument<Badge>> {
+    if (!id) {
+      throw new InvalidBadgeIdException(id);
     }
 
-    return badgeFounded;
-  }
+    const badge = await this.badgeModel.findById(id).exec();
+    if (!badge || badge.is_deleted) {
+      throw new BadgeNotFoundException(id);
+    }
 
-  async create(createBadgeDto: CreateBadgeDto): Promise<Badge> {
-    const createdBadge = new this.badgeModel(createBadgeDto);
-    return await createdBadge.save();
-  }
-
-  async update(createBadgeDto: CreateBadgeDto): Promise<Badge> {
-    const createdBadge = new this.badgeModel(createBadgeDto);
-    return await createdBadge.save();
+    return badge;
   }
 }
