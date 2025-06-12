@@ -11,22 +11,29 @@ import { ProfilesController } from './profiles/profiles.controller';
 import { BranchesController } from './branches/branches.controller';
 import { BadgesController } from './badges/badges.controller';
 import * as Joi from 'joi';
+import * as dotenv from 'dotenv';
+import { join } from 'path';
+import { existsSync } from 'fs';
 
+const env = process.env.NODE_ENV || 'development';
+const envPath = join(process.cwd(), `.env.${env}`);
+const fallbackPath = join(process.cwd(), `.env`);
+const resolvedPath = existsSync(envPath) ? envPath : fallbackPath;
+dotenv.config({ path: resolvedPath });
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: resolvedPath,
       validationSchema: Joi.object({
         NODE_ENV: Joi.string()
           .valid('development', 'production', 'test')
           .default('development'),
-        TCP_HOST: Joi.string().hostname().required(),
-        TCP_PORT: Joi.number().port().required(),
-        /*KAFKA_BROKER: Joi.string().uri().required(),
-        KAFKA_CLIENT_ID: Joi.string().required(),
-        KAFKA_GROUP_ID: Joi.string().required(),*/
+        TCP_HOST: Joi.string().required(),
+        TCP_PORT: Joi.number().required(),
         TCP_TIMEOUT: Joi.number().default(5000)
       })
+
   }),
 
   ClientsModule.registerAsync([
@@ -44,26 +51,6 @@ import * as Joi from 'joi';
         }),
         inject: [ConfigService]
       },
-      /*{
-        name: 'KAFKA_SERVICE',
-        imports: [ConfigModule],
-        useFactory: (configService: ConfigService) => ({
-          transport: Transport.KAFKA,
-          options: {
-            client: {
-              brokers: [configService.getOrThrow<string>('KAFKA_BROKER')],
-              clientId: configService.getOrThrow<string>('KAFKA_CLIENT_ID'),
-            },
-            consumer: {
-              groupId: configService.getOrThrow<string>('KAFKA_GROUP_ID'),
-            },
-            retry: {
-              initialRetryTime: 1000,
-              retries: 5
-            }
-          }
-        })
-      }*/
     ])
   ],
   controllers: [
@@ -80,3 +67,4 @@ import * as Joi from 'joi';
   ],
 })
 export class TotemApiGatewayModule {}
+console.log("process.env.TCP_HOST => ", process.env.TCP_HOST);

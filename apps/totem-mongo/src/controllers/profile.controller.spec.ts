@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProfileController } from './profile.controller';
 import { ProfileService } from '../services/profile.service';
-import { CreateProfileDto } from '../shared/dto/create-profile.dto';
+import { ProfileCreateDto } from '../shared/dto/profile-create.dto';
 
 describe('ProfileController', () => {
   let profileController: ProfileController;
@@ -43,16 +43,16 @@ describe('ProfileController', () => {
   });
 
   it('should create a new profile', async () => {
-    const dto: CreateProfileDto = {
+    const dto: ProfileCreateDto = {
       name: 'Test Profile',
-    } as unknown as CreateProfileDto;
+    } as unknown as ProfileCreateDto;
     await expect(profileController.createProfile(dto)).resolves.toEqual({});
   });
 
   it('should update a profile', async () => {
-    const dto: CreateProfileDto = {
+    const dto: ProfileCreateDto = {
       name: 'Updated Profile',
-    } as unknown as CreateProfileDto;
+    } as unknown as ProfileCreateDto;
     await expect(profileController.updateProfile('123', dto)).resolves.toEqual(
       {},
     );

@@ -1,12 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthService } from './services/auth.service';
-import { AuthController } from './controllers/auth.controller';
-import { User } from './entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from '../../../libs/auth/src/jwt.strategy';
-import { KafkaModule } from '../../../libs/kafka';
 
 @Module({
   imports: [
@@ -23,14 +18,12 @@ import { KafkaModule } from '../../../libs/kafka';
         synchronize: true,
       }),
     }),
-    TypeOrmModule.forFeature([User]),
     JwtModule.register({
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: process.env.JWT_EXPIRES_IN },
     }),
-    KafkaModule,
   ],
-  controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  controllers: [],
+  providers: [],
 })
 export class TotemAuthSqlModule {}

@@ -3,9 +3,12 @@ import { TotemApiGatewayModule } from './totem-api-gateway.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { Transport } from '@nestjs/microservices';
 import { CustomHttpExceptionFilter } from 'totem-mongo/src/shared/filters/CustomHttpExceptionFilter.filter';
+import { RpcToHttpInterceptor } from 'totem-api-gateway/src/interceptors/rpc-exception.interceptor';
 
 async function bootstrap() {
-  const app = await NestFactory.create(TotemApiGatewayModule);
+  const app = await NestFactory.create(TotemApiGatewayModule, {
+    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+  });
 
   // ➕ Connexion du microservice Kafka
   /*app.connectMicroservice({
@@ -19,6 +22,9 @@ async function bootstrap() {
       },
     },
   });*/
+
+  //Interceptor API
+  app.useGlobalInterceptors(new RpcToHttpInterceptor());
 
   // 📘 Swagger config
   const swaggerConfig = new DocumentBuilder()

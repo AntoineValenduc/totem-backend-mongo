@@ -1,10 +1,16 @@
-import { HttpException, HttpStatus, Inject, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, HydratedDocument } from 'mongoose';
+import { HydratedDocument, isValidObjectId, Model } from 'mongoose';
 import { Profile, ProfileDocument } from '../schema/profile.schema';
-import { CreateProfileDto } from '../shared/dto/create-profile.dto';
-import { ClientKafka } from '@nestjs/microservices';
-import { KAFKA_TOPICS } from '../shared/constants/kafka-topics';
+import { ProfileCreateDto } from '../shared/dto/profile-create.dto';
+import { ProfileUpdateDto } from '../shared/dto/profile-update.dto';
+import {
+  InvalidProfilIdException,
+  NullProfileIdException,
+  ProfileCreateException,
+  ProfileInterneErrorException,
+  ProfileNotFoundException,
+} from '../shared/exceptions/profile.exception';
 
 @Injectable()
 export class ProfileService {
@@ -12,89 +18,131 @@ export class ProfileService {
 
   constructor(
     @InjectModel(Profile.name) private readonly profileModel: Model<Profile>,
-    //@Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
   ) {}
 
   /**
    * Afficher la liste des profiles
    */
   async findAll(): Promise<ProfileDocument[]> {
-    return this.profileModel.find({ is_deleted: { $ne: true } }).exec();
+    this.logger.log('✅ Requête reçue => findAll profiles MongoDB');
+    try {
+      return await this.profileModel.find({ is_deleted: { $ne: true } }).exec();
+    } catch (err) {
+      this.logger.error('❌ Erreur lors du findAll() dans le service', err);
+      throw new ProfileInterneErrorException("Liste des Profils : " + err.message + "");
+    }
+  }
+
+  /**
+   * Afficher la liste des profiles soft-deleted
+   */
+  async findAllSoftDeleted(): Promise<ProfileDocument[]> {
+    this.logger.log('✅ SERVICE Requête reçue => findAllSoftDeleted profiles MongoDB');
+    try {
+      return this.profileModel.find({ is_deleted: { $ne: false } }).exec();
+    } catch (err) {
+      this.logger.error('❌ Erreur lors du findAllSoftDeleted() dans le service', err);
+      throw new ProfileInterneErrorException("Liste des Profils Soft-Deleted: " + err.message + "");
+    }
   }
 
   /**
    * Afficher un profile à partir de son ID
-   * @param idProfile
+   * @param id
    */
-  async getById(idProfile: string): Promise<ProfileDocument> {
-    return this.findProfileById(idProfile);
+  async getById(id: string): Promise<ProfileDocument> {
+    this.logger.log("✅ Requête reçue => getById profiles MongoDB, avec l'ID: " + id);
+    if (!id) {
+      throw new NullProfileIdException();
+    } else if (!isValidObjectId(id)) {
+      throw new InvalidProfilIdException(id);
+    } else {
+      return await this.findProfileById(id);
+    }
   }
 
   /**
    * Créer un nouveau profile
-   * @param createProfileDto
+   * @param dto
    */
-  async create(createProfileDto: CreateProfileDto): Promise<ProfileDocument> {
-    const createdProfile = new this.profileModel(createProfileDto);
-    const saved = await createdProfile.save();
-
-    /**this.logger.log(`📤 Emitting Kafka event: profile-created for ID ${saved._id}`);
-    this.kafkaClient.emit(KAFKA_TOPICS.PROFILE_CREATED, {
-      id: saved._id,
-      ...createProfileDto,
-    });*/
-
-    return saved;
+  async create(dto: ProfileCreateDto): Promise<ProfileDocument> {
+    this.logger.log("✅ Requête reçue => create profiles MongoDB");
+    try {
+      return await this.profileModel.create(dto);
+    } catch (err) {
+      this.logger.error('Erreur create()', err);
+      throw new ProfileCreateException(err.message);
+    }
   }
 
   /**
    * MAJ un profile existant à partir de son ID
-   * @param idProfile
-   * @param updateProfileDto
+   * @param id
+   * @param profile
    */
-  async update(idProfile: string, updateProfileDto: CreateProfileDto): Promise<ProfileDocument> {
-    const profile = await this.findProfileById(idProfile);
-    Object.assign(profile, updateProfileDto);
-    const updated = await profile.save();
+  async update(id: string, profile: ProfileUpdateDto): Promise<ProfileDocument> {
+    this.logger.log(`🔄 Mise à jour du profil ${id} avec : ${JSON.stringify(profile)}`);
 
-    /**this.logger.log(`📤 Emitting Kafka event: profile-updated for ID ${updated._id}`);
-    this.kafkaClient.emit(KAFKA_TOPICS.PROFILE_UPDATED, {
-      id: updated._id,
-      ...updateProfileDto,
-    });*/
+    if (!id) {
+      throw new NullProfileIdException();
+    } else if (!isValidObjectId(id)) {
+      throw new InvalidProfilIdException(id);
+    }
 
-    return updated;
+    await this.findProfileById(id);
+
+    try {
+      const updated = await this.profileModel.findByIdAndUpdate(
+        id,
+        { $set: profile },
+        { new: true },
+      ).exec();
+
+      if (!updated) {
+        throw new ProfileNotFoundException(id);
+      }
+
+      return updated;
+    } catch (err) {
+      this.logger.error('❌ Erreur lors du update() dans le service', err);
+      throw new ProfileInterneErrorException('Update Profil ' + err.message, err);
+    }
   }
 
   /**
    * Supprimer un profile existant à partir de son ID
-   * @param idProfile
+   * @param id
    */
-  async remove(idProfile: string): Promise<ProfileDocument> {
-    const profile = await this.findProfileById(idProfile);
-    profile.is_deleted = true;
-    profile.removed_at = new Date();
-    const deleted = await profile.save();
+  async remove(id: string): Promise<ProfileDocument> {
+    this.logger.log("✅ Requête reçue => remove profile MongoDB, avec l'ID: " + id);
 
-   /** this.logger.log(`📤 Emitting Kafka event: profile-deleted for ID ${deleted._id}`);
-    this.kafkaClient.emit(KAFKA_TOPICS.PROFILE_DELETED, {
-      id: deleted._id,
-      removed_at: deleted.removed_at,
-    });*/
-
-    return deleted;
+    if (!id) {
+      throw new NullProfileIdException();
+    } else if (!isValidObjectId(id)) {
+      throw new InvalidProfilIdException(id);
+    } else {
+      const profile = await this.findProfileById(id);
+      profile.is_deleted = true;
+      profile.removed_at = new Date();
+      return await profile.save();
+    }
   }
 
+  /**
+   * Mérhode interne - Recherche Profile par ID
+   * @param id
+   * @private
+   */
   private async findProfileById(
-    idProfile: string,
+    id: string,
   ): Promise<HydratedDocument<Profile>> {
-    if (!idProfile) {
-      throw new HttpException("ID can't be null", HttpStatus.BAD_REQUEST);
+    if (!id) {
+      throw new InvalidProfilIdException(id);
     }
 
-    const profile = await this.profileModel.findById(idProfile).exec();
+    const profile = await this.profileModel.findById(id).exec();
     if (!profile || profile.is_deleted) {
-      throw new HttpException('Profile not found', HttpStatus.NOT_FOUND);
+      throw new ProfileNotFoundException(id);
     }
 
     return profile;

@@ -1,9 +1,11 @@
 export const PROFILE_PATTERNS = {
   FIND_ALL: 'profiles.findAll',
+  FIND_ALL_SOFT_DELETED: 'profiles.fildAllSoftDeleted',
   GET_BY_ID: 'profiles.getById',
   CREATE: 'profiles.create',
   UPDATE: 'profiles.update',
   DELETE: 'profiles.delete',
+
 };
 
 export const BRANCH_PATTERNS = {
@@ -16,6 +18,7 @@ export const BRANCH_PATTERNS = {
 
 export const BADGE_PATTERNS = {
   FIND_ALL: 'badges.findAll',
+  FIND_ALL_SOFT_DELETED: 'badges.fildAllSoftDeleted',
   GET_BY_ID: 'badges.getById',
   CREATE: 'badges.create',
   UPDATE: 'badges.update',

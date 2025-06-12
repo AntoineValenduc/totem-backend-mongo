@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as Joi from 'joi';
 import { join } from 'path';
@@ -16,9 +16,6 @@ import { BranchService } from './services/branch.service';
 import { Badge, BadgeSchema } from './schema/badge.schema';
 import { BadgeController } from './controllers/badge.controller';
 import { BadgeService } from './services/badge.service';
-import { AuthModule } from '../../../libs/auth/src/auth.module';
-import { ClientsModule } from '@nestjs/microservices';
-import { getKafkaConfig } from '../../../libs/kafka';
 
 const env = process.env.NODE_ENV || 'development';
 
@@ -30,19 +27,16 @@ const resolvedEnvFilePath = existsSync(envFilePath) ? envFilePath : fallbackEnvF
 
 @Module({
   imports: [
-    AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: resolvedEnvFilePath,
       validationSchema: Joi.object({
-        NODE_ENV: Joi.string()
-          .valid('development', 'production', 'test')
-          .default('development'),
-        PORT: Joi.number().default(3000),
-        MONGO_URI: Joi.string().uri().required(),
-        //KAFKA_BROKER: Joi.string().required(),
-        JWT_SECRET: Joi.string().min(8).required(),
-        JWT_EXPIRES_IN: Joi.string().default('3600s'),
+        validationSchema: Joi.object({
+          TCP_HOST: Joi.string().required(),
+          TCP_PORT: Joi.number().required(),
+          MONGO_URI: Joi.string().required(),
+          NODE_ENV: Joi.string().default('development'),
+        }),
       }),
     }),
     MongooseModule.forRoot(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/totemDB'),
@@ -51,14 +45,6 @@ const resolvedEnvFilePath = existsSync(envFilePath) ? envFilePath : fallbackEnvF
       { name: Branch.name, schema: BranchSchema },
       { name: Badge.name, schema: BadgeSchema },
     ]),
-    /*ClientsModule.registerAsync([
-      {
-        name: 'KAFKA_SERVICE',
-        imports: [ConfigModule],
-        useFactory: getKafkaConfig,
-        inject: [ConfigService],
-      },
-    ]),*/
   ],
   controllers: [ProfileController, BranchController, BadgeController],
   providers: [ProfileService, BranchService, BadgeService],

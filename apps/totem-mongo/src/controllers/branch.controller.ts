@@ -1,12 +1,13 @@
-import { Controller, Logger, UseGuards } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { BranchService } from '../services/branch.service';
-import { CreateBranchDto } from '../shared/dto/create-branch.dto';
-import { BRANCH_PATTERNS } from '../shared/constants/patterns';
+import { BrancheCreateDto } from '../shared/dto/branche-create.dto';
+import { BRANCH_PATTERNS, PROFILE_PATTERNS } from '../shared/constants/patterns';
 import { BranchDocument } from '../schema/branch.schema';
-import { JwtAuthGuard } from '../../../../libs/auth/src/jwt.auth.guard';
+import { ProfileUpdateDto } from 'totem-mongo/src/shared/dto/profile-update.dto';
+import { ProfileDocument } from 'totem-mongo/src/schema/profile.schema';
+import { BrancheUpdateDto } from 'totem-mongo/src/shared/dto/branche-update.dto';
 
-@UseGuards(JwtAuthGuard)
 @Controller()
 export class BranchController {
   private readonly logger = new Logger(BranchController.name);
@@ -27,19 +28,18 @@ export class BranchController {
 
   @MessagePattern(BRANCH_PATTERNS.CREATE)
   async createBranch(
-    @Payload() branchDto: CreateBranchDto,
+    @Payload() branchDto: BrancheCreateDto,
   ): Promise<BranchDocument> {
     this.logger.log('✅ Requête reçue => create branch MongoDB');
     return this.branchService.create(branchDto);
   }
 
   @MessagePattern(BRANCH_PATTERNS.UPDATE)
-  async updateBranch(
-    @Payload('id') id: string,
-    @Payload() branchDto: CreateBranchDto,
-  ): Promise<BranchDocument> {
-    this.logger.log(`✅ Requête reçue => update branch MongoDB (ID: ${id})`);
-    return this.branchService.update(id, branchDto);
+  async updateBranch(@Payload() data: { id: string; branch: BrancheUpdateDto }): Promise<BranchDocument> {
+    const { id, branch } = data;
+    this.logger.log(`✅ Requête reçue => update branche MongoDB (ID: ${id})`);
+    this.logger.log(`✅ Requête reçue => update branche MongoDB (Payload: ${JSON.stringify(branch)})`);
+    return this.branchService.update(id, branch);
   }
 
   @MessagePattern(BRANCH_PATTERNS.DELETE)
