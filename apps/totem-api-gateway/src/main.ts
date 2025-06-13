@@ -10,6 +10,12 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
 
+  // ✅ Active CORS pour autoriser ton frontend
+  app.enableCors({
+    origin: 'http://localhost:3005',
+    credentials: true,
+  });
+
   // ➕ Connexion du microservice Kafka
   /*app.connectMicroservice({
     transport: Transport.KAFKA,
