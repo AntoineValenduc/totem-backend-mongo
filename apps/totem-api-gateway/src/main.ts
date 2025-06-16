@@ -2,8 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { TotemApiGatewayModule } from './totem-api-gateway.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { Transport } from '@nestjs/microservices';
-import { CustomHttpExceptionFilter } from 'totem-mongo/src/shared/filters/CustomHttpExceptionFilter.filter';
-import { RpcToHttpInterceptor } from 'totem-api-gateway/src/interceptors/rpc-exception.interceptor';
+import { CustomHttpExceptionFilter } from '../../totem-mongo/src/shared/filters/CustomHttpExceptionFilter.filter';
+import { RpcToHttpInterceptor } from '../src/interceptors/rpc-exception.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(TotemApiGatewayModule, {
