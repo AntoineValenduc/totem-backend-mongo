@@ -18,25 +18,25 @@ pipeline {
 
     stage('Install dependencies') {
       steps {
-        sh 'npm ci'
+        bat 'npm ci'
       }
     }
 
     stage('Build') {
       steps {
-        sh 'npm run build'
+        bat 'npm run build'
       }
     }
 
     stage('Run tests') {
       steps {
-        sh 'npm run test'
+        bat 'npm run test'
       }
     }
 
     stage('Run E2E tests') {
       steps {
-        sh 'npm run test:e2e'
+        bat 'npm run test:e2e'
       }
     }
   }
