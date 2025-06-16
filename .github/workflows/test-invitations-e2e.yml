@@ -1,0 +1,49 @@
+name: E2E Tests Invitations
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_DB: testdb
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Set env variables
+        run: |
+          echo "TCP_HOST=localhost" >> .env.test
+          echo "TCP_PORT=1234" >> .env.test
+          echo "NODE_ENV=test" >> .env.test
+
+      - name: Run E2E Tests
+        run: npm run test:e2e
+        env:
+          NODE_ENV: test

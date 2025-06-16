@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
 import { BranchesService } from './branches.service';
-import { BrancheCreateDto } from 'totem-mongo/src/shared/dto/branche-create.dto';
+import { BrancheCreateDto } from '../../../totem-mongo/src/shared/dto/branche-create.dto';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { BrancheUpdateDto } from 'totem-mongo/src/shared/dto/branche-update.dto';
+import { BrancheUpdateDto } from '../../../totem-mongo/src/shared/dto/branche-update.dto';
 
 @ApiTags('branches')
 @ApiBearerAuth()

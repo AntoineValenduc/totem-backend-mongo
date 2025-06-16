@@ -14,6 +14,8 @@ import * as Joi from 'joi';
 import * as dotenv from 'dotenv';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { InvitationsProxyController } from '../src/invitations/invitation-proxy.controller';
+import { HttpModule } from '@nestjs/axios';
 
 const env = process.env.NODE_ENV || 'development';
 const envPath = join(process.cwd(), `.env.${env}`);
@@ -33,7 +35,6 @@ dotenv.config({ path: resolvedPath });
         TCP_PORT: Joi.number().required(),
         TCP_TIMEOUT: Joi.number().default(5000)
       })
-
   }),
 
   ClientsModule.registerAsync([
@@ -51,13 +52,15 @@ dotenv.config({ path: resolvedPath });
         }),
         inject: [ConfigService]
       },
-    ])
+    ]),
+    HttpModule,
   ],
   controllers: [
     TotemApiGatewayController,
     ProfilesController,
     BranchesController,
     BadgesController,
+    InvitationsProxyController
   ],
   providers: [
     TotemApiGatewayService,

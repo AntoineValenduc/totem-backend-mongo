@@ -1,6 +1,15 @@
-Mettre Prisma
+Mettre Prisma => OK
 CI/CD => ESlint
 Actions
+Workflow
+Jenkins => PK
+Swagger => OK
+Sonar
+
+
+Jenkins
+cmd = java -jar jenkins.war
+SI >Jdk21 ajouter = --enable-future-java
 
 
 

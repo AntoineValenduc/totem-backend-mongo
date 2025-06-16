@@ -1,9 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { BrancheCreateDto } from 'totem-mongo/src/shared/dto/branche-create.dto';
-import { BRANCH_PATTERNS, PROFILE_PATTERNS } from 'totem-mongo/src/shared/constants/patterns';
+import { BrancheCreateDto } from '../../../totem-mongo/src/shared/dto/branche-create.dto';
+import { BRANCH_PATTERNS } from '../../../totem-mongo/src/shared/constants/patterns';
 import { firstValueFrom } from 'rxjs';
-import { BrancheUpdateDto } from 'totem-mongo/src/shared/dto/branche-update.dto';
+import { BrancheUpdateDto } from '../../../totem-mongo/src/shared/dto/branche-update.dto';
 
 @Injectable()
 export class BranchesService {

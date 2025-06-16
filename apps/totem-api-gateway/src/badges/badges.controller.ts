@@ -1,8 +1,8 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
 import { BadgesService } from './badges.service';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { BadgeUpdateDto } from 'totem-mongo/src/shared/dto/badge-update.dto';
-import { BadgeCreateDto } from 'totem-mongo/src/shared/dto/badge-create.dto';
+import { BadgeUpdateDto } from '../../../totem-mongo/src/shared/dto/badge-update.dto';
+import { BadgeCreateDto } from '../../../totem-mongo/src/shared/dto/badge-create.dto';
 
 @ApiTags('badges')
 @ApiBearerAuth()
