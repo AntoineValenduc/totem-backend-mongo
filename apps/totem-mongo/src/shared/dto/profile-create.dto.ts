@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ProfileCreateDto {
+  @ApiProperty({ example: '123456789' })
+  readonly user_id: string;
   @ApiProperty({ example: 'Jean' })
   readonly first_name: string;
   @ApiProperty({ example: 'Dupont' })
