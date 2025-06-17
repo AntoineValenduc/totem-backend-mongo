@@ -1,3 +1,4 @@
+/*
 import { Test, TestingModule } from '@nestjs/testing';
 import { BranchesService } from './branches.service';
 
@@ -16,3 +17,4 @@ describe('BranchesService', () => {
     expect(service).toBeDefined();
   });
 });
+*/

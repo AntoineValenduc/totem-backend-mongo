@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ProfileController } from './profile.controller';
 import { ProfileService } from '../services/profile.service';
 import { ProfileCreateDto } from '../shared/dto/profile-create.dto';
+import { ProfileUpdateDto } from 'totem-mongo/src/shared/dto/profile-update.dto';
 
 describe('ProfileController', () => {
   let profileController: ProfileController;
@@ -50,10 +51,10 @@ describe('ProfileController', () => {
   });
 
   it('should update a profile', async () => {
-    const dto: ProfileCreateDto = {
+    const dto: ProfileUpdateDto = {
       name: 'Updated Profile',
-    } as unknown as ProfileCreateDto;
-    await expect(profileController.updateProfile('123', dto)).resolves.toEqual(
+    } as unknown as ProfileUpdateDto;
+    await expect(profileController.updateProfile({id: '123',profile: dto})).resolves.toEqual(
       {},
     );
   });
