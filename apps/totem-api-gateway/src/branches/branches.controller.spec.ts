@@ -1,4 +1,3 @@
-/*
 import { Test, TestingModule } from '@nestjs/testing';
 import { BranchesController } from './branches.controller';
 
@@ -17,4 +16,3 @@ describe('BranchesController', () => {
     expect(controller).toBeDefined();
   });
 });
-*/
