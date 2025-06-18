@@ -9,6 +9,7 @@ export class AuthController {
 
   @Post('login')
   async login(@Body() dto: LoginUserDto, @Res({ passthrough: true }) res: any) {
+    console.log(dto);
     const token = await this.authService.login(dto);
     res.cookie('access_token', token, { httpOnly: true });
     return { success: true };

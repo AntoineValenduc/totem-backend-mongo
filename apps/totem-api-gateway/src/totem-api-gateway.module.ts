@@ -16,6 +16,8 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { InvitationsProxyController } from '../src/invitations/invitation-proxy.controller';
 import { HttpModule } from '@nestjs/axios';
+import { AuthProxyController } from 'totem-api-gateway/src/auth/login-proxy.controller';
+import { AuthGatewayModule } from 'totem-api-gateway/src/auth/login-proxy.module';
 
 const env = process.env.NODE_ENV || 'development';
 const envPath = join(process.cwd(), `.env.${env}`);
@@ -25,6 +27,7 @@ dotenv.config({ path: resolvedPath });
 
 @Module({
   imports: [
+    AuthGatewayModule,
     ConfigModule.forRoot({
       envFilePath: resolvedPath,
       validationSchema: Joi.object({
@@ -60,7 +63,8 @@ dotenv.config({ path: resolvedPath });
     ProfilesController,
     BranchesController,
     BadgesController,
-    InvitationsProxyController
+    InvitationsProxyController,
+    AuthProxyController
   ],
   providers: [
     TotemApiGatewayService,

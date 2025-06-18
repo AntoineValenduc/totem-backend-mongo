@@ -24,3 +24,7 @@ export const BADGE_PATTERNS = {
   UPDATE: 'badges.update',
   DELETE: 'badge.delete',
 };
+
+export const USER_PATTERNS = {
+  INVITATIONS_REGISTER: 'invitations.register',
+}

@@ -12,15 +12,47 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginUserDto) {
+    console.log('[AuthService] DTO reçu:', dto);
+
     const user = await this.usersService.findByEmail(dto.email);
+    console.log('[AuthService] Utilisateur trouvé par son email :', user);
+
+    //await run();
+
     if (!user || !(await bcrypt.compare(dto.password, user.password))) {
+      console.log('[AuthService] Utilisateur non trouvé en comparant avec le password');
       throw new UnauthorizedException('Identifiants invalides');
     }
 
-    return this.jwtService.sign({
+    const passwordMatch = await bcrypt.compare(dto.password, user.password);
+    console.log('[AuthService] Password match:', passwordMatch);
+
+    if (!passwordMatch) {
+      throw new UnauthorizedException('Password invalides');
+    }
+
+    const payload = {
       sub: user.id,
       email: user.email,
       role: user.role,
-    });
+    };
+
+    return this.jwtService.sign(payload);
   }
+
+
+}
+
+async function run() {
+  const password = 'testChef';
+  const hash = await bcrypt.hash(password, 10);
+  console.log('Mot de passe hashé :', hash);
+
+  const password1 = 'testAdmin';
+  const hash1 = await bcrypt.hash(password1, 10);
+  console.log('Mot de passe hashé1 :', hash1);
+
+  const password2 = 'testJeune';
+  const hash2 = await bcrypt.hash(password2, 10);
+  console.log('Mot de passe hashé2 :', hash2);
 }
