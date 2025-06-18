@@ -1,13 +1,21 @@
-import { Controller, Post, Body, Res } from '@nestjs/common';
+import { Controller, Post, Body, Res, HttpCode, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { LoginUserDto } from '../../../totem-auth-sql/src/users/dto/login-user.dto';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthProxyController {
   constructor(private readonly httpService: HttpService) {}
 
   @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Authentification via proxy microservice PostgreSQL (TOTEM-AUTH-SQL)'})
+  @ApiResponse({ status: 200, description: 'Authentification réussie', type: LoginUserDto})
+  @ApiResponse({ status: 404, description: 'Identifiants incorrects' })
+  @ApiResponse({ status: 500, description: 'Erreur lors de la connexion' })
   async proxyLogin(@Body() body: any, @Res({ passthrough: true }) res: Response) {
     console.log('[Gateway] login payload:', body);
     try {
