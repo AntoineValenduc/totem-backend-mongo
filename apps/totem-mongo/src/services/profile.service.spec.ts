@@ -76,14 +76,14 @@ describe('ProfileService', () => {
 
   it('Create => OK', async () => {
     const createDto: ProfileCreateDto = {
-      firstName: 'Created FName',
-      lastName: 'Created Name',
+      first_name: 'Created FName',
+      last_name: 'Created Name',
       city: 'Villeville',
       address: '200 rue du dév',
       zipcode: '12345',
       mail: 'adresse.mail@mail.fr',
-      dateOfBirth: new Date('2025-06-09'),
-      phoneNumber: '0605040302',
+      date_of_birth: new Date('2025-06-09'),
+      phone_number: '0605040302',
       branch: ""
     } as ProfileCreateDto;
 
