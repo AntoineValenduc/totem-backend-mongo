@@ -18,6 +18,8 @@ import { InvitationsProxyController } from '../src/invitations/invitation-proxy.
 import { HttpModule } from '@nestjs/axios';
 import { AuthProxyController } from 'totem-api-gateway/src/auth/login-proxy.controller';
 import { AuthGatewayModule } from 'totem-api-gateway/src/auth/login-proxy.module';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtSharedModule } from '../../totem-auth-sql/src/libs/shared/jwt/jwt.module';
 
 const env = process.env.NODE_ENV || 'development';
 const envPath = join(process.cwd(), `.env.${env}`);
@@ -57,6 +59,7 @@ dotenv.config({ path: resolvedPath });
       },
     ]),
     HttpModule,
+    JwtSharedModule
   ],
   controllers: [
     TotemApiGatewayController,
