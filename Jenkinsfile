@@ -53,27 +53,37 @@ pipeline {
       }
     }
 
-    stage('SonarCloud') {
-      environment {
-        SONAR_TOKEN = credentials('sonarqube_token')
+    stage('Debug reports') {
+      steps {
+        bat 'dir /s'
       }
+    }
+
+    stage('SonarCloud') {
       steps {
         bat 'npm run test:coverage'
         bat 'npx sonarqube-scanner'
       }
     }
-
   }
 
   post {
     always {
       echo '🏁 Pipeline terminée'
-      junit 'reports/junit/*.xml'                // Rapports JUnit
-      archiveArtifacts artifacts: 'coverage/**/*', allowEmptyArchive: true
+
+      // Pour chaque microservice
+      junit 'apps/totem-api-gateway/reports/junit/*.xml'
+      junit 'apps/totem-mongo/reports/junit/*.xml'
+      junit 'apps/totem-auth-sql/reports/junit/*.xml'
+
+      // Archive la couverture
+      archiveArtifacts artifacts: '**/coverage/**/*', allowEmptyArchive: true
     }
+
     failure {
       echo '❌ Échec de la pipeline'
     }
+
     success {
       echo '✅ Succès !'
     }

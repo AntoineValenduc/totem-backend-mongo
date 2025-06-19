@@ -26,7 +26,7 @@
     "test:e2eApi": "jest --config ./apps/totem-api-gateway/test/jest-e2e.json",
     "test:e2eSql": "jest --config ./apps/totem-auth-sql/test/jest-e2e.json",
     "test:e2eMongo": "jest --config ./apps/totem-mongo/test/jest-e2e.json",
-    "test:e2eAll": "jest --config ./jest-e2e.config.js",
+    "test:e2eAll": "npm run test:e2eApi && npm run test:e2eMongo && npm run test:e2eSql",
     "prisma-migrate": "prisma migrate dev --schema=apps/totem-auth-sql/src/prisma/schema.prisma",
     "prisma-studio": "prisma studio --schema=apps/totem-auth-sql/src/prisma/schema.prisma"
   },
