@@ -10,11 +10,6 @@ pipeline {
     skipDefaultCheckout(false)
   }
 
-  withEnv(["PATH+NODE=${pwd()}/node_modules/.bin"]) {
-    bat 'npm run lint'
-  }
-
-
   stages {
     stage('Checkout') {
       steps {
@@ -24,7 +19,11 @@ pipeline {
 
     stage('ESLint') {
       steps {
-        bat 'npm run lint'
+        script {
+          withEnv(["PATH+NODE=${pwd()}/node_modules/.bin"]) {
+            bat 'npm run lint'
+          }
+        }
       }
     }
 
