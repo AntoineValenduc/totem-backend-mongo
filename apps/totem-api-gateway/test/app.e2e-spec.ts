@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
 import { TotemApiGatewayModule } from './../src/totem-api-gateway.module';
 
 describe('TotemApiGatewayController (e2e)', () => {

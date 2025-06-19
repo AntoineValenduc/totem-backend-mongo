@@ -10,6 +10,11 @@ pipeline {
     skipDefaultCheckout(false)
   }
 
+  withEnv(["PATH+NODE=${pwd()}/node_modules/.bin"]) {
+    bat 'npm run lint'
+  }
+
+
   stages {
     stage('Checkout') {
       steps {

@@ -14,8 +14,7 @@ describe('TotemAuthSqlController (e2e)', () => {
     await app.init();
   });
 
-    it('works', () => {
-      expect(true).toBe(true);
-    });
-
+  it('works', () => {
+    expect(true).toBe(true);
+  });
 });
