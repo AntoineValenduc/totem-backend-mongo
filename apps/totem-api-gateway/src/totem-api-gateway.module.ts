@@ -16,9 +16,8 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 import { InvitationsProxyController } from '../src/invitations/invitation-proxy.controller';
 import { HttpModule } from '@nestjs/axios';
-import { AuthProxyController } from 'totem-api-gateway/src/auth/login-proxy.controller';
-import { AuthGatewayModule } from 'totem-api-gateway/src/auth/login-proxy.module';
-import { JwtModule } from '@nestjs/jwt';
+import { AuthProxyController } from '../src/auth/login-proxy.controller';
+import { AuthGatewayModule } from '../src/auth/login-proxy.module';
 import { JwtSharedModule } from '../../totem-auth-sql/src/libs/shared/jwt/jwt.module';
 
 const env = process.env.NODE_ENV || 'development';

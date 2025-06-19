@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
+import { InvitationsModule } from './invitations/invitations.module';
+import { TotemMongoModule } from '../../totem-mongo/src/totem-mongo.module';
 
 @Module({
   imports: [
@@ -23,7 +25,9 @@ import { AuthModule } from './auth/auth.module';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: process.env.JWT_EXPIRES_IN },
     }),
-    AuthModule
+    AuthModule,
+    InvitationsModule,
+    TotemMongoModule
   ],
   controllers: [],
   providers: [],

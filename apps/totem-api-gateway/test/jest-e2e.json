@@ -5,5 +5,25 @@
   "testRegex": "invitations/invitations.e2e-spec.ts$",
   "transform": {
     "^.+\\.(t|j)s$": "ts-jest"
-  }
+  },
+  "collectCoverage": true,
+  "coverageDirectory": "./coverage/e2e",
+  "coverageReporters": ["lcov", "text", "cobertura"],
+  "coveragePathIgnorePatterns": [
+    "/node_modules/",
+    "/dist/"
+  ],
+  "reporters": [
+    "default",
+    [
+      "jest-junit",
+      {
+        "outputDirectory": "./reports/junit",
+        "outputName": "jest-junit-e2e.xml",
+        "ancestorSeparator": " › ",
+        "classNameTemplate": "{classname}",
+        "titleTemplate": "{title}"
+      }
+    ]
+  ]
 }

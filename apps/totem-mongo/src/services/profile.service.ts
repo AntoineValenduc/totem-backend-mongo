@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { HydratedDocument, isValidObjectId, Model } from 'mongoose';
 import { Profile, ProfileDocument } from '../schema/profile.schema';
@@ -66,6 +66,11 @@ export class ProfileService {
    * @param dto
    */
   async create(dto: ProfileCreateDto): Promise<ProfileDocument> {
+    const existing = await this.profileModel.findOne({ user_id: dto.user_id });
+
+    if (existing) {
+      throw new BadRequestException(`Un profil existe déjà pour l'utilisateur ${dto.user_id}`);
+    }
     this.logger.log("✅ Requête reçue => create profiles MongoDB");
     try {
       return await this.profileModel.create(dto);
@@ -113,8 +118,8 @@ export class ProfileService {
    * Supprimer un profile existant à partir de son ID
    * @param id
    */
-  async remove(id: string): Promise<ProfileDocument> {
-    this.logger.log("✅ Requête reçue => remove profile MongoDB, avec l'ID: " + id);
+  async removeSoft(id: string): Promise<ProfileDocument> {
+    this.logger.log("✅ Requête reçue => removeSoft profile MongoDB, avec l'ID: " + id);
 
     if (!id) {
       throw new NullProfileIdException();
@@ -129,7 +134,7 @@ export class ProfileService {
   }
 
   /**
-   * Mérhode interne - Recherche Profile par ID
+   * Méthode interne - Recherche Profile par ID
    * @param id
    * @private
    */

@@ -68,7 +68,7 @@ export class ProfileController {
         `✅ Requête reçue => getById profile MongoDB (ID: ${id})`,
       );
       try {
-        return await this.profileService.remove(id);
+        return await this.profileService.removeSoft(id);
       } catch (error) {
         console.error('❌ Erreur dans getById:', error);
         throw new RpcException(error.message || 'Erreur interne microservice');

@@ -22,7 +22,7 @@ export class Profile {
   @Prop({ required: true })
   city: string;
   @Prop({ required: true })
-  mail: string;
+  email: string;
   @Prop()
   phone_number: string;
   @Prop()

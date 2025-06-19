@@ -48,5 +48,6 @@ const resolvedEnvFilePath = existsSync(envFilePath) ? envFilePath : fallbackEnvF
   ],
   controllers: [ProfileController, BranchController, BadgeController],
   providers: [ProfileService, BranchService, BadgeService],
+  exports: [ProfileService],
 })
 export class TotemMongoModule {}

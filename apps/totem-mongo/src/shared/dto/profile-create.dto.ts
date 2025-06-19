@@ -16,7 +16,7 @@ export class ProfileCreateDto {
   @ApiProperty({ example: 'Lille' })
   readonly city: string;
   @ApiProperty({ example: 'jean.dupont@email.com' })
-  readonly mail: string;
+  readonly email: string;
   @ApiProperty({ example: '+33605040302' })
   readonly phone_number: string;
   @ApiProperty({

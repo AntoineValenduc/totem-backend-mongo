@@ -8,7 +8,7 @@ export interface Profile {
     address: string;
     zipcode: string;
     city: string;
-    mail: string;
+    email: string;
     phoneNumber: string;
     branch: string | Branch;
 }

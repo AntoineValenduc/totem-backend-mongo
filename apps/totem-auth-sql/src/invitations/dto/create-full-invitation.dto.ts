@@ -10,7 +10,7 @@ export class CreateFullInvitationDto {
     address: string;
     zipcode: string;
     city: string;
-    mail: string;
+    email: string;
     phone_number: string;
     photo_url?: string;
     branch: string;

@@ -22,7 +22,7 @@ describe('ProfileService', () => {
     address: '12 rue de la paix',
     city: 'Lille',
     zipcode: '59211',
-    mail: 'jean.dupont@email.com',
+    email: 'jean.dupont@email.com',
     phone_number: '+33605040302',
     branch: new Types.ObjectId(),
     is_deleted: false,
@@ -71,7 +71,7 @@ describe('ProfileService', () => {
   });
 
   it('GetID => Exception: ID null', async () => {
-    await expect(service.remove(undefined as any)).rejects.toThrow(NullProfileIdException);
+    await expect(service.removeSoft(undefined as any)).rejects.toThrow(NullProfileIdException);
   });
 
   it('Create => OK', async () => {
@@ -81,7 +81,7 @@ describe('ProfileService', () => {
       city: 'Villeville',
       address: '200 rue du dév',
       zipcode: '12345',
-      mail: 'adresse.mail@mail.fr',
+      email: 'adresse.mail@mail.fr',
       date_of_birth: new Date('2025-06-09'),
       phone_number: '0605040302',
       branch: ""
@@ -112,7 +112,7 @@ describe('ProfileService', () => {
       city: 'Nocity',
       address: '404 nowhere',
       zipcode: 'ABCDE',
-      mail: 'invalid.email@fail',
+      email: 'invalid.email@fail',
       dateOfBirth: 'not-a-date', // ⚠️ ici c’est une string invalide
       phoneNumber: 'not-a-phone',
       branch: ''
@@ -185,7 +185,7 @@ describe('ProfileService', () => {
       removed_at: new Date(),
     });
 
-    const result = await service.remove(mockProfileDocument._id.toString());
+    const result = await service.removeSoft(mockProfileDocument._id.toString());
     expect(result.is_deleted).toBe(true);
     expect(result.removed_at).toBeDefined();
     expect(profileModel.findById).toHaveBeenCalledWith(mockProfileDocument._id.toString());
@@ -197,15 +197,15 @@ describe('ProfileService', () => {
       exec: jest.fn().mockResolvedValue(null),
     } as any);
 
-    await expect(service.remove('111111111111111111111111')).rejects.toThrow(ProfileNotFoundException);
+    await expect(service.removeSoft('111111111111111111111111')).rejects.toThrow(ProfileNotFoundException);
   });
 
   it('Delete => Exception: ID null', async () => {
-    await expect(service.remove(undefined as any)).rejects.toThrow(NullProfileIdException);
+    await expect(service.removeSoft(undefined as any)).rejects.toThrow(NullProfileIdException);
   });
 
   it('Delete => Exception: ID vide', async () => {
-    await expect(service.remove('')).rejects.toThrow(NullProfileIdException);
+    await expect(service.removeSoft('')).rejects.toThrow(NullProfileIdException);
   });
 
 });

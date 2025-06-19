@@ -23,7 +23,7 @@ describe('BadgeService', () => {
     address: '12 rue de la paix',
     city: 'Lille',
     zipcode: '59211',
-    mail: 'jean.dupont@email.com',
+    email: 'jean.dupont@email.com',
     phone_number: '+33605040302',
     branch: new Types.ObjectId(),
     is_deleted: false,

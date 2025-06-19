@@ -8,7 +8,7 @@ export class CreateInvitationDto {
   address: string;
   zipcode: string;
   city: string;
-  mail: string;
+  email: string;
   phone_number: string;
   email: string;
   role: Role;
