@@ -5,7 +5,6 @@ export const PROFILE_PATTERNS = {
   CREATE: 'profiles.create',
   UPDATE: 'profiles.update',
   DELETE: 'profiles.delete',
-
 };
 
 export const BRANCH_PATTERNS = {
@@ -27,4 +26,4 @@ export const BADGE_PATTERNS = {
 
 export const USER_PATTERNS = {
   INVITATIONS_REGISTER: 'invitations.register',
-}
+};

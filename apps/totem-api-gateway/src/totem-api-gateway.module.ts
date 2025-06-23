@@ -18,9 +18,9 @@ import { InvitationsProxyController } from '../src/invitations/invitation-proxy.
 import { HttpModule } from '@nestjs/axios';
 import { AuthProxyController } from '../src/auth/login-proxy.controller';
 import { AuthGatewayModule } from '../src/auth/login-proxy.module';
-import { JwtSharedModule } from '../../totem-auth-sql/src/libs/shared/jwt/jwt.module';
+import { JwtSharedModule } from '@totem-auth-sql/src/libs/shared/jwt/jwt.module';
 
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV ?? 'development';
 const envPath = join(process.cwd(), `.env.${env}`);
 const fallbackPath = join(process.cwd(), `.env`);
 const resolvedPath = existsSync(envPath) ? envPath : fallbackPath;
@@ -37,11 +37,11 @@ dotenv.config({ path: resolvedPath });
           .default('development'),
         TCP_HOST: Joi.string().required(),
         TCP_PORT: Joi.number().required(),
-        TCP_TIMEOUT: Joi.number().default(5000)
-      })
-  }),
+        TCP_TIMEOUT: Joi.number().default(5000),
+      }),
+    }),
 
-  ClientsModule.registerAsync([
+    ClientsModule.registerAsync([
       {
         name: 'TOTEM_MONGO_CLIENT',
         imports: [ConfigModule],
@@ -52,13 +52,13 @@ dotenv.config({ path: resolvedPath });
             port: configService.get<number>('TCP_PORT'),
           },
           retryAttempts: 5,
-          retryDelay: 3000
+          retryDelay: 3000,
         }),
-        inject: [ConfigService]
+        inject: [ConfigService],
       },
     ]),
     HttpModule,
-    JwtSharedModule
+    JwtSharedModule,
   ],
   controllers: [
     TotemApiGatewayController,
@@ -66,7 +66,7 @@ dotenv.config({ path: resolvedPath });
     BranchesController,
     BadgesController,
     InvitationsProxyController,
-    AuthProxyController
+    AuthProxyController,
   ],
   providers: [
     TotemApiGatewayService,
@@ -76,4 +76,4 @@ dotenv.config({ path: resolvedPath });
   ],
 })
 export class TotemApiGatewayModule {}
-console.log("process.env.TCP_HOST => ", process.env.TCP_HOST);
+console.log('process.env.TCP_HOST => ', process.env.TCP_HOST);

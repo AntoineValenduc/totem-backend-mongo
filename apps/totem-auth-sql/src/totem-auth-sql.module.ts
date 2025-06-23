@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { InvitationsModule } from './invitations/invitations.module';
-import { TotemMongoModule } from '../../totem-mongo/src/totem-mongo.module';
+import { TotemMongoModule } from '@totem-mongo/src/totem-mongo.module';
 
 @Module({
   imports: [
@@ -12,11 +12,11 @@ import { TotemMongoModule } from '../../totem-mongo/src/totem-mongo.module';
     TypeOrmModule.forRootAsync({
       useFactory: () => ({
         type: 'postgres',
-        host: process.env.POSTGRES_HOST || 'localhost',
-        port: parseInt(process.env.POSTGRES_PORT || '5432'),
-        username: process.env.POSTGRES_USER || 'postgres',
-        password: process.env.POSTGRES_PASSWORD || 'admin',
-        database: process.env.POSTGRES_DB || 'postgres',
+        host: process.env.POSTGRES_HOST ?? 'localhost',
+        port: parseInt(process.env.POSTGRES_PORT ?? '5432'),
+        username: process.env.POSTGRES_USER ?? 'postgres',
+        password: process.env.POSTGRES_PASSWORD ?? 'admin',
+        database: process.env.POSTGRES_DB ?? 'postgres',
         autoLoadEntities: true,
         synchronize: true,
       }),
@@ -27,7 +27,7 @@ import { TotemMongoModule } from '../../totem-mongo/src/totem-mongo.module';
     }),
     AuthModule,
     InvitationsModule,
-    TotemMongoModule
+    TotemMongoModule,
   ],
   controllers: [],
   providers: [],

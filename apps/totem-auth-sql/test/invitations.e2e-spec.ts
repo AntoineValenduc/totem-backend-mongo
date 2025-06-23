@@ -1,10 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
-import { ProfileService } from '../../totem-mongo/src/services/profile.service';
+import { ProfileService } from '@totem-mongo/src/services/profile.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { TotemAuthSqlModule } from '../src/totem-auth-sql.module';
-import Mail from 'nodemailer/lib/mailer';
 import { MailService } from '../src/mail/mail.service';
 
 const mockProfileService: Partial<ProfileService> = {
@@ -33,7 +32,7 @@ describe('Invitations E2E', () => {
     email: testEmail,
     branch: 'BR001',
     role: 'JEUNE',
-    password: 'temp123'
+    password: 'temp123',
   };
 
   beforeAll(async () => {

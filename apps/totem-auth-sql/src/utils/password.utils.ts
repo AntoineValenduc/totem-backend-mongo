@@ -10,10 +10,11 @@ export function generateTempPassword(length = 10): string {
   const symbols = '!@#$%^&*';
   const all = upper + lower + digits + symbols;
 
-  const getRandomChar = (set: string) => set[Math.floor(Math.random() * set.length)];
+  const getRandomChar = (set: string) =>
+    set[Math.floor(Math.random() * set.length)];
 
   // Préremplissage pour garantir 1 maj, 1 min, 1 chiffre, 1 symbole
-  let password = [
+  const password = [
     getRandomChar(upper),
     getRandomChar(lower),
     getRandomChar(digits),
@@ -26,5 +27,5 @@ export function generateTempPassword(length = 10): string {
   }
 
   // Mélange et envoi
-  return password.sort(() => Math.random() - 0.5).join('');
+  return password.toSorted(() => Math.random() - 0.5).join('');
 }

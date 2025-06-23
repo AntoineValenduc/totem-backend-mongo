@@ -4,15 +4,13 @@ import { ProfileService } from '../services/profile.service';
 import { ProfileCreateDto } from '../shared/dto/profile-create.dto';
 import { PROFILE_PATTERNS } from '../shared/constants/patterns';
 import { ProfileDocument } from '../schema/profile.schema';
-import { ProfileUpdateDto } from 'totem-mongo/src/shared/dto/profile-update.dto';
+import { ProfileUpdateDto } from '@totem-mongo/src/shared/dto/profile-update.dto';
 
 @Controller()
 export class ProfileController {
   private readonly logger = new Logger(ProfileController.name);
 
-  constructor(
-    private readonly profileService: ProfileService,
-  ) {}
+  constructor(private readonly profileService: ProfileService) {}
 
   @MessagePattern(PROFILE_PATTERNS.FIND_ALL)
   async findAll(): Promise<ProfileDocument[]> {
@@ -22,7 +20,9 @@ export class ProfileController {
 
   @MessagePattern(PROFILE_PATTERNS.FIND_ALL_SOFT_DELETED)
   async findAllSoftDeleted(): Promise<ProfileDocument[]> {
-    this.logger.log('✅ Requête reçue => findAll profiles soft-deleted MongoDB');
+    this.logger.log(
+      '✅ Requête reçue => findAll profiles soft-deleted MongoDB',
+    );
     return this.profileService.findAllSoftDeleted();
   }
 
@@ -37,7 +37,7 @@ export class ProfileController {
         return await this.profileService.getById(id);
       } catch (error) {
         console.error('❌ Erreur dans getById:', error);
-        throw new RpcException(error.message || 'Erreur interne microservice');
+        throw new RpcException(error.message ?? 'Erreur interne microservice');
       }
     }
   }
@@ -51,10 +51,14 @@ export class ProfileController {
   }
 
   @MessagePattern(PROFILE_PATTERNS.UPDATE)
-  async updateProfile(@Payload() data: { id: string; profile: ProfileUpdateDto }): Promise<ProfileDocument> {
+  async updateProfile(
+    @Payload() data: { id: string; profile: ProfileUpdateDto },
+  ): Promise<ProfileDocument> {
     const { id, profile } = data;
     this.logger.log(`✅ Requête reçue => update profile MongoDB (ID: ${id})`);
-    this.logger.log(`✅ Requête reçue => update profile MongoDB (Payload: ${JSON.stringify(profile)})`);
+    this.logger.log(
+      `✅ Requête reçue => update profile MongoDB (Payload: ${JSON.stringify(profile)})`,
+    );
     return this.profileService.update(id, profile);
   }
 
@@ -71,7 +75,7 @@ export class ProfileController {
         return await this.profileService.removeSoft(id);
       } catch (error) {
         console.error('❌ Erreur dans getById:', error);
-        throw new RpcException(error.message || 'Erreur interne microservice');
+        throw new RpcException(error.message ?? 'Erreur interne microservice');
       }
     }
   }

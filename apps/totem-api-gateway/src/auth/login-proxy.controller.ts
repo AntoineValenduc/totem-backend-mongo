@@ -3,7 +3,7 @@ import { Response } from 'express';
 import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { LoginUserDto } from '../../../totem-auth-sql/src/users/dto/login-user.dto';
+import { LoginUserDto } from '@totem-auth-sql/src/users/dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
 
 @ApiTags('auth')
@@ -31,7 +31,10 @@ export class AuthProxyController {
 
       const access_token = response.data?.access_token;
       if (!access_token) {
-        throw new Error("Token JWT manquant dans la réponse du microservice auth.");
+        return res.status(HttpStatus.UNAUTHORIZED).json({
+          success: false,
+          message: 'Token JWT manquant dans la réponse du microservice auth.',
+        });
       }
 
       res.cookie('jwt', response.data?.access_token, {
@@ -46,7 +49,7 @@ export class AuthProxyController {
         role: response.data?.role,
       };
     } catch (err) {
-      console.error('[Gateway] Erreur de proxy login:', err?.response?.data || err.message);
+      console.error('[Gateway] Erreur de proxy login:', err?.response?.data ?? err.message);
       return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ success: false, message: 'Erreur lors de la connexion' });
     }
   }

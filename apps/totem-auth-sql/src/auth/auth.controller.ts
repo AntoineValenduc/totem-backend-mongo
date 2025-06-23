@@ -1,12 +1,19 @@
-import { Controller, Post, Body, Res, UseGuards, Get, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Res,
+  UseGuards,
+  Get,
+  Req,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {
-  }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
   async login(@Body() dto: LoginUserDto, @Res({ passthrough: true }) res: any) {
@@ -19,7 +26,6 @@ export class AuthController {
       role: role,
     };
   }
-
 
   @UseGuards(JwtAuthGuard)
   @Get('me')

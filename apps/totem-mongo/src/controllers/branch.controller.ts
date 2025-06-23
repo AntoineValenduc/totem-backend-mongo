@@ -2,11 +2,11 @@ import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { BranchService } from '../services/branch.service';
 import { BrancheCreateDto } from '../shared/dto/branche-create.dto';
-import { BRANCH_PATTERNS, PROFILE_PATTERNS } from '../shared/constants/patterns';
+import {
+  BRANCH_PATTERNS,
+} from '../shared/constants/patterns';
 import { BranchDocument } from '../schema/branch.schema';
-import { ProfileUpdateDto } from 'totem-mongo/src/shared/dto/profile-update.dto';
-import { ProfileDocument } from 'totem-mongo/src/schema/profile.schema';
-import { BrancheUpdateDto } from 'totem-mongo/src/shared/dto/branche-update.dto';
+import { BrancheUpdateDto } from '@totem-mongo/src/shared/dto/branche-update.dto';
 
 @Controller()
 export class BranchController {
@@ -35,10 +35,14 @@ export class BranchController {
   }
 
   @MessagePattern(BRANCH_PATTERNS.UPDATE)
-  async updateBranch(@Payload() data: { id: string; branch: BrancheUpdateDto }): Promise<BranchDocument> {
+  async updateBranch(
+    @Payload() data: { id: string; branch: BrancheUpdateDto },
+  ): Promise<BranchDocument> {
     const { id, branch } = data;
     this.logger.log(`✅ Requête reçue => update branche MongoDB (ID: ${id})`);
-    this.logger.log(`✅ Requête reçue => update branche MongoDB (Payload: ${JSON.stringify(branch)})`);
+    this.logger.log(
+      `✅ Requête reçue => update branche MongoDB (Payload: ${JSON.stringify(branch)})`,
+    );
     return this.branchService.update(id, branch);
   }
 

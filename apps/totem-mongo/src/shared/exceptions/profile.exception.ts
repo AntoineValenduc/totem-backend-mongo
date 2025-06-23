@@ -6,11 +6,11 @@ import { HttpStatus } from '@nestjs/common';
  */
 export class ProfileInterneErrorException extends AppException {
   constructor(source: string, details?: string) {
-    super(
-      `Erreur lors de la récupération des profils (${source})${details ? ` : ${details}` : ''}`,
-      'PROFILE_FETCH_FAILED',
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
+    const message = details
+      ? `Erreur lors de la récupération des profils (${source}) : ${details}`
+      : `Erreur lors de la récupération des profils`
+
+    super (message, 'PROFILE_FETCH_FAILED', HttpStatus.INTERNAL_SERVER_ERROR)
   }
 }
 
@@ -23,7 +23,8 @@ export class ProfileNotFoundException extends AppException {
     super(
       `Profil avec l'ID ${id} introuvable`,
       'PROFILE_NOT_FOUND',
-      HttpStatus.NOT_FOUND);
+      HttpStatus.NOT_FOUND,
+    );
   }
 }
 
@@ -32,9 +33,11 @@ export class ProfileNotFoundException extends AppException {
  */
 export class InvalidProfilIdException extends AppException {
   constructor(id: string) {
-    super(`L'ID du profil ${id} est invalide`,
+    super(
+      `L'ID du profil ${id} est invalide`,
       'INVALID_PROFILE_ID',
-      HttpStatus.BAD_REQUEST);
+      HttpStatus.BAD_REQUEST,
+    );
   }
 }
 
@@ -43,9 +46,11 @@ export class InvalidProfilIdException extends AppException {
  */
 export class NullProfileIdException extends AppException {
   constructor() {
-    super(`L'ID du profil ne peux pas être null ou vide.`,
+    super(
+      `L'ID du profil ne peux pas être null ou vide.`,
       'NULL_PROFILE_ID',
-      HttpStatus.BAD_REQUEST);
+      HttpStatus.BAD_REQUEST,
+    );
   }
 }
 
@@ -54,18 +59,19 @@ export class NullProfileIdException extends AppException {
  */
 export class DeletedProfileException extends AppException {
   constructor(id: string) {
-    super(`L'ID du profil ${id} pointe vers un Profil en Soft-delete`,
+    super(
+      `L'ID du profil ${id} pointe vers un Profil en Soft-delete`,
       'DELETED_PROFILE_ID',
-      HttpStatus.BAD_REQUEST);
+      HttpStatus.BAD_REQUEST,
+    );
   }
 }
 
 export class ProfileCreateException extends AppException {
   constructor(message?: string) {
-    super(
-      `Erreur lors de la création du profil${message ? ` : ${message}` : ''}`,
-      'PROFILE_CREATE_FAILED',
-      HttpStatus.BAD_REQUEST,
-    );
+    const fullMessage = message
+      ? `Erreur lors de la création du profil : ${message}`
+      : `Erreur lors de la création du profil`
+    super(fullMessage, 'PROFILE_CREATE_FAILED', HttpStatus.BAD_REQUEST);
   }
 }

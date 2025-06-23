@@ -4,9 +4,7 @@ import { RegisterNewUserDto } from '../users/dto/register-from-invitation.dto';
 
 @Controller('invitations')
 export class InvitationsController {
-  constructor(
-    private readonly invitationsService: InvitationsService,
-  ) {}
+  constructor(private readonly invitationsService: InvitationsService) {}
 
   @Post('register')
   async registerFromToken(@Body() dto: RegisterNewUserDto) {

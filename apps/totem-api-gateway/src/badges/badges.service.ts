@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { BadgeCreateDto } from '../../../totem-mongo/src/shared/dto/badge-create.dto';
-import { BADGE_PATTERNS } from '../../../totem-mongo/src/shared/constants/patterns';
+import { BadgeCreateDto } from '@totem-mongo/src/shared/dto/badge-create.dto';
+import { BADGE_PATTERNS } from '@totem-mongo/src/shared/constants/patterns';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
-import { BadgeUpdateDto } from '../../../totem-mongo/src/shared/dto/badge-update.dto';
+import { BadgeUpdateDto } from '@totem-mongo/src/shared/dto/badge-update.dto';
 @Injectable()
 export class BadgesService {
   constructor(
@@ -24,19 +24,19 @@ export class BadgesService {
 
   async createBadge(badge: BadgeCreateDto) {
     return await firstValueFrom(
-      this.badgeClient.send(BADGE_PATTERNS.CREATE, badge)
+      this.badgeClient.send(BADGE_PATTERNS.CREATE, badge),
     );
   }
 
   async updateBadge(id: string, badge: BadgeUpdateDto) {
     return await firstValueFrom(
-      this.badgeClient.send(BADGE_PATTERNS.UPDATE, { id, badge: badge })
+      this.badgeClient.send(BADGE_PATTERNS.UPDATE, { id, badge: badge }),
     );
   }
 
   async deleteBadge(id: string) {
     return await firstValueFrom(
-      this.badgeClient.send(BADGE_PATTERNS.DELETE, { id })
+      this.badgeClient.send(BADGE_PATTERNS.DELETE, { id }),
     );
   }
 }

@@ -14,10 +14,10 @@ async function bootstrap() {
   // 🌐 Active les CORS pour accepter les cookies cross-origin
   app.enableCors({
     origin: 'http://localhost:3005', // ton front Next.js
-    credentials: true,              // important pour les cookies
+    credentials: true, // important pour les cookies
   });
 
-  await app.listen(config.get('PORT_TOTEM_AUTH') || 3002);
+  await app.listen(config.get('PORT_TOTEM_AUTH') ?? 3002);
 }
 void bootstrap().then(() =>
   console.log('🚀 Microservice Totem-Auth-Sql is running on port 3002'),

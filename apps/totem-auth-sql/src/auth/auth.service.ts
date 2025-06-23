@@ -17,10 +17,10 @@ export class AuthService {
     const user = await this.usersService.findByEmail(dto.email);
     console.log('[AuthService] Utilisateur trouvé par son email :', user);
 
-    //await run();
-
     if (!user || !(await bcrypt.compare(dto.password, user.password))) {
-      console.log('[AuthService] Utilisateur non trouvé en comparant avec le password');
+      console.log(
+        '[AuthService] Utilisateur non trouvé en comparant avec le password',
+      );
       throw new UnauthorizedException('Identifiants invalides');
     }
 
@@ -42,8 +42,6 @@ export class AuthService {
       role: user.role,
     };
   }
-
-
 }
 
 async function run() {

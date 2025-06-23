@@ -17,13 +17,15 @@ import { Badge, BadgeSchema } from './schema/badge.schema';
 import { BadgeController } from './controllers/badge.controller';
 import { BadgeService } from './services/badge.service';
 
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV ?? 'development';
 
 // Construction du chemin vers le fichier .env selon NODE_ENV
 const envFilePath = join(process.cwd(), `.env.${env}`);
 // Vérifie si le fichier existe, sinon fallback sur .env simple
 const fallbackEnvFilePath = join(process.cwd(), '.env');
-const resolvedEnvFilePath = existsSync(envFilePath) ? envFilePath : fallbackEnvFilePath;
+const resolvedEnvFilePath = existsSync(envFilePath)
+  ? envFilePath
+  : fallbackEnvFilePath;
 
 @Module({
   imports: [
@@ -39,7 +41,9 @@ const resolvedEnvFilePath = existsSync(envFilePath) ? envFilePath : fallbackEnvF
         }),
       }),
     }),
-    MongooseModule.forRoot(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/totemDB'),
+    MongooseModule.forRoot(
+      process.env.MONGO_URI ?? 'mongodb://127.0.0.1:27017/totemDB',
+    ),
     MongooseModule.forFeature([
       { name: Profile.name, schema: ProfileSchema },
       { name: Branch.name, schema: BranchSchema },

@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ProfileService } from '../../../totem-mongo/src/services/profile.service';
+import { ProfileService } from '@totem-mongo/src/services/profile.service';
 import { RegisterNewUserDto } from '../users/dto/register-from-invitation.dto';
 import * as bcrypt from 'bcrypt';
 import { Role } from '../common/enums/role.enum';
@@ -56,7 +56,7 @@ export class InvitationsService {
       await this.profileService.create({
         ...dto,
         user_id: user.id.toString(),
-        date_of_birth: new Date(dto.date_of_birth) // obligation de le respécifier
+        date_of_birth: new Date(dto.date_of_birth), // obligation de le respécifier
       });
     } catch (err) {
       console.error(err);
@@ -66,7 +66,7 @@ export class InvitationsService {
     // Génère Token JWT unique pour la session first-login (premier login avec création premier mdp)
     const token = this.jwtService.sign(
       { sub: user.id, purpose: 'first-login' },
-      { expiresIn: '2d' }
+      { expiresIn: '2d' },
     );
 
     // Envoi du email avec Token + mdp temp

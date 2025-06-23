@@ -6,13 +6,14 @@ import { HttpStatus } from '@nestjs/common';
  */
 export class BadgeInterneErrorException extends AppException {
   constructor(source: string, details?: string) {
-    super(
-      `Erreur lors de la récupération des bagdes (${source})${details ? ` : ${details}` : ''}`,
-      'BADGE_FETCH_FAILED',
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
+    const message = details
+      ? `Erreur lors de la récupération des bagdes (${source}) : ${details}`
+      : `Erreur lors de la récupération des bagdes (${source})`;
+
+    super(message, 'BADGE_FETCH_FAILED', HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
+
 
 /**
  * Badge introuvable en BDD
@@ -23,7 +24,8 @@ export class BadgeNotFoundException extends AppException {
     super(
       `Badge avec l'ID ${id} introuvable`,
       'BADGE_NOT_FOUND',
-      HttpStatus.NOT_FOUND);
+      HttpStatus.NOT_FOUND,
+    );
   }
 }
 
@@ -32,9 +34,11 @@ export class BadgeNotFoundException extends AppException {
  */
 export class InvalidBadgeIdException extends AppException {
   constructor(id: string) {
-    super(`L'ID du bagde ${id} est invalide`,
+    super(
+      `L'ID du bagde ${id} est invalide`,
       'INVALID_BADGE_ID',
-      HttpStatus.BAD_REQUEST);
+      HttpStatus.BAD_REQUEST,
+    );
   }
 }
 
@@ -43,9 +47,11 @@ export class InvalidBadgeIdException extends AppException {
  */
 export class NullBadgeIdException extends AppException {
   constructor() {
-    super(`L'ID du bagde ne peux pas être null ou vide.`,
+    super(
+      `L'ID du bagde ne peux pas être null ou vide.`,
       'NULL_BADGE_ID',
-      HttpStatus.BAD_REQUEST);
+      HttpStatus.BAD_REQUEST,
+    );
   }
 }
 
@@ -54,18 +60,20 @@ export class NullBadgeIdException extends AppException {
  */
 export class DeletedBadgeException extends AppException {
   constructor(id: string) {
-    super(`L'ID du bagde ${id} pointe vers un Badge en Soft-delete`,
+    super(
+      `L'ID du bagde ${id} pointe vers un Badge en Soft-delete`,
       'DELETED_BADGE_ID',
-      HttpStatus.BAD_REQUEST);
+      HttpStatus.BAD_REQUEST,
+    );
   }
 }
 
 export class BadgeCreateException extends AppException {
   constructor(message?: string) {
-    super(
-      `Erreur lors de la création du bagde${message ? ` : ${message}` : ''}`,
-      'BADGE_CREATE_FAILED',
-      HttpStatus.BAD_REQUEST,
-    );
+    const fullMessage = message
+      ? `Erreur lors de la création du bagde : ${message}`
+      : 'Erreur lors de la création du bagde';
+
+    super(fullMessage, 'BADGE_CREATE_FAILED', HttpStatus.BAD_REQUEST);
   }
 }

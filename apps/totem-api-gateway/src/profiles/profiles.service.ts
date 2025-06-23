@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ProfileCreateDto } from '../../../totem-mongo/src/shared/dto/profile-create.dto';
-import { PROFILE_PATTERNS } from '../../../totem-mongo/src/shared/constants/patterns';
+import { ProfileCreateDto } from '@totem-mongo/src/shared/dto/profile-create.dto';
+import { PROFILE_PATTERNS } from '@totem-mongo/src/shared/constants/patterns';
 import { firstValueFrom } from 'rxjs';
-import { ProfileUpdateDto } from '../../../totem-mongo/src/shared/dto/profile-update.dto';
+import { ProfileUpdateDto } from '@totem-mongo/src/shared/dto/profile-update.dto';
 
 @Injectable()
 export class ProfilesService {
@@ -25,19 +25,22 @@ export class ProfilesService {
 
   async createProfile(profile: ProfileCreateDto) {
     return await firstValueFrom(
-      this.profilesClient.send(PROFILE_PATTERNS.CREATE, profile)
+      this.profilesClient.send(PROFILE_PATTERNS.CREATE, profile),
     );
   }
 
   async updateProfile(id: string, profile: ProfileUpdateDto) {
     return await firstValueFrom(
-      this.profilesClient.send(PROFILE_PATTERNS.UPDATE, { id, profile: profile })
+      this.profilesClient.send(PROFILE_PATTERNS.UPDATE, {
+        id,
+        profile: profile,
+      }),
     );
   }
 
   async deleteProfile(id: string) {
     return await firstValueFrom(
-      this.profilesClient.send(PROFILE_PATTERNS.DELETE, { id })
+      this.profilesClient.send(PROFILE_PATTERNS.DELETE, { id }),
     );
   }
 }

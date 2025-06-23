@@ -54,9 +54,9 @@ describe('ProfileController', () => {
     const dto: ProfileUpdateDto = {
       name: 'Updated Profile',
     } as unknown as ProfileUpdateDto;
-    await expect(profileController.updateProfile({id: '123',profile: dto})).resolves.toEqual(
-      {},
-    );
+    await expect(
+      profileController.updateProfile({ id: '123', profile: dto }),
+    ).resolves.toEqual({});
   });
 
   it('should remove a profile', async () => {

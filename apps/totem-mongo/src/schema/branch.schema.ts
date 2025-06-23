@@ -31,7 +31,6 @@ export class Branch {
   @Prop({ default: false })
   is_deleted: boolean;
 
-
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Profile' })
   profile: Profile[];
 }
