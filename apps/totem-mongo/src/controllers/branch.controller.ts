@@ -6,7 +6,7 @@ import {
   BRANCH_PATTERNS,
 } from '../shared/constants/patterns';
 import { BranchDocument } from '../schema/branch.schema';
-import { BrancheUpdateDto } from '@totem-mongo/src/shared/dto/branche-update.dto';
+import { BrancheUpdateDto } from '../shared/dto/branche-update.dto';
 
 @Controller()
 export class BranchController {

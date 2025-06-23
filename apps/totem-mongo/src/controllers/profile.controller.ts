@@ -4,7 +4,7 @@ import { ProfileService } from '../services/profile.service';
 import { ProfileCreateDto } from '../shared/dto/profile-create.dto';
 import { PROFILE_PATTERNS } from '../shared/constants/patterns';
 import { ProfileDocument } from '../schema/profile.schema';
-import { ProfileUpdateDto } from '@totem-mongo/src/shared/dto/profile-update.dto';
+import { ProfileUpdateDto } from '../shared/dto/profile-update.dto';
 
 @Controller()
 export class ProfileController {

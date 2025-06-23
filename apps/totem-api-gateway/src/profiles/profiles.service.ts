@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { ProfileCreateDto } from '@totem-mongo/src/shared/dto/profile-create.dto';
-import { PROFILE_PATTERNS } from '@totem-mongo/src/shared/constants/patterns';
 import { firstValueFrom } from 'rxjs';
-import { ProfileUpdateDto } from '@totem-mongo/src/shared/dto/profile-update.dto';
+import { PROFILE_PATTERNS } from '../../../totem-mongo/src/shared/constants/patterns';
+import { ProfileCreateDto } from '../../../totem-mongo/src/shared/dto/profile-create.dto';
+import { ProfileUpdateDto } from '../../../totem-mongo/src/shared/dto/profile-update.dto';
 
 @Injectable()
 export class ProfilesService {

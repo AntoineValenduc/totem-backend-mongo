@@ -14,11 +14,11 @@ import * as Joi from 'joi';
 import * as dotenv from 'dotenv';
 import { join } from 'path';
 import { existsSync } from 'fs';
-import { InvitationsProxyController } from '../src/invitations/invitation-proxy.controller';
+import { InvitationsProxyController } from './invitations/invitation-proxy.controller';
 import { HttpModule } from '@nestjs/axios';
-import { AuthProxyController } from '../src/auth/login-proxy.controller';
-import { AuthGatewayModule } from '../src/auth/login-proxy.module';
-import { JwtSharedModule } from '@totem-auth-sql/src/libs/shared/jwt/jwt.module';
+import { AuthProxyController } from './auth/login-proxy.controller';
+import { AuthGatewayModule } from './auth/login-proxy.module';
+import { JwtSharedModule } from '../../totem-auth-sql/src/libs/shared/jwt/jwt.module';
 
 const env = process.env.NODE_ENV ?? 'development';
 const envPath = join(process.cwd(), `.env.${env}`);

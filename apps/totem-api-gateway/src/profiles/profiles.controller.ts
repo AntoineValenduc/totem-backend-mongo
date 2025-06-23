@@ -11,15 +11,15 @@ import {
   Put,
 } from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
-import { ProfileCreateDto } from '@totem-mongo/src/shared/dto/profile-create.dto';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { ProfileUpdateDto } from '@totem-mongo/src/shared/dto/profile-update.dto';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
+import { ProfileCreateDto } from '../../../totem-mongo/src/shared/dto/profile-create.dto';
+import { ProfileUpdateDto } from '../../../totem-mongo/src/shared/dto/profile-update.dto';
 
 @ApiTags('profiles')
 @ApiBearerAuth()

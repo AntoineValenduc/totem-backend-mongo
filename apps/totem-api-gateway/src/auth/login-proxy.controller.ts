@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
-import { LoginUserDto } from '@totem-auth-sql/src/users/dto/login-user.dto';
+import { LoginUserDto } from '../../../totem-auth-sql/src/users/dto/login-user.dto';
 
 @ApiTags('auth')
 @Controller('auth')

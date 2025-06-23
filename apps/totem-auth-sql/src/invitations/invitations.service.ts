@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { ProfileService } from '@totem-mongo/src/services/profile.service';
 import { RegisterNewUserDto } from '../users/dto/register-from-invitation.dto';
 import * as bcrypt from 'bcrypt';
 import { Role } from '../common/enums/role.enum';
 import { generateTempPassword } from '../utils/password.utils';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service';
+import { ProfileService } from '../../../totem-mongo/src/services/profile.service';
 
 @Injectable()
 export class InvitationsService {

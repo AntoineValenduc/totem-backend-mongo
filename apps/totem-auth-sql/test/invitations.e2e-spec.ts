@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
-import { ProfileService } from '@totem-mongo/src/services/profile.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { TotemAuthSqlModule } from '../src/totem-auth-sql.module';
 import { MailService } from '../src/mail/mail.service';
+import { ProfileService } from '../../totem-mongo/src/services/profile.service';
 
 const mockProfileService: Partial<ProfileService> = {
   create: jest.fn().mockResolvedValue({}),

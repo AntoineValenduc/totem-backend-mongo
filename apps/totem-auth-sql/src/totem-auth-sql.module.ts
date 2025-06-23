@@ -4,7 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthModule } from './auth/auth.module';
 import { InvitationsModule } from './invitations/invitations.module';
-import { TotemMongoModule } from '@totem-mongo/src/totem-mongo.module';
+import { TotemMongoModule } from '../../totem-mongo/src/totem-mongo.module';
 
 @Module({
   imports: [

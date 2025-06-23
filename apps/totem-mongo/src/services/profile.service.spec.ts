@@ -10,7 +10,7 @@ import {
   ProfileInterneErrorException,
   ProfileNotFoundException,
 } from '../shared/exceptions/profile.exception';
-import { ProfileCreateDto } from '@totem-mongo/src/shared/dto/profile-create.dto';
+import { ProfileCreateDto } from '../shared/dto/profile-create.dto';
 
 describe('ProfileService', () => {
   let service: ProfileService;
