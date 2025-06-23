@@ -22,20 +22,23 @@ export class BadgesService {
     return this.badgeClient.send(BADGE_PATTERNS.GET_BY_ID, { id });
   }
 
-  async createBadge(badge: BadgeCreateDto) {
-    return await firstValueFrom(
+  async createBadge(badge: BadgeCreateDto): Promise<BadgeCreateDto> {
+    return await firstValueFrom<BadgeCreateDto>(
       this.badgeClient.send(BADGE_PATTERNS.CREATE, badge),
     );
   }
 
-  async updateBadge(id: string, badge: BadgeUpdateDto) {
-    return await firstValueFrom(
+  async updateBadge(
+    id: string,
+    badge: BadgeUpdateDto,
+  ): Promise<BadgeUpdateDto> {
+    return await firstValueFrom<BadgeUpdateDto>(
       this.badgeClient.send(BADGE_PATTERNS.UPDATE, { id, badge: badge }),
     );
   }
 
-  async deleteBadge(id: string) {
-    return await firstValueFrom(
+  async deleteBadge(id: string): Promise<void> {
+    return await firstValueFrom<void>(
       this.badgeClient.send(BADGE_PATTERNS.DELETE, { id }),
     );
   }
