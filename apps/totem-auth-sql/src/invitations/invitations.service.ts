@@ -28,8 +28,8 @@ export class InvitationsService {
       throw new BadRequestException('Email manquant');
     }
 
-    // Vérifie eemail déjà existant
-    const existing = await this.prisma.user.findUnique({
+    // Vérifie email déjà existant
+    const existing: User | null = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
 
@@ -37,7 +37,7 @@ export class InvitationsService {
       throw new BadRequestException(`L'email ${dto.email} est déjà utilisé.`);
     }
 
-    // Génète mdt temp
+    // Génère mdt temp
     const tempPassword = generateTempPassword();
     const hashed = await bcrypt.hash(tempPassword, 10);
 
@@ -59,7 +59,8 @@ export class InvitationsService {
         user_id: user.id.toString(),
         date_of_birth: new Date(dto.date_of_birth), // obligation de le respécifier
       });
-    } catch (err) {
+    } catch (err: unknown) {
+      // Only log the error, don't try to access properties
       console.error(err);
       throw err;
     }
