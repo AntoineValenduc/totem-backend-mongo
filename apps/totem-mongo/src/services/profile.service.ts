@@ -85,6 +85,9 @@ export class ProfileService {
    * @param dto
    */
   async create(dto: ProfileCreateDto): Promise<ProfileDocument> {
+    if (!dto) {
+      throw new ProfileCreateException('Payload invalide');
+    }
     const existing = await this.profileModel.findOne({ user_id: dto.user_id });
 
     if (existing) {
@@ -126,15 +129,27 @@ export class ProfileService {
 
     await this.findProfileById(id);
 
-    const updated = await this.profileModel
-      .findByIdAndUpdate(id, { $set: profile }, { new: true })
-      .exec();
+    try {
+      const updated = await this.profileModel
+        .findByIdAndUpdate(id, { $set: profile }, { new: true })
+        .exec();
 
-    if (!updated) {
-      this.logger.warn(`⚠️ Profil ${id} introuvable lors de l'update`);
-      throw new ProfileNotFoundException(id);
+      if (!updated) {
+        this.logger.warn(`Profil ${id} introuvable lors de l'update`);
+        throw new ProfileNotFoundException(id);
+      }
+      return updated;
+    } catch (err) {
+      if (err instanceof ProfileNotFoundException) {
+        throw err;
+      }
+      this.logger.error('❌ Erreur lors de la mise à jour du profil', err);
+      const errorMessage =
+        err && typeof err === 'object' && err !== null && 'message' in err
+          ? (err as { message: string }).message
+          : String(err);
+      throw new ProfileInterneErrorException(errorMessage);
     }
-    return updated;
   }
 
   /**

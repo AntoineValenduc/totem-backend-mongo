@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="1" failures="0" errors="0" time="11.325">
-  <testsuite name="TotemApiGatewayController (e2e)" errors="0" failures="0" skipped="0" timestamp="2025-06-19T15:23:59" time="10.944" tests="1">
-    <testcase classname="TotemApiGatewayController (e2e)" name="works" time="0.371">
+<testsuites name="jest tests" tests="1" failures="0" errors="0" time="12.431">
+  <testsuite name="TotemMongoController (e2e)" errors="0" failures="0" skipped="0" timestamp="2025-06-23T14:13:28" time="11.989" tests="1">
+    <testcase classname="TotemMongoController (e2e)" name="works" time="0.481">
     </testcase>
   </testsuite>
 </testsuites>

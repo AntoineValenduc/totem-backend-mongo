@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -10,13 +11,13 @@ import {
 } from '../shared/exceptions/branch.exception';
 import { BrancheCreateDto } from '../shared/dto/branche-create.dto';
 import { BrancheUpdateDto } from '../shared/dto/branche-update.dto';
-import { Branch } from '../schema/branch.schema';
+import { Branch, BranchDocument } from '../schema/branch.schema';
 
 describe('BranchService', () => {
   let service: BranchService;
   let branchModel: Model<Branch>;
 
-  const mockBranchDocument = {
+  const mockBranchDocument: Partial<BranchDocument> = {
     _id: new Types.ObjectId(),
     name: 'nom branche',
     color: 'blanc noiratre',
@@ -63,16 +64,18 @@ describe('BranchService', () => {
   });
 
   it('GetID => OK', async () => {
-    const result = await service.getById(mockBranchDocument._id.toString());
+    const result = await service.getById(mockBranchDocument._id!.toString());
     expect(result).toEqual(mockBranchDocument);
     const findByIdSpy = jest.spyOn(branchModel, 'findById');
-    expect(findByIdSpy).toHaveBeenCalledWith(mockBranchDocument._id.toString());
+    expect(findByIdSpy).toHaveBeenCalledWith(
+      mockBranchDocument._id!.toString(),
+    );
   });
 
   it('GetID => Exception: Branch not Found', async () => {
     jest.spyOn(branchModel, 'findById').mockReturnValueOnce({
       exec: jest.fn().mockResolvedValue(null),
-    } as any);
+    } as unknown as import('mongoose').Query<unknown, BranchDocument>);
     await expect(service.getById('111111111111111111111111')).rejects.toThrow(
       BranchNotFoundException,
     );
@@ -110,9 +113,9 @@ describe('BranchService', () => {
       throw new Error('Payload invalide');
     });
 
-    await expect(service.create(null as any)).rejects.toThrow(
-      BranchCreateException,
-    );
+    await expect(
+      service.create(null as unknown as BrancheCreateDto),
+    ).rejects.toThrow(BranchCreateException);
   });
 
   it('Create => Exception: date invalide', async () => {
@@ -170,9 +173,9 @@ describe('BranchService', () => {
       firstName: 'Updated Name',
     } as BrancheUpdateDto;
 
-    await expect(service.update(null as any, updateDto)).rejects.toThrow(
-      NullBranchIdException,
-    );
+    await expect(
+      service.update(null as unknown as string, updateDto),
+    ).rejects.toThrow(NullBranchIdException);
   });
 
   it('Update => Exception: Payload null', async () => {
@@ -182,9 +185,9 @@ describe('BranchService', () => {
       throw new Error('Payload invalid');
     });
 
-    await expect(service.update(id, null as any)).rejects.toThrow(
-      InvalidBranchPayloadException,
-    );
+    await expect(
+      service.update(id, null as unknown as BrancheUpdateDto),
+    ).rejects.toThrow(InvalidBranchPayloadException);
   });
 
   it('Delete => OK', async () => {
@@ -192,20 +195,27 @@ describe('BranchService', () => {
       ...mockBranchDocument,
       is_deleted: true,
       removed_at: new Date(),
-    });
+    } as BranchDocument);
 
-    const result = await service.remove(mockBranchDocument._id.toString());
+    const result = await service.remove(mockBranchDocument._id!.toString());
     expect(result.is_deleted).toBe(true);
     expect(result.removed_at).toBeDefined();
     const spy = jest.spyOn(branchModel, 'findById');
-    expect(spy).toHaveBeenCalledWith(mockBranchDocument._id.toString());
+    expect(spy).toHaveBeenCalledWith(mockBranchDocument._id!.toString());
     expect(mockBranchDocument.save).toHaveBeenCalled();
   });
 
   it('Delete => Exception: Branch not found', async () => {
     jest.spyOn(branchModel, 'findById').mockReturnValueOnce({
       exec: jest.fn().mockResolvedValue(null),
-    } as any);
+    } as unknown as import('mongoose').Query<
+      unknown,
+      Branch,
+      object,
+      Branch,
+      'findOne',
+      object
+    >);
 
     await expect(service.remove('111111111111111111111111')).rejects.toThrow(
       BranchNotFoundException,
@@ -213,9 +223,9 @@ describe('BranchService', () => {
   });
 
   it('Delete => Exception: ID null', async () => {
-    await expect(service.remove(undefined as any)).rejects.toThrow(
-      NullBranchIdException,
-    );
+    await expect(
+      service.remove(undefined as unknown as string),
+    ).rejects.toThrow(NullBranchIdException);
   });
 
   it('Delete => Exception: ID vide', async () => {

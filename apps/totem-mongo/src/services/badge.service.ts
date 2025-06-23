@@ -118,16 +118,25 @@ export class BadgeService {
 
     await this.findBadgeById(id); // Lève déjà une erreur si introuvable
 
-    const updated = await this.badgeModel
-      .findByIdAndUpdate(id, { $set: badge }, { new: true })
-      .exec();
+    try {
+      const updated = await this.badgeModel
+        .findByIdAndUpdate(id, { $set: badge }, { new: true })
+        .exec();
 
-    if (!updated) {
-      this.logger.warn(`⚠️ Badge ${id} introuvable lors de l'update`);
-      throw new BadgeNotFoundException(id);
+      if (!updated) {
+        this.logger.warn(`⚠️ Badge ${id} introuvable lors de l'update`);
+        throw new BadgeNotFoundException(id);
+      }
+
+      return updated;
+    } catch (err) {
+      this.logger.error('Erreur update()', err);
+      const message =
+        err && typeof err === 'object' && 'message' in err
+          ? String((err as { message?: unknown }).message)
+          : String(err);
+      throw new BadgeInterneErrorException(message);
     }
-
-    return updated;
   }
 
   /**

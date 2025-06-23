@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -43,6 +44,8 @@ describe('ProfileService', () => {
         exec: jest.fn().mockResolvedValue(mockProfileDocument),
       }),
       create: jest.fn().mockResolvedValue(mockProfileDocument),
+      findOne: jest.fn().mockResolvedValue(null),
+      findByIdAndDelete: jest.fn().mockResolvedValue(mockProfileDocument),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -110,7 +113,6 @@ describe('ProfileService', () => {
       ...createDto,
       save: jest.fn(),
       is_deleted: false,
-      // Add Mongoose document properties to mock
       toObject: jest.fn().mockReturnThis(),
       __v: 0,
     } as unknown as Profile & {
