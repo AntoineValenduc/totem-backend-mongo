@@ -2,9 +2,7 @@ import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { BranchService } from '../services/branch.service';
 import { BrancheCreateDto } from '../shared/dto/branche-create.dto';
-import {
-  BRANCH_PATTERNS,
-} from '../shared/constants/patterns';
+import { BRANCH_PATTERNS } from '../shared/constants/patterns';
 import { BranchDocument } from '../schema/branch.schema';
 import { BrancheUpdateDto } from '../shared/dto/branche-update.dto';
 

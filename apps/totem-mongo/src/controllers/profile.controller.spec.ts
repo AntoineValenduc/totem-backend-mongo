@@ -6,7 +6,6 @@ import { ProfileUpdateDto } from '../shared/dto/profile-update.dto';
 
 describe('ProfileController', () => {
   let profileController: ProfileController;
-  //let profileService: ProfileService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
