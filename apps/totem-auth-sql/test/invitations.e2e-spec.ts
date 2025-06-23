@@ -54,7 +54,7 @@ describe('Invitations E2E', () => {
   });
 
   afterAll(async () => {
-    if (prisma?.user) {
+    if (prisma && typeof prisma.user?.deleteMany === 'function') {
       await prisma.user.deleteMany({ where: { email: testEmail } });
     }
     await app.close();

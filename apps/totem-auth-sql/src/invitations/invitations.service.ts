@@ -7,6 +7,7 @@ import { generateTempPassword } from '../utils/password.utils';
 import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service';
 import { ProfileService } from '../../../totem-mongo/src/services/profile.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class InvitationsService {
@@ -41,7 +42,7 @@ export class InvitationsService {
     const hashed = await bcrypt.hash(tempPassword, 10);
 
     // Crée User (SQL)
-    const user = await this.prisma.user.create({
+    const user: User = await this.prisma.user.create({
       data: {
         email: dto.email,
         password: hashed,
