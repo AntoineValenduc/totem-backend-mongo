@@ -6,7 +6,6 @@ export type ProfileDocument = HydratedDocument<Profile>;
 
 @Schema({ timestamps: true })
 export class Profile {
-
   @Prop({ required: true })
   user_id: string;
   @Prop({ required: true })
@@ -22,7 +21,7 @@ export class Profile {
   @Prop({ required: true })
   city: string;
   @Prop({ required: true })
-  mail: string;
+  email: string;
   @Prop()
   phone_number: string;
   @Prop()

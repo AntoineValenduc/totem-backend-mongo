@@ -35,7 +35,7 @@ export class BadgeController {
         return await this.badgeService.getById(id);
       } catch (error) {
         console.error('❌ Erreur dans getById:', error);
-        throw new RpcException(error.message || 'Erreur interne microservice');
+        throw new RpcException(error.message ?? 'Erreur interne microservice');
       }
     }
   }
@@ -49,10 +49,14 @@ export class BadgeController {
   }
 
   @MessagePattern(BADGE_PATTERNS.UPDATE)
-  async updateBadge(@Payload() data: { id: string; badge: BadgeUpdateDto }): Promise<BadgeDocument> {
+  async updateBadge(
+    @Payload() data: { id: string; badge: BadgeUpdateDto },
+  ): Promise<BadgeDocument> {
     const { id, badge } = data;
     this.logger.log(`✅ Requête reçue => update badge MongoDB (ID: ${id})`);
-    this.logger.log(`✅ Requête reçue => update badge MongoDB (Payload: ${JSON.stringify(badge)})`);
+    this.logger.log(
+      `✅ Requête reçue => update badge MongoDB (Payload: ${JSON.stringify(badge)})`,
+    );
     return this.badgeService.update(id, badge);
   }
 
@@ -62,14 +66,12 @@ export class BadgeController {
       this.logger.error('❌ Requête reçue => ID is required');
       throw new Error('❌ Requête reçue => ID is required');
     } else {
-      this.logger.log(
-        `✅ Requête reçue => getById badge MongoDB (ID: ${id})`,
-      );
+      this.logger.log(`✅ Requête reçue => getById badge MongoDB (ID: ${id})`);
       try {
         return await this.badgeService.remove(id);
       } catch (error) {
         console.error('❌ Erreur dans getById:', error);
-        throw new RpcException(error.message || 'Erreur interne microservice');
+        throw new RpcException(error.message ?? 'Erreur interne microservice');
       }
     }
   }

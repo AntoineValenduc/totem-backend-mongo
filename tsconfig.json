@@ -17,16 +17,5 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
-    "paths": {
-      "@totem/auth": [
-        "libs/auth/src"
-      ],
-      "totem-api-gateway/*": [
-        "apps/totem-api-gateway/*"
-      ],
-      "totem-mongo/*": [
-        "apps/totem-mongo/*"
-      ]
-    }
   }
 }

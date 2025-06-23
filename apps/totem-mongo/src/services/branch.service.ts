@@ -5,7 +5,8 @@ import {
   BranchCreateException,
   BranchInterneErrorException,
   BranchNotFoundException,
-  InvalidBranchIdException, InvalidBranchPayloadException,
+  InvalidBranchIdException,
+  InvalidBranchPayloadException,
   NullBranchIdException,
 } from '../shared/exceptions/branch.exception';
 import { Branch, BranchDocument } from '../schema/branch.schema';
@@ -29,7 +30,9 @@ export class BranchService {
       return await this.branchModel.find({ is_deleted: { $ne: true } }).exec();
     } catch (err) {
       this.logger.error('❌ Erreur lors du findAll() dans le service', err);
-      throw new BranchInterneErrorException("Liste des Branches : " + err.message + "");
+      throw new BranchInterneErrorException(
+        'Liste des Branches : ' + err.message + '',
+      );
     }
   }
 
@@ -38,7 +41,9 @@ export class BranchService {
    * @param id
    */
   async getById(id: string): Promise<BranchDocument> {
-    this.logger.log("✅ Requête reçue => getById branchs MongoDB, avec l'ID: " + id);
+    this.logger.log(
+      "✅ Requête reçue => getById branchs MongoDB, avec l'ID: " + id,
+    );
     if (!id) {
       throw new NullBranchIdException();
     } else if (!isValidObjectId(id)) {
@@ -53,7 +58,7 @@ export class BranchService {
    * @param dto
    */
   async create(dto: BrancheCreateDto): Promise<BranchDocument> {
-    this.logger.log("✅ Requête reçue => create branchs MongoDB");
+    this.logger.log('✅ Requête reçue => create branchs MongoDB');
     try {
       return await this.branchModel.create(dto);
     } catch (err) {
@@ -68,7 +73,9 @@ export class BranchService {
    * @param branch
    */
   async update(id: string, branch: BrancheUpdateDto): Promise<BranchDocument> {
-    this.logger.log(`🔄 Mise à jour du branche ${id} avec : ${JSON.stringify(branch)}`);
+    this.logger.log(
+      `🔄 Mise à jour du branche ${id} avec : ${JSON.stringify(branch)}`,
+    );
 
     await this.validateId(id);
     await this.findBranchById(id);
@@ -76,11 +83,10 @@ export class BranchService {
       throw new InvalidBranchPayloadException(branch);
     }
 
-      return await this.branchModel.findByIdAndUpdate(
-        id,
-        { $set: branch },
-        { new: true },
-      ).exec().then((updated) => {
+    return await this.branchModel
+      .findByIdAndUpdate(id, { $set: branch }, { new: true })
+      .exec()
+      .then((updated) => {
         if (!updated) {
           throw new BranchNotFoundException(id);
         }
@@ -93,7 +99,9 @@ export class BranchService {
    * @param id
    */
   async remove(id: string): Promise<BranchDocument> {
-    this.logger.log("✅ Requête reçue => remove branch MongoDB, avec l'ID: " + id);
+    this.logger.log(
+      "✅ Requête reçue => remove branch MongoDB, avec l'ID: " + id,
+    );
 
     if (!id) {
       throw new NullBranchIdException();
@@ -112,9 +120,7 @@ export class BranchService {
    * @param id
    * @private
    */
-  private async findBranchById(
-    id: string,
-  ): Promise<HydratedDocument<Branch>> {
+  private async findBranchById(id: string): Promise<HydratedDocument<Branch>> {
     if (!id) {
       throw new InvalidBranchIdException(id);
     }

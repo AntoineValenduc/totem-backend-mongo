@@ -29,7 +29,9 @@ export class BadgeService {
       return await this.badgeModel.find({ is_deleted: { $ne: true } }).exec();
     } catch (err) {
       this.logger.error('❌ Erreur lors du findAll() dans le service', err);
-      throw new BadgeInterneErrorException("Liste des Profils : " + err.message + "");
+      throw new BadgeInterneErrorException(
+        'Liste des Profils : ' + err.message + '',
+      );
     }
   }
 
@@ -37,12 +39,19 @@ export class BadgeService {
    * Afficher la liste des profiles soft-deleted
    */
   async findAllSoftDeleted(): Promise<BadgeDocument[]> {
-    this.logger.log('✅ SERVICE Requête reçue => findAllSoftDeleted badges MongoDB');
+    this.logger.log(
+      '✅ SERVICE Requête reçue => findAllSoftDeleted badges MongoDB',
+    );
     try {
       return this.badgeModel.find({ is_deleted: { $ne: false } }).exec();
     } catch (err) {
-      this.logger.error('❌ Erreur lors du findAllSoftDeleted() dans le service', err);
-      throw new BadgeInterneErrorException("Liste des Badges Soft-Deleted: " + err.message + "");
+      this.logger.error(
+        '❌ Erreur lors du findAllSoftDeleted() dans le service',
+        err,
+      );
+      throw new BadgeInterneErrorException(
+        'Liste des Badges Soft-Deleted: ' + err.message + '',
+      );
     }
   }
 
@@ -51,7 +60,9 @@ export class BadgeService {
    * @param id
    */
   async getById(id: string): Promise<BadgeDocument> {
-    this.logger.log("✅ Requête reçue => getById badges MongoDB, avec l'ID: " + id);
+    this.logger.log(
+      "✅ Requête reçue => getById badges MongoDB, avec l'ID: " + id,
+    );
     if (!id) {
       throw new NullBadgeIdException();
     } else if (!isValidObjectId(id)) {
@@ -66,7 +77,7 @@ export class BadgeService {
    * @param dto
    */
   async create(dto: BadgeCreateDto): Promise<BadgeDocument> {
-    this.logger.log("✅ Requête reçue => create badges MongoDB");
+    this.logger.log('✅ Requête reçue => create badges MongoDB');
     try {
       return await this.badgeModel.create(dto);
     } catch (err) {
@@ -81,40 +92,41 @@ export class BadgeService {
    * @param badge
    */
   async update(id: string, badge: BadgeUpdateDto): Promise<BadgeDocument> {
-    this.logger.log(`🔄 Mise à jour du badge ${id} avec : ${JSON.stringify(badge)}`);
+    this.logger.log(
+      `🔄 Mise à jour du badge ${id} avec : ${JSON.stringify(badge)}`,
+    );
 
     if (!id) {
       throw new NullBadgeIdException();
-    } else if (!isValidObjectId(id)) {
+    }
+
+    if (!isValidObjectId(id)) {
       throw new InvalidBadgeIdException(id);
     }
 
-    await this.findBadgeById(id);
+    await this.findBadgeById(id); // Lève déjà une erreur si introuvable
 
-    try {
-      const updated = await this.badgeModel.findByIdAndUpdate(
-        id,
-        { $set: badge },
-        { new: true },
-      ).exec();
+    const updated = await this.badgeModel
+      .findByIdAndUpdate(id, { $set: badge }, { new: true })
+      .exec();
 
-      if (!updated) {
-        throw new BadgeNotFoundException(id);
-      }
-
-      return updated;
-    } catch (err) {
-      this.logger.error('❌ Erreur lors du update() dans le service', err);
-      throw new BadgeInterneErrorException('Update Badge ' + err.message, err);
+    if (!updated) {
+      this.logger.warn(`⚠️ Badge ${id} introuvable lors de l'update`);
+      throw new BadgeNotFoundException(id);
     }
+
+    return updated;
   }
+
 
   /**
    * Supprimer un badge existant à partir de son ID
    * @param id
    */
   async remove(id: string): Promise<BadgeDocument> {
-    this.logger.log("✅ Requête reçue => remove badge MongoDB, avec l'ID: " + id);
+    this.logger.log(
+      "✅ Requête reçue => remove badge MongoDB, avec l'ID: " + id,
+    );
 
     if (!id) {
       throw new NullBadgeIdException();
@@ -133,9 +145,7 @@ export class BadgeService {
    * @param id
    * @private
    */
-  private async findBadgeById(
-    id: string,
-  ): Promise<HydratedDocument<Badge>> {
+  private async findBadgeById(id: string): Promise<HydratedDocument<Badge>> {
     if (!id) {
       throw new InvalidBadgeIdException(id);
     }

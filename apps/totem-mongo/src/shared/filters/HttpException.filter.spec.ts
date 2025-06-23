@@ -1,5 +1,5 @@
 import { ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
-import { CustomHttpExceptionFilter } from 'totem-mongo/src/shared/filters/CustomHttpExceptionFilter.filter';
+import { CustomHttpExceptionFilter } from './CustomHttpExceptionFilter.filter';
 
 describe('CustomHttpExceptionFilter', () => {
   let filter: CustomHttpExceptionFilter;

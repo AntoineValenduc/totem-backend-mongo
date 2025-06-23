@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { HydratedDocument, isValidObjectId, Model } from 'mongoose';
 import { Profile, ProfileDocument } from '../schema/profile.schema';
@@ -29,7 +29,9 @@ export class ProfileService {
       return await this.profileModel.find({ is_deleted: { $ne: true } }).exec();
     } catch (err) {
       this.logger.error('❌ Erreur lors du findAll() dans le service', err);
-      throw new ProfileInterneErrorException("Liste des Profils : " + err.message + "");
+      throw new ProfileInterneErrorException(
+        'Liste des Profils : ' + err.message + '',
+      );
     }
   }
 
@@ -37,12 +39,19 @@ export class ProfileService {
    * Afficher la liste des profiles soft-deleted
    */
   async findAllSoftDeleted(): Promise<ProfileDocument[]> {
-    this.logger.log('✅ SERVICE Requête reçue => findAllSoftDeleted profiles MongoDB');
+    this.logger.log(
+      '✅ SERVICE Requête reçue => findAllSoftDeleted profiles MongoDB',
+    );
     try {
       return this.profileModel.find({ is_deleted: { $ne: false } }).exec();
     } catch (err) {
-      this.logger.error('❌ Erreur lors du findAllSoftDeleted() dans le service', err);
-      throw new ProfileInterneErrorException("Liste des Profils Soft-Deleted: " + err.message + "");
+      this.logger.error(
+        '❌ Erreur lors du findAllSoftDeleted() dans le service',
+        err,
+      );
+      throw new ProfileInterneErrorException(
+        'Liste des Profils Soft-Deleted: ' + err.message + '',
+      );
     }
   }
 
@@ -51,7 +60,9 @@ export class ProfileService {
    * @param id
    */
   async getById(id: string): Promise<ProfileDocument> {
-    this.logger.log("✅ Requête reçue => getById profiles MongoDB, avec l'ID: " + id);
+    this.logger.log(
+      "✅ Requête reçue => getById profiles MongoDB, avec l'ID: " + id,
+    );
     if (!id) {
       throw new NullProfileIdException();
     } else if (!isValidObjectId(id)) {
@@ -66,7 +77,14 @@ export class ProfileService {
    * @param dto
    */
   async create(dto: ProfileCreateDto): Promise<ProfileDocument> {
-    this.logger.log("✅ Requête reçue => create profiles MongoDB");
+    const existing = await this.profileModel.findOne({ user_id: dto.user_id });
+
+    if (existing) {
+      throw new BadRequestException(
+        `Un profil existe déjà pour l'utilisateur ${dto.user_id}`,
+      );
+    }
+    this.logger.log('✅ Requête reçue => create profiles MongoDB');
     try {
       return await this.profileModel.create(dto);
     } catch (err) {
@@ -80,8 +98,13 @@ export class ProfileService {
    * @param id
    * @param profile
    */
-  async update(id: string, profile: ProfileUpdateDto): Promise<ProfileDocument> {
-    this.logger.log(`🔄 Mise à jour du profil ${id} avec : ${JSON.stringify(profile)}`);
+  async update(
+    id: string,
+    profile: ProfileUpdateDto,
+  ): Promise<ProfileDocument> {
+    this.logger.log(
+      `🔄 Mise à jour du profil ${id} avec : ${JSON.stringify(profile)}`,
+    );
 
     if (!id) {
       throw new NullProfileIdException();
@@ -91,30 +114,25 @@ export class ProfileService {
 
     await this.findProfileById(id);
 
-    try {
-      const updated = await this.profileModel.findByIdAndUpdate(
-        id,
-        { $set: profile },
-        { new: true },
-      ).exec();
+      const updated = await this.profileModel
+        .findByIdAndUpdate(id, { $set: profile }, { new: true })
+        .exec();
 
       if (!updated) {
+        this.logger.warn(`⚠️ Profil ${id} introuvable lors de l'update`);
         throw new ProfileNotFoundException(id);
       }
-
       return updated;
-    } catch (err) {
-      this.logger.error('❌ Erreur lors du update() dans le service', err);
-      throw new ProfileInterneErrorException('Update Profil ' + err.message, err);
-    }
   }
 
   /**
    * Supprimer un profile existant à partir de son ID
    * @param id
    */
-  async remove(id: string): Promise<ProfileDocument> {
-    this.logger.log("✅ Requête reçue => remove profile MongoDB, avec l'ID: " + id);
+  async removeSoft(id: string): Promise<ProfileDocument> {
+    this.logger.log(
+      "✅ Requête reçue => removeSoft profile MongoDB, avec l'ID: " + id,
+    );
 
     if (!id) {
       throw new NullProfileIdException();
@@ -129,7 +147,7 @@ export class ProfileService {
   }
 
   /**
-   * Mérhode interne - Recherche Profile par ID
+   * Méthode interne - Recherche Profile par ID
    * @param id
    * @private
    */

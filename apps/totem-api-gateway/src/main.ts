@@ -1,10 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { TotemApiGatewayModule } from './totem-api-gateway.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { Transport } from '@nestjs/microservices';
-import { CustomHttpExceptionFilter } from '../../totem-mongo/src/shared/filters/CustomHttpExceptionFilter.filter';
-import { RpcToHttpInterceptor } from '../src/interceptors/rpc-exception.interceptor';
+import { RpcToHttpInterceptor } from './interceptors/rpc-exception.interceptor';
 import * as cookieParser from 'cookie-parser';
+import { CustomHttpExceptionFilter } from '../../totem-mongo/src/shared/filters/CustomHttpExceptionFilter.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(TotemApiGatewayModule, {
@@ -21,17 +20,6 @@ async function bootstrap() {
   });
 
   // ➕ Connexion du microservice Kafka
-  /*app.connectMicroservice({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        brokers: ['localhost:9092'],
-      },
-      consumer: {
-        groupId: 'totem-api-gateway-group',
-      },
-    },
-  });*/
 
   //Interceptor API
   app.useGlobalInterceptors(new RpcToHttpInterceptor());

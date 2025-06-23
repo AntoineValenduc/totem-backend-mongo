@@ -19,7 +19,7 @@ import { JwtSharedModule } from '../libs/shared/jwt/jwt.module';
       envFilePath: '.env.development',
     }),
     JwtSharedModule,
-    PrismaModule
+    PrismaModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, JwtAuthGuard, RolesGuard],

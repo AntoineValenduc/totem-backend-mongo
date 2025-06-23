@@ -4,10 +4,7 @@ import { AuthProxyController } from './login-proxy.controller';
 import { JwtSharedModule } from '../../../totem-auth-sql/src/libs/shared/jwt/jwt.module';
 
 @Module({
-  imports: [
-    HttpModule,
-    JwtSharedModule
-  ],
+  imports: [HttpModule, JwtSharedModule],
   controllers: [AuthProxyController],
 })
 export class AuthGatewayModule {}

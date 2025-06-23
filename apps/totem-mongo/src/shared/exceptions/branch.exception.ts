@@ -6,11 +6,11 @@ import { HttpStatus } from '@nestjs/common';
  */
 export class BranchInterneErrorException extends AppException {
   constructor(source: string, details?: string) {
-    super(
-      `Erreur lors de la récupération des branches (${source})${details ? ` : ${details}` : ''}`,
-      'BRANCH_FETCH_FAILED',
-      HttpStatus.INTERNAL_SERVER_ERROR,
-    );
+    const message = details
+      ?`Erreur lors de la récupération des branches (${source}) : ${details}`
+      : `Erreur lors de la récupération des branches  (${source})`;
+
+      super(message, 'BRANCH_FETCH_FAILED', HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 
@@ -22,7 +22,8 @@ export class BranchNotFoundException extends AppException {
     super(
       `Branche avec l'ID ${id} introuvable`,
       'BRANCH_NOT_FOUND',
-      HttpStatus.NOT_FOUND);
+      HttpStatus.NOT_FOUND,
+    );
   }
 }
 
@@ -35,7 +36,7 @@ export class InvalidBranchPayloadException extends AppException {
       'Le payload est invalide : ' + payload,
       'INVALID_BRANCH_PAYLOAD',
       HttpStatus.BAD_REQUEST,
-      );
+    );
   }
 }
 
@@ -44,9 +45,11 @@ export class InvalidBranchPayloadException extends AppException {
  */
 export class InvalidBranchIdException extends AppException {
   constructor(id: string) {
-    super(`L'ID de la branche ${id} est invalide`,
+    super(
+      `L'ID de la branche ${id} est invalide`,
       'INVALID_BRANCH_ID',
-      HttpStatus.BAD_REQUEST);
+      HttpStatus.BAD_REQUEST,
+    );
   }
 }
 
@@ -55,9 +58,11 @@ export class InvalidBranchIdException extends AppException {
  */
 export class NullBranchIdException extends AppException {
   constructor() {
-    super(`L'ID de la branche ne peux pas être null ou vide.`,
+    super(
+      `L'ID de la branche ne peux pas être null ou vide.`,
       'NULL_BRANCH_ID',
-      HttpStatus.BAD_REQUEST);
+      HttpStatus.BAD_REQUEST,
+    );
   }
 }
 
@@ -66,10 +71,10 @@ export class NullBranchIdException extends AppException {
  */
 export class BranchCreateException extends AppException {
   constructor(message?: string) {
-    super(
-      `Erreur lors de la création de la branche${message ? ` : ${message}` : ''}`,
-      'BRANCH_CREATE_FAILED',
-      HttpStatus.BAD_REQUEST,
-    );
+    const fullMessage = message
+      ? `Erreur lors de la création de la branche (${message})`
+      : 'Erreur lors de la création de la branche'
+
+    super(fullMessage, 'BRANCH_CREATE_FAILED', HttpStatus.BAD_REQUEST);
   }
 }

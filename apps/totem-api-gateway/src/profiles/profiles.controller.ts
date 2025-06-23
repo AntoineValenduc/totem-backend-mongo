@@ -1,9 +1,25 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post, Put, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
-import { ProfileCreateDto } from '../../../totem-mongo/src/shared/dto/profile-create.dto';
-import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ProfileUpdateDto } from '../../../totem-mongo/src/shared/dto/profile-update.dto';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
+import { ProfileCreateDto } from '../../../totem-mongo/src/shared/dto/profile-create.dto';
+import { ProfileUpdateDto } from '../../../totem-mongo/src/shared/dto/profile-update.dto';
 
 @ApiTags('profiles')
 @ApiBearerAuth()
@@ -11,24 +27,30 @@ import { ParseObjectIdPipe } from '@nestjs/mongoose';
 export class ProfilesController {
   private readonly logger = new Logger(ProfilesController.name);
 
-  constructor(
-    private readonly profileService: ProfilesService,
-  ) {}
+  constructor(private readonly profileService: ProfilesService) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Lister tous les profils' })
-  @ApiResponse({ status: 200, description: 'Liste des profils', type: [ProfileCreateDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des profils',
+    type: [ProfileCreateDto],
+  })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   findAll() {
     this.logger.log('✅ Requête envoyé => findAll profile');
     return this.profileService.findAll();
   }
 
-  @Get("/anciens")
+  @Get('/anciens')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Lister tous les profils soft-deleted' })
-  @ApiResponse({ status: 200, description: 'Liste des profils soft-deleted', type: [ProfileCreateDto] })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des profils soft-deleted',
+    type: [ProfileCreateDto],
+  })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   findAllSoftDeleted() {
     this.logger.log('✅ Requête envoyé => findAllSoftDeleted profile');
@@ -38,19 +60,29 @@ export class ProfilesController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Obtenir un profil par ID' })
-  @ApiResponse({ status: 200, description: 'Profil trouvé', type: ProfileCreateDto })
-  @ApiResponse({ status: 400, description: 'ID invalide'})
+  @ApiResponse({
+    status: 200,
+    description: 'Profil trouvé',
+    type: ProfileCreateDto,
+  })
+  @ApiResponse({ status: 400, description: 'ID invalide' })
   @ApiResponse({ status: 404, description: 'Profil introuvable' })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   getById(@Param('id', ParseObjectIdPipe) id: string) {
-    this.logger.log("✅ Requête envoyé => getById profile MongoDB, ID : ", { id });
+    this.logger.log('✅ Requête envoyé => getById profile MongoDB, ID : ', {
+      id,
+    });
     return this.profileService.getById(id);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Créer un profil' })
-  @ApiResponse({ status: 201, description: 'Profil créé avec succès', type: ProfileCreateDto })
+  @ApiResponse({
+    status: 201,
+    description: 'Profil créé avec succès',
+    type: ProfileCreateDto,
+  })
   @ApiResponse({ status: 400, description: 'Données invalides' })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   createProfile(@Body() profile: ProfileCreateDto) {
@@ -61,12 +93,16 @@ export class ProfilesController {
   @Put(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Modifier un profil' })
-  @ApiResponse({ status: 200, description: 'Profil mis à jour avec succès', type: ProfileCreateDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Profil mis à jour avec succès',
+    type: ProfileCreateDto,
+  })
   @ApiResponse({ status: 400, description: 'Données invalides' })
   @ApiResponse({ status: 404, description: 'Profil introuvable' })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   updateProfile(@Param('id') id: string, @Body() profile: ProfileUpdateDto) {
-    this.logger.log("✅ Requête envoyée => update profile, ID : ", { id });
+    this.logger.log('✅ Requête envoyée => update profile, ID : ', { id });
     return this.profileService.updateProfile(id, profile);
   }
 
@@ -74,11 +110,11 @@ export class ProfilesController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: "Suppression douce d'un profil" })
   @ApiResponse({ status: 200, description: 'Profil supprimé avec succès' })
-  @ApiResponse({ status: 400, description: 'ID invalide'})
+  @ApiResponse({ status: 400, description: 'ID invalide' })
   @ApiResponse({ status: 404, description: 'Profil introuvable' })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   deleteProfile(@Param('id') id: string) {
-    this.logger.log("✅ Requête envoyée => delete profile, ID : ", { id });
+    this.logger.log('✅ Requête envoyée => delete profile, ID : ', { id });
     return this.profileService.deleteProfile(id);
   }
 }

@@ -4,8 +4,8 @@ import * as nodemailer from 'nodemailer';
 @Injectable()
 export class MailService {
   private readonly transporter = nodemailer.createTransport({
-    host: process.env.MAIL_HOST || 'smtp.example.com',
-    port: parseInt(process.env.MAIL_PORT || '587'),
+    host: process.env.MAIL_HOST ?? 'smtp.example.com',
+    port: parseInt(process.env.MAIL_PORT ?? '587'),
     secure: false, // true pour le port 465
     auth: {
       user: process.env.MAIL_USER,
@@ -32,4 +32,9 @@ export class MailService {
   `,
     });
   }
+
+  /*async sendMail(to: string, subject: string, body: string) {
+    console.log(`Mock mail sent to ${to} with subject "${subject}"`);
+    return true;
+  }*/
 }

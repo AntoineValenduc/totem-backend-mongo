@@ -5,10 +5,12 @@ import { ProfileUpdateDto } from '../shared/dto/profile-update.dto';
 import { Profile } from '../schema/profile.schema';
 import { ProfileService } from './profile.service';
 import {
-  NullProfileIdException, ProfileCreateException, ProfileInterneErrorException,
+  NullProfileIdException,
+  ProfileCreateException,
+  ProfileInterneErrorException,
   ProfileNotFoundException,
 } from '../shared/exceptions/profile.exception';
-import { ProfileCreateDto } from 'totem-mongo/src/shared/dto/profile-create.dto';
+import { ProfileCreateDto } from '../shared/dto/profile-create.dto';
 
 describe('ProfileService', () => {
   let service: ProfileService;
@@ -22,7 +24,7 @@ describe('ProfileService', () => {
     address: '12 rue de la paix',
     city: 'Lille',
     zipcode: '59211',
-    mail: 'jean.dupont@email.com',
+    email: 'jean.dupont@email.com',
     phone_number: '+33605040302',
     branch: new Types.ObjectId(),
     is_deleted: false,
@@ -31,9 +33,15 @@ describe('ProfileService', () => {
 
   beforeEach(async () => {
     const mockProfileModel = {
-      find: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue([mockProfileDocument]) }),
-      findById: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(mockProfileDocument) }),
-      findByIdAndUpdate: jest.fn().mockReturnValue({ exec: jest.fn().mockResolvedValue(mockProfileDocument) }),
+      find: jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue([mockProfileDocument]),
+      }),
+      findById: jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue(mockProfileDocument),
+      }),
+      findByIdAndUpdate: jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue(mockProfileDocument),
+      }),
       create: jest.fn().mockResolvedValue(mockProfileDocument),
     };
 
@@ -54,24 +62,32 @@ describe('ProfileService', () => {
   it('Liste => OK', async () => {
     const result = await service.findAll();
     expect(result).toEqual([mockProfileDocument]);
-    expect(profileModel.find).toHaveBeenCalledWith({ is_deleted: { $ne: true } });
+    expect(profileModel.find).toHaveBeenCalledWith({
+      is_deleted: { $ne: true },
+    });
   });
 
   it('GetID => OK', async () => {
     const result = await service.getById(mockProfileDocument._id.toString());
     expect(result).toEqual(mockProfileDocument);
-    expect(profileModel.findById).toHaveBeenCalledWith(mockProfileDocument._id.toString());
+    expect(profileModel.findById).toHaveBeenCalledWith(
+      mockProfileDocument._id.toString(),
+    );
   });
 
   it('GetID => Exception: Profile not Found', async () => {
     jest.spyOn(profileModel, 'findById').mockReturnValueOnce({
       exec: jest.fn().mockResolvedValue(null),
     } as any);
-    await expect(service.getById("111111111111111111111111")).rejects.toThrow(ProfileNotFoundException);
+    await expect(service.getById('111111111111111111111111')).rejects.toThrow(
+      ProfileNotFoundException,
+    );
   });
 
   it('GetID => Exception: ID null', async () => {
-    await expect(service.remove(undefined as any)).rejects.toThrow(NullProfileIdException);
+    await expect(service.removeSoft(undefined as any)).rejects.toThrow(
+      NullProfileIdException,
+    );
   });
 
   it('Create => OK', async () => {
@@ -81,28 +97,31 @@ describe('ProfileService', () => {
       city: 'Villeville',
       address: '200 rue du dév',
       zipcode: '12345',
-      mail: 'adresse.mail@mail.fr',
+      email: 'adresse.mail@mail.fr',
       date_of_birth: new Date('2025-06-09'),
       phone_number: '0605040302',
-      branch: ""
+      branch: '',
     } as ProfileCreateDto;
 
     const mockProfile = { _id: 'mockId', ...createDto };
 
-    jest.spyOn(profileModel, 'create').mockResolvedValueOnce(mockProfile as any);
+    jest
+      .spyOn(profileModel, 'create')
+      .mockResolvedValueOnce(mockProfile as any);
 
     const result = await service.create(createDto);
 
     expect(result).toEqual(mockProfile);
-
-  })
+  });
 
   it('Create => Exception: payload null', async () => {
     jest.spyOn(profileModel, 'create').mockImplementation(() => {
       throw new Error('Payload invalide');
     });
 
-    await expect(service.create(null as any)).rejects.toThrow(ProfileCreateException);
+    await expect(service.create(null as any)).rejects.toThrow(
+      ProfileCreateException,
+    );
   });
 
   it('Create => Exception: date invalide', async () => {
@@ -112,19 +131,20 @@ describe('ProfileService', () => {
       city: 'Nocity',
       address: '404 nowhere',
       zipcode: 'ABCDE',
-      mail: 'invalid.email@fail',
+      email: 'invalid.email@fail',
       dateOfBirth: 'not-a-date', // ⚠️ ici c’est une string invalide
       phoneNumber: 'not-a-phone',
-      branch: ''
+      branch: '',
     } as any;
 
     jest.spyOn(profileModel, 'create').mockImplementation(() => {
       throw new Error('Invalid date format');
     });
 
-    await expect(service.create(invalidDto)).rejects.toThrow(ProfileCreateException);
+    await expect(service.create(invalidDto)).rejects.toThrow(
+      ProfileCreateException,
+    );
   });
-
 
   it('Update => OK', async () => {
     const id = '6842e91c349d654ce1845b04'; // Simulated string ID
@@ -143,7 +163,6 @@ describe('ProfileService', () => {
       { new: true },
     );
   });
-
 
   it('Update => Exception: Profil not Found', async () => {
     const id = '6842eb694bb5600315b02240';
@@ -165,7 +184,9 @@ describe('ProfileService', () => {
       firstName: 'Updated Name',
     } as ProfileUpdateDto;
 
-    await expect(service.update(null as any, updateDto)).rejects.toThrow(NullProfileIdException);
+    await expect(service.update(null as any, updateDto)).rejects.toThrow(
+      NullProfileIdException,
+    );
   });
 
   it('Update => Exception: Payload null', async () => {
@@ -175,7 +196,9 @@ describe('ProfileService', () => {
       throw new Error('Payload invalid');
     });
 
-    await expect(service.update(id, null as any)).rejects.toThrow(ProfileInterneErrorException);
+    await expect(service.update(id, null as any)).rejects.toThrow(
+      ProfileInterneErrorException,
+    );
   });
 
   it('Delete => OK', async () => {
@@ -185,10 +208,12 @@ describe('ProfileService', () => {
       removed_at: new Date(),
     });
 
-    const result = await service.remove(mockProfileDocument._id.toString());
+    const result = await service.removeSoft(mockProfileDocument._id.toString());
     expect(result.is_deleted).toBe(true);
     expect(result.removed_at).toBeDefined();
-    expect(profileModel.findById).toHaveBeenCalledWith(mockProfileDocument._id.toString());
+    expect(profileModel.findById).toHaveBeenCalledWith(
+      mockProfileDocument._id.toString(),
+    );
     expect(mockProfileDocument.save).toHaveBeenCalled();
   });
 
@@ -197,15 +222,20 @@ describe('ProfileService', () => {
       exec: jest.fn().mockResolvedValue(null),
     } as any);
 
-    await expect(service.remove('111111111111111111111111')).rejects.toThrow(ProfileNotFoundException);
+    await expect(
+      service.removeSoft('111111111111111111111111'),
+    ).rejects.toThrow(ProfileNotFoundException);
   });
 
   it('Delete => Exception: ID null', async () => {
-    await expect(service.remove(undefined as any)).rejects.toThrow(NullProfileIdException);
+    await expect(service.removeSoft(undefined as any)).rejects.toThrow(
+      NullProfileIdException,
+    );
   });
 
   it('Delete => Exception: ID vide', async () => {
-    await expect(service.remove('')).rejects.toThrow(NullProfileIdException);
+    await expect(service.removeSoft('')).rejects.toThrow(
+      NullProfileIdException,
+    );
   });
-
 });
