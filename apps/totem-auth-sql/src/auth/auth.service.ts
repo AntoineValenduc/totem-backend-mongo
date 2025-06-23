@@ -43,17 +43,3 @@ export class AuthService {
     };
   }
 }
-
-async function run() {
-  const password = 'testChef';
-  const hash = await bcrypt.hash(password, 10);
-  console.log('Mot de passe hashé :', hash);
-
-  const password1 = 'testAdmin';
-  const hash1 = await bcrypt.hash(password1, 10);
-  console.log('Mot de passe hashé1 :', hash1);
-
-  const password2 = 'testJeune';
-  const hash2 = await bcrypt.hash(password2, 10);
-  console.log('Mot de passe hashé2 :', hash2);
-}
