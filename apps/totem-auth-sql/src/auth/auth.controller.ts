@@ -21,7 +21,9 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     console.log(dto);
-    const { access_token, role } = await this.authService.login(dto);
+    const result: { access_token: string; role: string } =
+      await this.authService.login(dto);
+    const { access_token, role } = result;
     res.cookie('jwt', access_token, { httpOnly: true });
     return {
       success: true,
