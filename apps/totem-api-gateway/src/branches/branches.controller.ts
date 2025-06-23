@@ -11,14 +11,14 @@ import {
   Put,
 } from '@nestjs/common';
 import { BranchesService } from './branches.service';
-import { BrancheCreateDto } from '@totem-mongo/src/shared/dto/branche-create.dto';
 import {
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { BrancheUpdateDto } from '@totem-mongo/src/shared/dto/branche-update.dto';
+import { BrancheCreateDto } from '../../../totem-mongo/src/shared/dto/branche-create.dto';
+import { BrancheUpdateDto } from '../../../totem-mongo/src/shared/dto/branche-update.dto';
 
 @ApiTags('branches')
 @ApiBearerAuth()

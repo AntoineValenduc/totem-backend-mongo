@@ -1,9 +1,9 @@
 import { NestFactory } from '@nestjs/core';
 import { TotemApiGatewayModule } from './totem-api-gateway.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { CustomHttpExceptionFilter } from '@totem-mongo/src/shared/filters/CustomHttpExceptionFilter.filter';
-import { RpcToHttpInterceptor } from '../src/interceptors/rpc-exception.interceptor';
+import { RpcToHttpInterceptor } from './interceptors/rpc-exception.interceptor';
 import * as cookieParser from 'cookie-parser';
+import { CustomHttpExceptionFilter } from '../../totem-mongo/src/shared/filters/CustomHttpExceptionFilter.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(TotemApiGatewayModule, {
