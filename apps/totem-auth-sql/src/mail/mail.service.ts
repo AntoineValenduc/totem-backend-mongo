@@ -33,8 +33,8 @@ export class MailService {
     });
   }
 
-  async sendMail(to: string, subject: string, body: string) {
+  /*async sendMail(to: string, subject: string, body: string) {
     console.log(`Mock mail sent to ${to} with subject "${subject}"`);
     return true;
-  }
+  }*/
 }
