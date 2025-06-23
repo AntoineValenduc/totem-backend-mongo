@@ -10,13 +10,16 @@ import {
 import { AuthService } from './auth.service';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-
   @Post('login')
-  async login(@Body() dto: LoginUserDto, @Res({ passthrough: true }) res: any) {
+  async login(
+    @Body() dto: LoginUserDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     console.log(dto);
     const { access_token, role } = await this.authService.login(dto);
     res.cookie('jwt', access_token, { httpOnly: true });
@@ -29,11 +32,11 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  getMe(@Req() req: any) {
+  getMe(@Req() req: { user: { email: string; role: string } }) {
     const user = req.user;
     return {
-      email: user['email'],
-      role: user['role'],
+      email: user.email,
+      role: user.role,
     };
   }
 }

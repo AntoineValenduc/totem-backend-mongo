@@ -38,7 +38,7 @@ describe('CustomHttpExceptionFilter', () => {
       statusCode: HttpStatus.BAD_REQUEST,
       message: 'Test error message',
       error: 'Test error message',
-      timestamp: expect.any(String),
+      timestamp: expect.any(String) as unknown as string,
       path: '/test-url',
     });
   });
@@ -56,7 +56,7 @@ describe('CustomHttpExceptionFilter', () => {
       statusCode: HttpStatus.BAD_REQUEST,
       message: 'Error 1, Error 2',
       error: 'Validation Error',
-      timestamp: expect.any(String),
+      timestamp: expect.any(String) as unknown as string,
       path: '/test-url',
     });
   });
@@ -71,7 +71,7 @@ describe('CustomHttpExceptionFilter', () => {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       message: 'An unexpected error occurred',
       error: 'An unexpected error occurred',
-      timestamp: expect.any(String),
+      timestamp: expect.any(String) as unknown as string,
       path: '/test-url',
     });
   });

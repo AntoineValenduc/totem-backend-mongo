@@ -21,22 +21,25 @@ export class BranchesService {
     return this.branchesClient.send(BRANCH_PATTERNS.GET_BY_ID, { id });
   }
 
-  async createBranche(branchDto: BrancheCreateDto) {
-    return await firstValueFrom(
+  async createBranche(branchDto: BrancheCreateDto): Promise<BrancheCreateDto> {
+    return await firstValueFrom<BrancheCreateDto>(
       this.branchesClient.send(BRANCH_PATTERNS.CREATE, branchDto),
     );
   }
 
-  async updateBranche(id: string, branch: BrancheUpdateDto) {
+  async updateBranche(
+    id: string,
+    branch: BrancheUpdateDto,
+  ): Promise<BrancheUpdateDto> {
     this.logger.log(`✅ service API (ID: ${id})`);
     this.logger.log(`✅ service API (Payload: ${JSON.stringify(branch)})`);
-    return await firstValueFrom(
+    return await firstValueFrom<BrancheUpdateDto>(
       this.branchesClient.send(BRANCH_PATTERNS.UPDATE, { id, branch: branch }),
     );
   }
 
-  async deleteBranche(id: string) {
-    return await firstValueFrom(
+  async deleteBranche(id: string): Promise<{ deleted: boolean }> {
+    return await firstValueFrom<{ deleted: boolean }>(
       this.branchesClient.send(BRANCH_PATTERNS.DELETE, { id }),
     );
   }

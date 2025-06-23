@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
@@ -65,7 +66,8 @@ describe('Invitations E2E', () => {
       .send(dto)
       .expect(201);
 
-    expect(res.body.message).toBe('Invitation envoyée');
+    const body = res.body as { message: string };
+    expect(body.message).toBe('Invitation envoyée');
   });
 
   it('🚫 devrait échouer si l’mail existe déjà', async () => {
@@ -74,6 +76,7 @@ describe('Invitations E2E', () => {
       .send(dto)
       .expect(400);
 
-    expect(res.body.message).toMatch(/déjà utilisé/i);
+    const body = res.body as { message: string };
+    expect(body.message).toMatch(/déjà utilisé/i);
   });
 });

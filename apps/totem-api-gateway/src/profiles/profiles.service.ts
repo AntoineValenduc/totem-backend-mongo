@@ -23,14 +23,17 @@ export class ProfilesService {
     return this.profilesClient.send(PROFILE_PATTERNS.GET_BY_ID, { id });
   }
 
-  async createProfile(profile: ProfileCreateDto) {
-    return await firstValueFrom(
+  async createProfile(profile: ProfileCreateDto): Promise<ProfileCreateDto> {
+    return await firstValueFrom<ProfileCreateDto>(
       this.profilesClient.send(PROFILE_PATTERNS.CREATE, profile),
     );
   }
 
-  async updateProfile(id: string, profile: ProfileUpdateDto) {
-    return await firstValueFrom(
+  async updateProfile(
+    id: string,
+    profile: ProfileUpdateDto,
+  ): Promise<ProfileUpdateDto> {
+    return await firstValueFrom<ProfileUpdateDto>(
       this.profilesClient.send(PROFILE_PATTERNS.UPDATE, {
         id,
         profile: profile,
@@ -38,8 +41,8 @@ export class ProfilesService {
     );
   }
 
-  async deleteProfile(id: string) {
-    return await firstValueFrom(
+  async deleteProfile(id: string): Promise<{ deleted: boolean }> {
+    return await firstValueFrom<{ deleted: boolean }>(
       this.profilesClient.send(PROFILE_PATTERNS.DELETE, { id }),
     );
   }

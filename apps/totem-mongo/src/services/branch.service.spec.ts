@@ -56,7 +56,8 @@ describe('BranchService', () => {
   it('Liste => OK', async () => {
     const result = await service.findAll();
     expect(result).toEqual([mockBranchDocument]);
-    expect(branchModel.find).toHaveBeenCalledWith({
+    const spy = jest.spyOn(branchModel, 'find');
+    expect(spy).toHaveBeenCalledWith({
       is_deleted: { $ne: true },
     });
   });
@@ -64,9 +65,8 @@ describe('BranchService', () => {
   it('GetID => OK', async () => {
     const result = await service.getById(mockBranchDocument._id.toString());
     expect(result).toEqual(mockBranchDocument);
-    expect(branchModel.findById).toHaveBeenCalledWith(
-      mockBranchDocument._id.toString(),
-    );
+    const findByIdSpy = jest.spyOn(branchModel, 'findById');
+    expect(findByIdSpy).toHaveBeenCalledWith(mockBranchDocument._id.toString());
   });
 
   it('GetID => Exception: Branch not Found', async () => {
@@ -79,9 +79,9 @@ describe('BranchService', () => {
   });
 
   it('GetID => Exception: ID null', async () => {
-    await expect(service.remove(undefined as any)).rejects.toThrow(
-      NullBranchIdException,
-    );
+    await expect(
+      service.remove(undefined as unknown as string),
+    ).rejects.toThrow(NullBranchIdException);
   });
 
   it('Create => OK', async () => {
@@ -92,7 +92,11 @@ describe('BranchService', () => {
       description: "Je suis une branche scout pas une branche d'arbre",
     } as BrancheCreateDto;
 
-    const mockBranch = { _id: 'mockId', ...createDto };
+    const mockBranch = {
+      _id: new Types.ObjectId(),
+      ...createDto,
+      save: jest.fn(),
+    } as unknown as Branch & { _id: Types.ObjectId; save: jest.Mock };
 
     jest.spyOn(branchModel, 'create').mockResolvedValueOnce(mockBranch as any);
 
@@ -112,12 +116,12 @@ describe('BranchService', () => {
   });
 
   it('Create => Exception: date invalide', async () => {
-    const invalidDto = {
+    const invalidDto: BrancheCreateDto = {
       name: 'nom branche',
       color: 'blanc noiratre',
       range_age: '1-99',
       description: "Je suis une branche scout pas une branche d'arbre",
-    } as any;
+    };
 
     jest.spyOn(branchModel, 'create').mockImplementation(() => {
       throw new Error('Invalid date format');
@@ -129,7 +133,7 @@ describe('BranchService', () => {
   });
 
   it('Update => OK', async () => {
-    const id = '6842e91c349d654ce1845b04'; // Simulated string ID
+    const id = '6842e91c349d654ce1845b04';
     const updateDto: BrancheUpdateDto = {
       firstName: 'Updated Name',
     } as BrancheUpdateDto;
@@ -138,8 +142,8 @@ describe('BranchService', () => {
 
     expect(result).toEqual(mockBranchDocument);
 
-    // Vérifie que la méthode a été appelée avec les bons arguments
-    expect(branchModel.findByIdAndUpdate).toHaveBeenCalledWith(
+    const findByIdAndUpdateSpy = jest.spyOn(branchModel, 'findByIdAndUpdate');
+    expect(findByIdAndUpdateSpy).toHaveBeenCalledWith(
       id,
       { $set: updateDto },
       { new: true },
@@ -193,9 +197,8 @@ describe('BranchService', () => {
     const result = await service.remove(mockBranchDocument._id.toString());
     expect(result.is_deleted).toBe(true);
     expect(result.removed_at).toBeDefined();
-    expect(branchModel.findById).toHaveBeenCalledWith(
-      mockBranchDocument._id.toString(),
-    );
+    const spy = jest.spyOn(branchModel, 'findById');
+    expect(spy).toHaveBeenCalledWith(mockBranchDocument._id.toString());
     expect(mockBranchDocument.save).toHaveBeenCalled();
   });
 

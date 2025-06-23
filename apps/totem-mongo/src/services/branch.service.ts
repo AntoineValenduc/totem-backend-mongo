@@ -31,7 +31,10 @@ export class BranchService {
     } catch (err) {
       this.logger.error('❌ Erreur lors du findAll() dans le service', err);
       throw new BranchInterneErrorException(
-        'Liste des Branches : ' + err.message + '',
+        'Liste des Branches : ' +
+          (err && typeof err === 'object' && 'message' in err
+            ? (err as { message: string }).message
+            : String(err)),
       );
     }
   }
@@ -63,7 +66,11 @@ export class BranchService {
       return await this.branchModel.create(dto);
     } catch (err) {
       this.logger.error('Erreur create()', err);
-      throw new BranchCreateException(err.message);
+      const errorMessage =
+        err && typeof err === 'object' && 'message' in err
+          ? String((err as { message: unknown }).message)
+          : String(err);
+      throw new BranchCreateException(errorMessage);
     }
   }
 
@@ -77,7 +84,7 @@ export class BranchService {
       `🔄 Mise à jour du branche ${id} avec : ${JSON.stringify(branch)}`,
     );
 
-    await this.validateId(id);
+    this.validateId(id);
     await this.findBranchById(id);
     if (!branch) {
       throw new InvalidBranchPayloadException(branch);
@@ -133,7 +140,7 @@ export class BranchService {
     return branch;
   }
 
-  private async validateId(id: string) {
+  private validateId(id: string) {
     if (!id) throw new NullBranchIdException();
     if (!isValidObjectId(id)) throw new InvalidBranchIdException(id);
   }

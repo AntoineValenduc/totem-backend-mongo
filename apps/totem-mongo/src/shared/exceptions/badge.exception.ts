@@ -14,7 +14,6 @@ export class BadgeInterneErrorException extends AppException {
   }
 }
 
-
 /**
  * Badge introuvable en BDD
  */

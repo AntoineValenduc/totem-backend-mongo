@@ -30,7 +30,11 @@ export class ProfileService {
     } catch (err) {
       this.logger.error('❌ Erreur lors du findAll() dans le service', err);
       throw new ProfileInterneErrorException(
-        'Liste des Profils : ' + err.message + '',
+        'Liste des Profils : ' +
+          (err && typeof err === 'object' && err !== null && 'message' in err
+            ? (err as { message: string }).message
+            : String(err)) +
+          '',
       );
     }
   }
@@ -50,7 +54,11 @@ export class ProfileService {
         err,
       );
       throw new ProfileInterneErrorException(
-        'Liste des Profils Soft-Deleted: ' + err.message + '',
+        'Liste des Profils Soft-Deleted: ' +
+          (err && typeof err === 'object' && err !== null && 'message' in err
+            ? (err as { message: string }).message
+            : String(err)) +
+          '',
       );
     }
   }
@@ -89,7 +97,11 @@ export class ProfileService {
       return await this.profileModel.create(dto);
     } catch (err) {
       this.logger.error('Erreur create()', err);
-      throw new ProfileCreateException(err.message);
+      const errorMessage =
+        err && typeof err === 'object' && err !== null && 'message' in err
+          ? (err as { message: string }).message
+          : String(err);
+      throw new ProfileCreateException(errorMessage);
     }
   }
 
@@ -114,15 +126,15 @@ export class ProfileService {
 
     await this.findProfileById(id);
 
-      const updated = await this.profileModel
-        .findByIdAndUpdate(id, { $set: profile }, { new: true })
-        .exec();
+    const updated = await this.profileModel
+      .findByIdAndUpdate(id, { $set: profile }, { new: true })
+      .exec();
 
-      if (!updated) {
-        this.logger.warn(`⚠️ Profil ${id} introuvable lors de l'update`);
-        throw new ProfileNotFoundException(id);
-      }
-      return updated;
+    if (!updated) {
+      this.logger.warn(`⚠️ Profil ${id} introuvable lors de l'update`);
+      throw new ProfileNotFoundException(id);
+    }
+    return updated;
   }
 
   /**
