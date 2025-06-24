@@ -16,15 +16,6 @@ const mockProfileService: Partial<ProfileService> = {
   create: jest.fn().mockResolvedValue({}),
 };
 
-jest.mock('@nestjs/mongoose', () => ({
-  ...jest.requireActual('@nestjs/mongoose'),
-  MongooseModule: {
-    forRoot: () => ({
-      module: class MockMongooseModule {},
-    }),
-  },
-}));
-
 // Stop SMTP réels pour les tests
 const mockMailService = {
   sendInvitation: jest.fn().mockResolvedValue(undefined),
