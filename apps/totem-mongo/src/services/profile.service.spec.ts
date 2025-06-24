@@ -35,6 +35,7 @@ describe('ProfileService', () => {
   beforeEach(async () => {
     const mockProfileModel = {
       find: jest.fn().mockReturnValue({
+        populate: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue([mockProfileDocument]),
       }),
       findById: jest.fn().mockReturnValue({
@@ -67,7 +68,7 @@ describe('ProfileService', () => {
     expect(result).toEqual([mockProfileDocument]);
     const spy = jest.spyOn(profileModel, 'find');
     expect(spy).toHaveBeenCalledWith({
-      is_deleted: { $ne: true },
+      is_deleted: false,
     });
   });
 
