@@ -16,7 +16,7 @@ jobs:
         env:
           POSTGRES_DB: totem_auth_sql_test
           POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          POSTGRES_PASSWORD: admin
         ports:
           - 5432:5432
         options: >-
