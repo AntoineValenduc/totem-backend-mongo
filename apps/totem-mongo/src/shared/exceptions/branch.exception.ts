@@ -7,10 +7,10 @@ import { HttpStatus } from '@nestjs/common';
 export class BranchInterneErrorException extends AppException {
   constructor(source: string, details?: string) {
     const message = details
-      ?`Erreur lors de la récupération des branches (${source}) : ${details}`
+      ? `Erreur lors de la récupération des branches (${source}) : ${details}`
       : `Erreur lors de la récupération des branches  (${source})`;
 
-      super(message, 'BRANCH_FETCH_FAILED', HttpStatus.INTERNAL_SERVER_ERROR);
+    super(message, 'BRANCH_FETCH_FAILED', HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 
@@ -73,7 +73,7 @@ export class BranchCreateException extends AppException {
   constructor(message?: string) {
     const fullMessage = message
       ? `Erreur lors de la création de la branche (${message})`
-      : 'Erreur lors de la création de la branche'
+      : 'Erreur lors de la création de la branche';
 
     super(fullMessage, 'BRANCH_CREATE_FAILED', HttpStatus.BAD_REQUEST);
   }

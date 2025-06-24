@@ -1,4 +1,4 @@
-import { ArgumentsHost, Catch, RpcExceptionFilter } from '@nestjs/common';
+import { Catch, RpcExceptionFilter } from '@nestjs/common';
 import { Observable, throwError } from 'rxjs';
 import { RpcException } from '@nestjs/microservices';
 
@@ -6,7 +6,7 @@ import { RpcException } from '@nestjs/microservices';
 export class CustomRpcExceptionFilter
   implements RpcExceptionFilter<RpcException>
 {
-  catch(exception: RpcException, host: ArgumentsHost): Observable<any> {
+  catch(exception: RpcException): Observable<any> {
     const errorResponse = {
       status: 'error',
       message: exception.message || 'An unexpected error occurred',

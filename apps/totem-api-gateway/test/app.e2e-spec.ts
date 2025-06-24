@@ -14,6 +14,12 @@ describe('TotemApiGatewayController (e2e)', () => {
     await app.init();
   });
 
+  afterAll(async () => {
+    if (app) {
+      await app.close();
+    }
+  });
+
   it('works', () => {
     expect(true).toBe(true);
   });

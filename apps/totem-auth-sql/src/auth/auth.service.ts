@@ -4,6 +4,13 @@ import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 
+interface UserSafe {
+  id: string;
+  email: string;
+  password: string;
+  role: string;
+}
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -11,10 +18,14 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async login(dto: LoginUserDto) {
+  async login(
+    dto: LoginUserDto,
+  ): Promise<{ access_token: string; role: string }> {
     console.log('[AuthService] DTO reçu:', dto);
 
-    const user = await this.usersService.findByEmail(dto.email);
+    const user = (await this.usersService.findByEmail(
+      dto.email,
+    )) as unknown as UserSafe;
     console.log('[AuthService] Utilisateur trouvé par son email :', user);
 
     if (!user || !(await bcrypt.compare(dto.password, user.password))) {

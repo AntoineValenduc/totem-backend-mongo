@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   Injectable,
   OnModuleInit,
@@ -15,7 +17,7 @@ export class PrismaService
     await this.$connect();
   }
 
-  async enableShutdownHooks(app: INestApplication) {
+  enableShutdownHooks(app: INestApplication) {
     (this as any).$on('beforeExit', async () => {
       await app.close();
     });

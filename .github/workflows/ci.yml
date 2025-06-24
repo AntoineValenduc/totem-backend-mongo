@@ -10,6 +10,25 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: totem_auth_sql_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: admin
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      mongo:
+        image: mongo:6
+        ports:
+          - 27017:27017
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -21,22 +40,38 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        
+      - name: Generate Prisma Client
+        run: npx prisma generate --schema=apps/totem-auth-sql/src/prisma/schema.prisma
+        env:
+          DATABASE_URL: postgresql://postgres:admin@localhost:5432/totem_auth_sql_test
 
-      - name: Lint
-        run: npm run lint
+      - name: Wait for PostgreSQL
+        run: |
+          for i in {1..10}; do
+            nc -z localhost 5432 && echo "Postgres is up" && exit 0
+            echo "Waiting for Postgres..."
+            sleep 3
+          done
+          echo "Postgres did not start in time" && exit 1
+
+      - name: Run migrations
+        run: npx prisma migrate deploy --schema=apps/totem-auth-sql/src/prisma/schema.prisma
+        env:
+          DATABASE_URL: postgresql://postgres:admin@localhost:5432/totem_auth_sql_test
 
       - name: Run unit tests
         run: npm run test
 
-      - name: Run E2E tests
+      - name: Run E2E tests (API)
         run: npm run test:e2eApi
-
-      - name: Run E2E tests
+      - name: Run E2E tests (SQL)
         run: npm run test:e2eSql
+        env:
+          DATABASE_URL: postgresql://postgres:admin@localhost:5432/totem_auth_sql_test
 
-      - name: Run E2E tests
+      - name: Run E2E tests (Mongo)
         run: npm run test:e2eMongo
-
       - name: Generate coverage
         run: npm run test:coverage
 

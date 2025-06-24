@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { HydratedDocument, isValidObjectId, Model } from 'mongoose';
+import { HydratedDocument, isValidObjectId, Model, Types } from 'mongoose';
 import { Profile, ProfileDocument } from '../schema/profile.schema';
 import { ProfileCreateDto } from '../shared/dto/profile-create.dto';
 import { ProfileUpdateDto } from '../shared/dto/profile-update.dto';
@@ -26,11 +26,18 @@ export class ProfileService {
   async findAll(): Promise<ProfileDocument[]> {
     this.logger.log('✅ Requête reçue => findAll profiles MongoDB');
     try {
-      return await this.profileModel.find({ is_deleted: { $ne: true } }).exec();
+      return await this.profileModel
+        .find({ is_deleted: false })
+        .populate({ path: 'branch', populate: { path: 'badges' } })
+        .exec();
     } catch (err) {
       this.logger.error('❌ Erreur lors du findAll() dans le service', err);
       throw new ProfileInterneErrorException(
-        'Liste des Profils : ' + err.message + '',
+        'Liste des Profils : ' +
+          (err && typeof err === 'object' && err !== null && 'message' in err
+            ? (err as { message: string }).message
+            : String(err)) +
+          '',
       );
     }
   }
@@ -50,7 +57,36 @@ export class ProfileService {
         err,
       );
       throw new ProfileInterneErrorException(
-        'Liste des Profils Soft-Deleted: ' + err.message + '',
+        'Liste des Profils Soft-Deleted: ' +
+          (err && typeof err === 'object' && err !== null && 'message' in err
+            ? (err as { message: string }).message
+            : String(err)) +
+          '',
+      );
+    }
+  }
+
+  /**
+   * Afficher tous les profiles d'une branche
+   * @param branchId
+   */
+  async getProfilesByBranch(branchId: string): Promise<ProfileDocument[]> {
+    this.logger.log(`✅ Requête reçue => getProfilesByBranch ${branchId}`);
+    if (!isValidObjectId(branchId)) {
+      throw new InvalidProfilIdException(branchId);
+    }
+    try {
+      return await this.profileModel
+        .find({ branch: new Types.ObjectId(branchId), is_deleted: false })
+        .populate({ path: 'branch', populate: { path: 'badge' } })
+        .exec();
+    } catch (err) {
+      this.logger.error('❌ Erreur getProfilesByBranch()', err);
+      throw new ProfileInterneErrorException(
+        'Profils par branche : ' +
+          (err && typeof err === 'object' && err !== null && 'message' in err
+            ? (err as { message: string }).message
+            : String(err)),
       );
     }
   }
@@ -77,6 +113,9 @@ export class ProfileService {
    * @param dto
    */
   async create(dto: ProfileCreateDto): Promise<ProfileDocument> {
+    if (!dto) {
+      throw new ProfileCreateException('Payload invalide');
+    }
     const existing = await this.profileModel.findOne({ user_id: dto.user_id });
 
     if (existing) {
@@ -89,7 +128,11 @@ export class ProfileService {
       return await this.profileModel.create(dto);
     } catch (err) {
       this.logger.error('Erreur create()', err);
-      throw new ProfileCreateException(err.message);
+      const errorMessage =
+        err && typeof err === 'object' && err !== null && 'message' in err
+          ? (err as { message: string }).message
+          : String(err);
+      throw new ProfileCreateException(errorMessage);
     }
   }
 
@@ -114,15 +157,27 @@ export class ProfileService {
 
     await this.findProfileById(id);
 
+    try {
       const updated = await this.profileModel
         .findByIdAndUpdate(id, { $set: profile }, { new: true })
         .exec();
 
       if (!updated) {
-        this.logger.warn(`⚠️ Profil ${id} introuvable lors de l'update`);
+        this.logger.warn(`Profil ${id} introuvable lors de l'update`);
         throw new ProfileNotFoundException(id);
       }
       return updated;
+    } catch (err) {
+      if (err instanceof ProfileNotFoundException) {
+        throw err;
+      }
+      this.logger.error('❌ Erreur lors de la mise à jour du profil', err);
+      const errorMessage =
+        err && typeof err === 'object' && err !== null && 'message' in err
+          ? (err as { message: string }).message
+          : String(err);
+      throw new ProfileInterneErrorException(errorMessage);
+    }
   }
 
   /**

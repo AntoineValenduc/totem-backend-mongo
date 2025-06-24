@@ -1,0 +1,6 @@
+{
+  "ignorePatterns": [
+    "**/coverage/**",
+    "**/lcov-report/**"
+  ]
+}

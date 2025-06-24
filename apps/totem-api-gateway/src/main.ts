@@ -44,4 +44,4 @@ async function bootstrap() {
   console.log('🚀 API Gateway is running at http://localhost:3000');
   console.log('📘 Swagger: http://localhost:3000/api/docs');
 }
-bootstrap();
+void bootstrap();

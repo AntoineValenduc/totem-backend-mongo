@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
 import { TotemMongoModule } from './../src/totem-mongo.module';
+import mongoose from 'mongoose';
 
 describe('TotemMongoController (e2e)', () => {
   let app: INestApplication;
@@ -13,6 +13,13 @@ describe('TotemMongoController (e2e)', () => {
 
     app = moduleFixture.createNestApplication();
     await app.init();
+  });
+
+  afterAll(async () => {
+    if (app) {
+      await app.close();
+    }
+    await mongoose.disconnect();
   });
 
   it('works', () => {

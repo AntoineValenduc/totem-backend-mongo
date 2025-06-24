@@ -30,7 +30,11 @@ export class BadgeService {
     } catch (err) {
       this.logger.error('❌ Erreur lors du findAll() dans le service', err);
       throw new BadgeInterneErrorException(
-        'Liste des Profils : ' + err.message + '',
+        'Liste des Profils : ' +
+          (err && typeof err === 'object' && err !== null && 'message' in err
+            ? (err as { message?: string }).message
+            : String(err)) +
+          '',
       );
     }
   }
@@ -50,7 +54,11 @@ export class BadgeService {
         err,
       );
       throw new BadgeInterneErrorException(
-        'Liste des Badges Soft-Deleted: ' + err.message + '',
+        'Liste des Badges Soft-Deleted: ' +
+          (err && typeof err === 'object' && err !== null && 'message' in err
+            ? (err as { message?: string }).message
+            : String(err)) +
+          '',
       );
     }
   }
@@ -82,7 +90,11 @@ export class BadgeService {
       return await this.badgeModel.create(dto);
     } catch (err) {
       this.logger.error('Erreur create()', err);
-      throw new BadgeCreateException(err.message);
+      const message =
+        err && typeof err === 'object' && 'message' in err
+          ? String((err as { message?: unknown }).message)
+          : String(err);
+      throw new BadgeCreateException(message);
     }
   }
 
@@ -106,18 +118,26 @@ export class BadgeService {
 
     await this.findBadgeById(id); // Lève déjà une erreur si introuvable
 
-    const updated = await this.badgeModel
-      .findByIdAndUpdate(id, { $set: badge }, { new: true })
-      .exec();
+    try {
+      const updated = await this.badgeModel
+        .findByIdAndUpdate(id, { $set: badge }, { new: true })
+        .exec();
 
-    if (!updated) {
-      this.logger.warn(`⚠️ Badge ${id} introuvable lors de l'update`);
-      throw new BadgeNotFoundException(id);
+      if (!updated) {
+        this.logger.warn(`⚠️ Badge ${id} introuvable lors de l'update`);
+        throw new BadgeNotFoundException(id);
+      }
+
+      return updated;
+    } catch (err) {
+      this.logger.error('Erreur update()', err);
+      const message =
+        err && typeof err === 'object' && 'message' in err
+          ? String((err as { message?: unknown }).message)
+          : String(err);
+      throw new BadgeInterneErrorException(message);
     }
-
-    return updated;
   }
-
 
   /**
    * Supprimer un badge existant à partir de son ID

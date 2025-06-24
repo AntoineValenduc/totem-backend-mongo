@@ -19,13 +19,13 @@ describe('ProfileController', () => {
             create: jest.fn().mockResolvedValue({}),
             update: jest.fn().mockResolvedValue({}),
             remove: jest.fn().mockResolvedValue({}),
+            removeSoft: jest.fn().mockResolvedValue({}),
           },
         },
       ],
     }).compile();
 
     profileController = module.get<ProfileController>(ProfileController);
-    //profileService = module.get<ProfileService>(ProfileService);
   });
 
   it('should return all profiles', async () => {

@@ -26,6 +26,29 @@ export class ProfileController {
     return this.profileService.findAllSoftDeleted();
   }
 
+  @MessagePattern(PROFILE_PATTERNS.FIND_ALL_BY_BRANCH)
+  async getProfilesByBranch(
+    @Payload('branchId') branchId: string,
+  ): Promise<ProfileDocument[]> {
+    this.logger.log(
+      `✅ Requête reçue => getProfilesByBranch MongoDB (branchId: ${branchId})`,
+    );
+    if (!branchId) {
+      this.logger.error('❌ Requête reçue => branchId is required');
+      throw new RpcException('Branch ID requis');
+    }
+    try {
+      return await this.profileService.getProfilesByBranch(branchId);
+    } catch (error) {
+      console.error('❌ Erreur dans getProfilesByBranch:', error);
+      const message =
+        error && typeof error === 'object' && 'message' in error
+          ? (error as { message?: string }).message
+          : undefined;
+      throw new RpcException(message ?? 'Erreur interne microservice');
+    }
+  }
+
   @MessagePattern(PROFILE_PATTERNS.GET_BY_ID)
   async getById(@Payload('id') id: string): Promise<ProfileDocument> {
     this.logger.log(`✅ Requête reçue => getById profile MongoDB (ID: ${id})`);
@@ -37,7 +60,11 @@ export class ProfileController {
         return await this.profileService.getById(id);
       } catch (error) {
         console.error('❌ Erreur dans getById:', error);
-        throw new RpcException(error.message ?? 'Erreur interne microservice');
+        const message =
+          error && typeof error === 'object' && 'message' in error
+            ? (error as { message?: string }).message
+            : undefined;
+        throw new RpcException(message ?? 'Erreur interne microservice');
       }
     }
   }
@@ -67,16 +94,16 @@ export class ProfileController {
     if (!id) {
       this.logger.error('❌ Requête reçue => ID is required');
       throw new Error('❌ Requête reçue => ID is required');
-    } else {
-      this.logger.log(
-        `✅ Requête reçue => getById profile MongoDB (ID: ${id})`,
-      );
-      try {
-        return await this.profileService.removeSoft(id);
-      } catch (error) {
-        console.error('❌ Erreur dans getById:', error);
-        throw new RpcException(error.message ?? 'Erreur interne microservice');
-      }
+    }
+    try {
+      return await this.profileService.removeSoft(id);
+    } catch (error) {
+      console.error('❌ Erreur dans removeProfile:', error);
+      const message =
+        error && typeof error === 'object' && 'message' in error
+          ? (error as { message?: string }).message
+          : undefined;
+      throw new RpcException(message ?? 'Erreur interne microservice');
     }
   }
 }

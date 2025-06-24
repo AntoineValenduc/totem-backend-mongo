@@ -8,9 +8,9 @@ export class ProfileInterneErrorException extends AppException {
   constructor(source: string, details?: string) {
     const message = details
       ? `Erreur lors de la récupération des profils (${source}) : ${details}`
-      : `Erreur lors de la récupération des profils`
+      : `Erreur lors de la récupération des profils`;
 
-    super (message, 'PROFILE_FETCH_FAILED', HttpStatus.INTERNAL_SERVER_ERROR)
+    super(message, 'PROFILE_FETCH_FAILED', HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 
@@ -71,7 +71,7 @@ export class ProfileCreateException extends AppException {
   constructor(message?: string) {
     const fullMessage = message
       ? `Erreur lors de la création du profil : ${message}`
-      : `Erreur lors de la création du profil`
+      : `Erreur lors de la création du profil`;
     super(fullMessage, 'PROFILE_CREATE_FAILED', HttpStatus.BAD_REQUEST);
   }
 }

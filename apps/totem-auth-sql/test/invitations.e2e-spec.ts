@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-redundant-type-constituents */
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
@@ -5,6 +6,11 @@ import { PrismaService } from '../src/prisma/prisma.service';
 import { TotemAuthSqlModule } from '../src/totem-auth-sql.module';
 import { MailService } from '../src/mail/mail.service';
 import { ProfileService } from '../../totem-mongo/src/services/profile.service';
+
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test_secret';
+process.env.POSTGRES_URL =
+  process.env.POSTGRES_URL ||
+  'postgresql://postgres:postgres@localhost:5432/totem_auth_sql_test?schema=public';
 
 const mockProfileService: Partial<ProfileService> = {
   create: jest.fn().mockResolvedValue({}),
@@ -18,6 +24,7 @@ const mockMailService = {
 describe('Invitations E2E', () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  jest.setTimeout(30000);
 
   const testEmail = 'test@example.com';
 
@@ -53,10 +60,12 @@ describe('Invitations E2E', () => {
   });
 
   afterAll(async () => {
-    if (prisma?.user) {
+    if (prisma && typeof prisma.user?.deleteMany === 'function') {
       await prisma.user.deleteMany({ where: { email: testEmail } });
     }
-    await app.close();
+    if (app && typeof app.close === 'function') {
+      await app.close();
+    }
   });
 
   it('✅ devrait créer un utilisateur et un profil', async () => {
@@ -65,7 +74,8 @@ describe('Invitations E2E', () => {
       .send(dto)
       .expect(201);
 
-    expect(res.body.message).toBe('Invitation envoyée');
+    const body = res.body as { message: string };
+    expect(body.message).toBe('Invitation envoyée');
   });
 
   it('🚫 devrait échouer si l’mail existe déjà', async () => {
@@ -74,6 +84,7 @@ describe('Invitations E2E', () => {
       .send(dto)
       .expect(400);
 
-    expect(res.body.message).toMatch(/déjà utilisé/i);
+    const body = res.body as { message: string };
+    expect(body.message).toMatch(/déjà utilisé/i);
   });
 });

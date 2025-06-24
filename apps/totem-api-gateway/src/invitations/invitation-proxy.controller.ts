@@ -14,9 +14,9 @@ export class InvitationsProxyController {
   constructor(private readonly http: LegacyHttpService) {}
 
   @Post('register')
-  async registerFromToken(@Body() body: RegisterNewUserDto) {
+  async registerFromToken(@Body() body: RegisterNewUserDto): Promise<unknown> {
     return this.http.axiosRef
-      .post('http://totem-auth-sql:3002/invitations/register', body)
+      .post<unknown>('http://totem-auth-sql:3002/invitations/register', body)
       .then((res) => res.data);
   }
 }
