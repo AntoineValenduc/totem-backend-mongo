@@ -8,7 +8,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Installer les dépendances
-RUN npm install
+RUN npm install --ignore-scripts
 
 # Copier tout le projet
 COPY . .
@@ -26,7 +26,7 @@ COPY --from=builder /usr/src/app/dist ./dist
 COPY package*.json ./
 
 # Installer uniquement les dépendances de production
-RUN npm install --production
+RUN npm install --production --ignore-scripts
 
 # Exposer le port
 EXPOSE 3001
