@@ -64,7 +64,7 @@ jobs:
       - name: Run E2E tests (SQL)
         run: npm run test:e2eSql
         env:
-          DATABASE_URL: postgres://postgres:admin@localhost:5432/postgres
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/totem_auth_sql_test
 
       - name: Run E2E tests (Mongo)
         run: npm run test:e2eMongo
