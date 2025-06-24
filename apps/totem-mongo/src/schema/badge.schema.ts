@@ -1,5 +1,6 @@
 import { HydratedDocument, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Branch } from './branch.schema';
 
 export type BadgeDocument = HydratedDocument<Badge>;
 
@@ -39,7 +40,7 @@ export class Badge {
   is_deleted: boolean;
 
   @Prop({ type: Types.ObjectId, ref: 'Branch', required: true })
-  branch: Types.ObjectId;
+  branch: Types.ObjectId | Branch;
 }
 
 export const BadgeSchema = SchemaFactory.createForClass(Badge);

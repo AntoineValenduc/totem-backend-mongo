@@ -57,6 +57,23 @@ export class ProfilesController {
     return this.profileService.findAllSoftDeleted();
   }
 
+  @Get('branch/:branchId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Lister tous les profils d’une branche' })
+  @ApiResponse({
+    status: 200,
+    description: 'Liste des profils liés à la branche',
+    type: [ProfileCreateDto],
+  })
+  @ApiResponse({ status: 400, description: 'ID de branche invalide' })
+  @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
+  getProfilesByBranch(@Param('branchId', ParseObjectIdPipe) branchId: string) {
+    this.logger.log(
+      `✅ Requête envoyée => getProfilesByBranch, ID : ${branchId}`,
+    );
+    return this.profileService.findAllByBranch(branchId);
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Obtenir un profil par ID' })

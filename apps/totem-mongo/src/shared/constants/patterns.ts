@@ -1,6 +1,7 @@
 export const PROFILE_PATTERNS = {
   FIND_ALL: 'profiles.findAll',
   FIND_ALL_SOFT_DELETED: 'profiles.fildAllSoftDeleted',
+  FIND_ALL_BY_BRANCH: 'profiles.findAllByBranch',
   GET_BY_ID: 'profiles.getById',
   CREATE: 'profiles.create',
   UPDATE: 'profiles.update',

@@ -19,6 +19,12 @@ export class ProfilesService {
     return this.profilesClient.send(PROFILE_PATTERNS.FIND_ALL_SOFT_DELETED, {});
   }
 
+  findAllByBranch(branchId: string) {
+    return this.profilesClient.send(PROFILE_PATTERNS.FIND_ALL_BY_BRANCH, {
+      branchId,
+    });
+  }
+
   getById(id: string) {
     return this.profilesClient.send(PROFILE_PATTERNS.GET_BY_ID, { id });
   }

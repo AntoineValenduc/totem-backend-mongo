@@ -26,6 +26,29 @@ export class ProfileController {
     return this.profileService.findAllSoftDeleted();
   }
 
+  @MessagePattern(PROFILE_PATTERNS.FIND_ALL_BY_BRANCH)
+  async getProfilesByBranch(
+    @Payload('branchId') branchId: string,
+  ): Promise<ProfileDocument[]> {
+    this.logger.log(
+      `✅ Requête reçue => getProfilesByBranch MongoDB (branchId: ${branchId})`,
+    );
+    if (!branchId) {
+      this.logger.error('❌ Requête reçue => branchId is required');
+      throw new RpcException('Branch ID requis');
+    }
+    try {
+      return await this.profileService.getProfilesByBranch(branchId);
+    } catch (error) {
+      console.error('❌ Erreur dans getProfilesByBranch:', error);
+      const message =
+        error && typeof error === 'object' && 'message' in error
+          ? (error as { message?: string }).message
+          : undefined;
+      throw new RpcException(message ?? 'Erreur interne microservice');
+    }
+  }
+
   @MessagePattern(PROFILE_PATTERNS.GET_BY_ID)
   async getById(@Payload('id') id: string): Promise<ProfileDocument> {
     this.logger.log(`✅ Requête reçue => getById profile MongoDB (ID: ${id})`);

@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { HydratedDocument, isValidObjectId, Model } from 'mongoose';
+import { HydratedDocument, isValidObjectId, Model, Types } from 'mongoose';
 import { Profile, ProfileDocument } from '../schema/profile.schema';
 import { ProfileCreateDto } from '../shared/dto/profile-create.dto';
 import { ProfileUpdateDto } from '../shared/dto/profile-update.dto';
@@ -26,7 +26,10 @@ export class ProfileService {
   async findAll(): Promise<ProfileDocument[]> {
     this.logger.log('✅ Requête reçue => findAll profiles MongoDB');
     try {
-      return await this.profileModel.find({ is_deleted: { $ne: true } }).exec();
+      return await this.profileModel
+        .find({ is_deleted: false })
+        .populate({ path: 'branch', populate: { path: 'badges' } })
+        .exec();
     } catch (err) {
       this.logger.error('❌ Erreur lors du findAll() dans le service', err);
       throw new ProfileInterneErrorException(
@@ -59,6 +62,31 @@ export class ProfileService {
             ? (err as { message: string }).message
             : String(err)) +
           '',
+      );
+    }
+  }
+
+  /**
+   * Afficher tous les profiles d'une branche
+   * @param branchId
+   */
+  async getProfilesByBranch(branchId: string): Promise<ProfileDocument[]> {
+    this.logger.log(`✅ Requête reçue => getProfilesByBranch ${branchId}`);
+    if (!isValidObjectId(branchId)) {
+      throw new InvalidProfilIdException(branchId);
+    }
+    try {
+      return await this.profileModel
+        .find({ branch: new Types.ObjectId(branchId), is_deleted: false })
+        .populate({ path: 'branch', populate: { path: 'badge' } })
+        .exec();
+    } catch (err) {
+      this.logger.error('❌ Erreur getProfilesByBranch()', err);
+      throw new ProfileInterneErrorException(
+        'Profils par branche : ' +
+          (err && typeof err === 'object' && err !== null && 'message' in err
+            ? (err as { message: string }).message
+            : String(err)),
       );
     }
   }

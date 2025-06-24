@@ -40,7 +40,7 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate --schema=apps/totem-auth-sql/src/prisma/schema.prisma
         env:
-          DATABASE_URL: postgres://postgres:admin@localhost:5432/totem_auth_sql_test
+          DATABASE_URL: postgresql://postgres:admin@localhost:5432/totem_auth_sql_test
 
       - name: Wait for PostgreSQL
         run: |
@@ -64,7 +64,7 @@ jobs:
       - name: Run E2E tests (SQL)
         run: npm run test:e2eSql
         env:
-          DATABASE_URL: postgres://postgres:admin@localhost:5432/totem_auth_sql_test
+          DATABASE_URL: postgresql://postgres:admin@localhost:5432/totem_auth_sql_test
 
       - name: Run E2E tests (Mongo)
         run: npm run test:e2eMongo
