@@ -1,24 +1,25 @@
-# Utiliser une image Node légère
+# Image Node
 FROM node:18-alpine AS builder
 
-# Définir le répertoire de travail
+# Répertoire de travail
 WORKDIR /usr/src/app
 
-# Copier les fichiers package.json et package-lock.json
+# Package.json
 COPY package*.json ./
 
 # Installer les dépendances
-RUN npm install --ignore-scripts
+RUN npm install
 
 # Copier tout le projet
 COPY . .
 
-# Lancer le build de l'application
+# Build de l'appli
 RUN npm run build
 
-# Utiliser une image légère pour l'exécution
+# Image Node légère pour l'exécution
 FROM node:18-alpine
 
+# Répertoire de travail
 WORKDIR /usr/src/app
 
 # Copier les fichiers buildés de l'étape précédente
@@ -29,7 +30,7 @@ COPY package*.json ./
 RUN npm install --production
 
 # Exposer le port
-EXPOSE 3000
+EXPOSE 3002
 
-# Démarrer l'application
+# Démarrer l'appli
 CMD ["node", "dist/apps/totem-api-gateway/main.js"]
