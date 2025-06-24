@@ -14,7 +14,7 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: postgres
+          POSTGRES_DB: totem_auth_sql_test
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: admin
         ports:
@@ -40,7 +40,7 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate --schema=apps/totem-auth-sql/src/prisma/schema.prisma
         env:
-          POSTGRES_URL: postgres://postgres:admin@localhost:5432/postgres
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/totem_auth_sql_test
 
       - name: Wait for PostgreSQL
         run: |
@@ -54,7 +54,7 @@ jobs:
       - name: Run migrations
         run: npx prisma migrate deploy --schema=apps/totem-auth-sql/src/prisma/schema.prisma
         env:
-          POSTGRES_URL: postgresql://postgres:admin@localhost:5432/postgres
+          DATABASE_URL: postgresql://postgres:admin@localhost:5432/totem_auth_sql_test
 
       - name: Run unit tests
         run: npm run test
@@ -64,7 +64,7 @@ jobs:
       - name: Run E2E tests (SQL)
         run: npm run test:e2eSql
         env:
-          POSTGRES_URL: postgres://postgres:admin@localhost:5432/postgres
+          DATABASE_URL: postgres://postgres:admin@localhost:5432/postgres
 
       - name: Run E2E tests (Mongo)
         run: npm run test:e2eMongo
