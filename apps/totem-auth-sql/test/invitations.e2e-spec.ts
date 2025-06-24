@@ -16,6 +16,15 @@ const mockProfileService: Partial<ProfileService> = {
   create: jest.fn().mockResolvedValue({}),
 };
 
+jest.mock('@nestjs/mongoose', () => ({
+  ...jest.requireActual('@nestjs/mongoose'),
+  MongooseModule: {
+    forRoot: () => ({
+      module: class MockMongooseModule {},
+    }),
+  },
+}));
+
 // Stop SMTP réels pour les tests
 const mockMailService = {
   sendInvitation: jest.fn().mockResolvedValue(undefined),
@@ -63,7 +72,9 @@ describe('Invitations E2E', () => {
     if (prisma && typeof prisma.user?.deleteMany === 'function') {
       await prisma.user.deleteMany({ where: { email: testEmail } });
     }
-    await app.close();
+    if (app && typeof app.close === 'function') {
+      await app.close();
+    }
   });
 
   it('✅ devrait créer un utilisateur et un profil', async () => {
