@@ -7,6 +7,11 @@ import { TotemAuthSqlModule } from '../src/totem-auth-sql.module';
 import { MailService } from '../src/mail/mail.service';
 import { ProfileService } from '../../totem-mongo/src/services/profile.service';
 
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test_secret';
+process.env.POSTGRES_URL =
+  process.env.POSTGRES_URL ||
+  'postgresql://postgres:postgres@localhost:5432/totem_auth_sql_test?schema=public';
+
 const mockProfileService: Partial<ProfileService> = {
   create: jest.fn().mockResolvedValue({}),
 };
