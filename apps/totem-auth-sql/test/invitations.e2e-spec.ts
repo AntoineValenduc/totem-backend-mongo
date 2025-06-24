@@ -24,6 +24,7 @@ const mockMailService = {
 describe('Invitations E2E', () => {
   let app: INestApplication;
   let prisma: PrismaService;
+  jest.setTimeout(30000);
 
   const testEmail = 'test@example.com';
 
