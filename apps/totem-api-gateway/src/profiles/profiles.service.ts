@@ -29,6 +29,12 @@ export class ProfilesService {
     return this.profilesClient.send(PROFILE_PATTERNS.GET_BY_ID, { id });
   }
 
+  getByUserId(userId: string) {
+    return this.profilesClient.send(PROFILE_PATTERNS.GET_BY_USER_ID, {
+      userId,
+    });
+  }
+
   async createProfile(profile: ProfileCreateDto): Promise<ProfileCreateDto> {
     return await firstValueFrom<ProfileCreateDto>(
       this.profilesClient.send(PROFILE_PATTERNS.CREATE, profile),

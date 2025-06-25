@@ -3,6 +3,7 @@ export const PROFILE_PATTERNS = {
   FIND_ALL_SOFT_DELETED: 'profiles.fildAllSoftDeleted',
   FIND_ALL_BY_BRANCH: 'profiles.findAllByBranch',
   GET_BY_ID: 'profiles.getById',
+  GET_BY_USER_ID: 'profiles.getByUserId',
   CREATE: 'profiles.create',
   UPDATE: 'profiles.update',
   DELETE: 'profiles.delete',

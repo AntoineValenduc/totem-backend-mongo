@@ -92,6 +92,23 @@ export class ProfilesController {
     return this.profileService.getById(id);
   }
 
+  @Get('user/:userId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Obtenir un profil par user_id SQL' })
+  @ApiResponse({
+    status: 200,
+    description: 'Profil trouvé',
+    type: ProfileCreateDto,
+  })
+  @ApiResponse({ status: 404, description: 'Profil introuvable' })
+  getByUserId(@Param('userId') userId: string) {
+    this.logger.log(
+      '✅ Requête envoyé => getByUserId profile, user_id :',
+      userId,
+    );
+    return this.profileService.getByUserId(userId);
+  }
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Créer un profil' })

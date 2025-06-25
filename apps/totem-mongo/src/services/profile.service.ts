@@ -109,6 +109,28 @@ export class ProfileService {
   }
 
   /**
+   * Afficher un profile à partir de son user.id PostgreSQL
+   * @param userId
+   */
+  async getByUserId(userId: string): Promise<ProfileDocument> {
+    this.logger.log(
+      "✅ Requête reçue => getByUserId PostgreSQL, avec l'ID: " + userId,
+    );
+    if (!userId) {
+      throw new NullProfileIdException();
+    }
+    const profile = await this.profileModel
+      .findOne({ user_id: userId, is_deleted: false })
+      .populate('branch')
+      .exec();
+    if (!profile || profile.is_deleted) {
+      throw new ProfileNotFoundException(userId);
+    } else {
+      return profile;
+    }
+  }
+
+  /**
    * Créer un nouveau profile
    * @param dto
    */

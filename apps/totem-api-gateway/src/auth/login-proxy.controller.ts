@@ -15,6 +15,7 @@ import { HttpService } from '@nestjs/axios';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
 import { LoginUserDto } from '../../../totem-auth-sql/src/users/dto/login-user.dto';
+import { ProfilesService } from '../profiles/profiles.service';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -22,6 +23,7 @@ export class AuthProxyController {
   constructor(
     private readonly httpService: HttpService,
     private readonly jwtService: JwtService,
+    private readonly profileService: ProfilesService,
   ) {}
 
   @Post('login')
@@ -86,8 +88,8 @@ export class AuthProxyController {
     }
   }
 
-  @Get('me')
-  getMe(@Req() req: { cookies?: Record<string, string> }, @Res() res: Response) {
+  @Get('/me')
+  async getMe(@Req() req: { cookies?: Record<string, string> }, @Res() res: Response) {
     try {
       const token: string | undefined = req.cookies?.jwt;
       console.log('[Gateway] Token reçu dans le cookie :', req.cookies?.jwt);
@@ -98,12 +100,24 @@ export class AuthProxyController {
           .json({ message: 'Non authentifié' });
       }
 
-      type JwtPayload = { email?: string; role?: string };
+      type JwtPayload = { sub: string, email?: string; role?: string };
       const payload: JwtPayload = this.jwtService.verify(token, {
         secret: process.env.JWT_SECRET as string,
       });
+      const userId = payload.sub;
+
+      console.log('[Gateway] Payload du JWT:', payload);
+
+      /**
+       * Recherche de l'utilisateur Mongo
+       */
+     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+     const profile = await firstValueFrom(this.profileService.getByUserId(userId));
+
+      console.log('[Gateway] Profil utilisateur récupéré:', profile);
 
       return res.status(200).json({
+        ...profile,
         email: payload.email ?? null,
         role: payload.role ?? null,
       });

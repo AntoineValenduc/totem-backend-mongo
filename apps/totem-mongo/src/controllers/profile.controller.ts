@@ -69,6 +69,30 @@ export class ProfileController {
     }
   }
 
+  @MessagePattern(PROFILE_PATTERNS.GET_BY_USER_ID)
+  async getByUserId(
+    @Payload('userId') userId: string,
+  ): Promise<ProfileDocument> {
+    this.logger.log(
+      `✅ Requête reçue => getById profile MongoDB (ID: ${userId})`,
+    );
+    if (!userId) {
+      this.logger.error('❌ Requête reçue => ID is required');
+      throw new Error('❌ Requête reçue => ID is required');
+    } else {
+      try {
+        return await this.profileService.getByUserId(userId);
+      } catch (error) {
+        console.error('❌ Erreur dans getById:', error);
+        const message =
+          error && typeof error === 'object' && 'message' in error
+            ? (error as { message?: string }).message
+            : undefined;
+        throw new RpcException(message ?? 'Erreur interne microservice');
+      }
+    }
+  }
+
   @MessagePattern(PROFILE_PATTERNS.CREATE)
   async createProfile(
     @Payload() profileDto: ProfileCreateDto,

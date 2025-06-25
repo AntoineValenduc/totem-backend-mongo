@@ -20,7 +20,7 @@ export class AuthService {
 
   async login(
     dto: LoginUserDto,
-  ): Promise<{ access_token: string; role: string }> {
+  ): Promise<{ access_token: string; role: string; user_id: string }> {
     console.log('[AuthService] DTO reçu:', dto);
 
     const user = (await this.usersService.findByEmail(
@@ -51,6 +51,7 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
       role: user.role,
+      user_id: user.id,
     };
   }
 }
