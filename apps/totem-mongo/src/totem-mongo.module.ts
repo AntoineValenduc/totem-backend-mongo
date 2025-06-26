@@ -16,6 +16,7 @@ import { BranchService } from './services/branch.service';
 import { Badge, BadgeSchema } from './schema/badge.schema';
 import { BadgeController } from './controllers/badge.controller';
 import { BadgeService } from './services/badge.service';
+import { ProfileBadge, ProfileBadgeSchema } from './schema/profileBadge.schema';
 
 const env = process.env.NODE_ENV ?? 'development';
 
@@ -48,6 +49,7 @@ const resolvedEnvFilePath = existsSync(envFilePath)
       { name: Profile.name, schema: ProfileSchema },
       { name: Branch.name, schema: BranchSchema },
       { name: Badge.name, schema: BadgeSchema },
+      { name: ProfileBadge.name, schema: ProfileBadgeSchema },
     ]),
   ],
   controllers: [ProfileController, BranchController, BadgeController],

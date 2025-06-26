@@ -12,45 +12,36 @@ import {
 import { Branch, BranchDocument } from '../schema/branch.schema';
 import { BrancheCreateDto } from '../shared/dto/branche-create.dto';
 import { BrancheUpdateDto } from '../shared/dto/branche-update.dto';
-import { Badge } from '../schema/badge.schema';
+import { BranchExposeDto } from '../shared/dto/branche-expose.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class BranchService {
   private readonly logger = new Logger(BranchService.name);
 
   constructor(
-    @InjectModel(Branch.name) private readonly branchModel: Model<Branch>,
-    @InjectModel(Badge.name) private readonly badgeModel: Model<Badge>,
+    @InjectModel(Branch.name)
+    private readonly branchModel: Model<BranchDocument>,
   ) {}
 
   /**
    * Afficher la liste des branchs
    */
-  async findAll(): Promise<(Branch & { badges: Badge[] })[]> {
-    this.logger.log('✅ Requête reçue => findAll branchs MongoDB');
+  async findAll(): Promise<BranchExposeDto[]> {
     try {
       const branches = await this.branchModel
-        .find({ is_deleted: { $ne: true } })
-        .lean(); // lean() pour rendre les objets modifiables
+        .find({ is_deleted: false })
+        .populate('badges')
+        .lean()
+        .exec();
 
-      // Pour chaque branche, on va chercher les badges liés
-      const branchesWithBadges = await Promise.all(
-        branches.map(async (branch) => {
-          const badges = await this.badgeModel
-            .find({ branch: branch._id, is_deleted: { $ne: true } })
-            .lean();
-          return { ...branch, badges };
-        }),
-      );
-
-      return branchesWithBadges;
+      return plainToInstance(BranchExposeDto, branches, {
+        excludeExtraneousValues: true,
+      });
     } catch (err) {
       this.logger.error('❌ Erreur lors du findAll() dans le service', err);
       throw new BranchInterneErrorException(
-        'Liste des Branches : ' +
-          (err && typeof err === 'object' && 'message' in err
-            ? (err as { message: string }).message
-            : String(err)),
+        'Erreur interne lors de la récupération des branches',
       );
     }
   }

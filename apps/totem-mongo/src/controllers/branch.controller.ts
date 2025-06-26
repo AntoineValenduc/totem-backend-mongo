@@ -3,9 +3,9 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { BranchService } from '../services/branch.service';
 import { BrancheCreateDto } from '../shared/dto/branche-create.dto';
 import { BRANCH_PATTERNS } from '../shared/constants/patterns';
-import { Branch, BranchDocument } from '../schema/branch.schema';
+import { BranchDocument } from '../schema/branch.schema';
 import { BrancheUpdateDto } from '../shared/dto/branche-update.dto';
-import { Badge } from '../schema/badge.schema';
+import { BranchExposeDto } from '../shared/dto/branche-expose.dto';
 
 @Controller()
 export class BranchController {
@@ -14,7 +14,7 @@ export class BranchController {
   constructor(private readonly branchService: BranchService) {}
 
   @MessagePattern(BRANCH_PATTERNS.FIND_ALL)
-  async findAll(): Promise<(Branch & { badges: Badge[] })[]> {
+  async findAll(): Promise<BranchExposeDto[]> {
     this.logger.log('✅ Requête reçue => findAll branchs MongoDB');
     return this.branchService.findAll();
   }

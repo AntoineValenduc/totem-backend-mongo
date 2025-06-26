@@ -7,13 +7,13 @@ export class ProfileBadge {
   @Prop({ type: Types.ObjectId, ref: 'Badge', required: true })
   badge: Types.ObjectId;
 
-  @Prop({ default: Date.now })
+  @Prop({ required: true, default: Date.now })
   date_earned: Date;
 
   @Prop({ min: 0, max: 100, default: 0 })
   progress: number;
 
-  @Prop({ default: 'Non acquis' })
+  @Prop({ required: true, default: 'Non acquis' })
   status: string
 }
 

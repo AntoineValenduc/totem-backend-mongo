@@ -118,7 +118,7 @@ export class AuthProxyController {
 
       return res.status(200).json({
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        profile_id: profile._id?.toString() ?? profile.id?.toString(),
+        profile_id: profile.id?.toString(),
         email: payload.email ?? null,
         role: payload.role ?? null,
       });

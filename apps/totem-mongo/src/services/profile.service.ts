@@ -12,33 +12,36 @@ import {
   ProfileInterneErrorException,
   ProfileNotFoundException,
 } from '../shared/exceptions/profile.exception';
+import { ProfileExposeDto } from '../shared/dto/profile-expose.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ProfileService {
   private readonly logger = new Logger(ProfileService.name);
 
   constructor(
-    @InjectModel(Profile.name) private readonly profileModel: Model<Profile>,
+    @InjectModel(Profile.name)
+    private readonly profileModel: Model<ProfileDocument>,
   ) {}
 
   /**
    * Afficher la liste des profiles
    */
-  async findAll(): Promise<ProfileDocument[]> {
-    this.logger.log('✅ Requête reçue => findAll profiles MongoDB');
+  async findAll(): Promise<ProfileExposeDto[]> {
     try {
-      return await this.profileModel
+      const profiles = await this.profileModel
         .find({ is_deleted: false })
         .populate({ path: 'branch', populate: { path: 'badges' } })
+        .lean()
         .exec();
+
+      return plainToInstance(ProfileExposeDto, profiles, {
+        excludeExtraneousValues: true,
+      });
     } catch (err) {
-      this.logger.error('❌ Erreur lors du findAll() dans le service', err);
+      this.logger.error('Erreur lors du findAll() dans le service', err);
       throw new ProfileInterneErrorException(
-        'Liste des Profils : ' +
-          (err && typeof err === 'object' && err !== null && 'message' in err
-            ? (err as { message: string }).message
-            : String(err)) +
-          '',
+        'Erreur lors de la récupération des profils',
       );
     }
   }
@@ -46,26 +49,27 @@ export class ProfileService {
   /**
    * Afficher la liste des profiles soft-deleted
    */
-  async findAllSoftDeleted(): Promise<ProfileDocument[]> {
+  async findAllSoftDeleted(): Promise<ProfileExposeDto[]> {
     this.logger.log(
       '✅ SERVICE Requête reçue => findAllSoftDeleted profiles MongoDB',
     );
     try {
-      return this.profileModel
+      const profiles = await this.profileModel
         .find({ is_deleted: true })
-        .populate({ path: 'branch', populate: { path: 'badge' } })
+        .populate({ path: 'branch', populate: { path: 'badges' } })
+        .lean()
         .exec();
+
+      return plainToInstance(ProfileExposeDto, profiles, {
+        excludeExtraneousValues: true,
+      });
     } catch (err) {
       this.logger.error(
-        '❌ Erreur lors du findAllSoftDeleted() dans le service',
+        'Erreur lors du findAllSoftDeleted() dans le service',
         err,
       );
       throw new ProfileInterneErrorException(
-        'Liste des Profils Soft-Deleted: ' +
-          (err && typeof err === 'object' && err !== null && 'message' in err
-            ? (err as { message: string }).message
-            : String(err)) +
-          '',
+        'Erreur lors de la récupération des profils supprimés',
       );
     }
   }
@@ -74,23 +78,24 @@ export class ProfileService {
    * Afficher tous les profiles d'une branche
    * @param branchId
    */
-  async getProfilesByBranch(branchId: string): Promise<ProfileDocument[]> {
-    this.logger.log(`✅ Requête reçue => getProfilesByBranch ${branchId}`);
+  async getProfilesByBranch(branchId: string): Promise<ProfileExposeDto[]> {
     if (!isValidObjectId(branchId)) {
       throw new InvalidProfilIdException(branchId);
     }
     try {
-      return await this.profileModel
+      const profiles = await this.profileModel
         .find({ branch: new Types.ObjectId(branchId), is_deleted: false })
         .populate({ path: 'branch', populate: { path: 'badge' } })
+        .lean()
         .exec();
+
+      return plainToInstance(ProfileExposeDto, profiles, {
+        excludeExtraneousValues: true,
+      });
     } catch (err) {
-      this.logger.error('❌ Erreur getProfilesByBranch()', err);
+      this.logger.error('Erreur getProfilesByBranch()', err);
       throw new ProfileInterneErrorException(
-        'Profils par branche : ' +
-          (err && typeof err === 'object' && err !== null && 'message' in err
-            ? (err as { message: string }).message
-            : String(err)),
+        'Erreur lors de la récupération des profils pour la branche',
       );
     }
   }
@@ -99,16 +104,17 @@ export class ProfileService {
    * Afficher un profile à partir de son ID
    * @param id
    */
-  async getById(id: string): Promise<ProfileDocument> {
-    this.logger.log(
-      "✅ Requête reçue => getById profiles MongoDB, avec l'ID: " + id,
-    );
+  async getById(id: string): Promise<ProfileExposeDto> {
     if (!id) {
       throw new NullProfileIdException();
     } else if (!isValidObjectId(id)) {
       throw new InvalidProfilIdException(id);
     } else {
-      return await this.findProfileById(id);
+      const profile = await this.findProfileById(id);
+
+      return plainToInstance(ProfileExposeDto, profile, {
+        excludeExtraneousValues: true,
+      });
     }
   }
 
@@ -116,23 +122,19 @@ export class ProfileService {
    * Afficher un profile à partir de son user.id PostgreSQL
    * @param userId
    */
-  async getByUserId(userId: string): Promise<ProfileDocument> {
-    this.logger.log(
-      "✅ Requête reçue => getByUserId PostgreSQL, avec l'ID: " + userId,
-    );
+  async getByUserId(userId: string): Promise<ProfileExposeDto> {
     if (!userId) {
       throw new NullProfileIdException();
     }
-    this.logger.log("Recherche du profile pour l'utilisateur:", userId);
     const profile = await this.profileModel
       .findOne({ user_id: userId.toString(), is_deleted: false })
-      .populate('branch')
       .exec();
-    this.logger.log('Profile trouvé:', profile);
     if (!profile || profile.is_deleted) {
       throw new ProfileNotFoundException(userId);
     } else {
-      return profile;
+      return plainToInstance(ProfileExposeDto, profile, {
+        excludeExtraneousValues: true,
+      });
     }
   }
 

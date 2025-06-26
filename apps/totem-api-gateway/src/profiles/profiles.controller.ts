@@ -21,6 +21,7 @@ import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import { ProfileCreateDto } from '../../../totem-mongo/src/shared/dto/profile-create.dto';
 import { ProfileUpdateDto } from '../../../totem-mongo/src/shared/dto/profile-update.dto';
 import { ProfileBadgeDto } from 'apps/totem-mongo/src/shared/dto/profileBadge.dto';
+import { ProfileExposeDto } from 'apps/totem-mongo/src/shared/dto/profile-expose.dto';
 
 @ApiTags('profiles')
 @ApiBearerAuth()
@@ -36,11 +37,10 @@ export class ProfilesController {
   @ApiResponse({
     status: 200,
     description: 'Liste des profils',
-    type: [ProfileCreateDto],
+    type: [ProfileExposeDto],
   })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   findAll() {
-    this.logger.log('✅ Requête envoyé => findAll profile');
     return this.profileService.findAll();
   }
 
@@ -50,11 +50,10 @@ export class ProfilesController {
   @ApiResponse({
     status: 200,
     description: 'Liste des profils soft-deleted',
-    type: [ProfileCreateDto],
+    type: [ProfileExposeDto],
   })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   findAllSoftDeleted() {
-    this.logger.log('✅ Requête envoyé => findAllSoftDeleted profile');
     return this.profileService.findAllSoftDeleted();
   }
 
@@ -64,14 +63,11 @@ export class ProfilesController {
   @ApiResponse({
     status: 200,
     description: 'Liste des profils liés à la branche',
-    type: [ProfileCreateDto],
+    type: [ProfileExposeDto],
   })
   @ApiResponse({ status: 400, description: 'ID de branche invalide' })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   getProfilesByBranch(@Param('branchId', ParseObjectIdPipe) branchId: string) {
-    this.logger.log(
-      `✅ Requête envoyée => getProfilesByBranch, ID : ${branchId}`,
-    );
     return this.profileService.findAllByBranch(branchId);
   }
 
@@ -81,15 +77,12 @@ export class ProfilesController {
   @ApiResponse({
     status: 200,
     description: 'Profil trouvé',
-    type: ProfileCreateDto,
+    type: ProfileExposeDto,
   })
   @ApiResponse({ status: 400, description: 'ID invalide' })
   @ApiResponse({ status: 404, description: 'Profil introuvable' })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   getById(@Param('id', ParseObjectIdPipe) id: string) {
-    this.logger.log('✅ Requête envoyé => getById profile MongoDB, ID : ', {
-      id,
-    });
     return this.profileService.getById(id);
   }
 
@@ -99,14 +92,10 @@ export class ProfilesController {
   @ApiResponse({
     status: 200,
     description: 'Profil trouvé',
-    type: ProfileCreateDto,
+    type: ProfileExposeDto,
   })
   @ApiResponse({ status: 404, description: 'Profil introuvable' })
   getByUserId(@Param('userId') userId: string) {
-    this.logger.log(
-      '✅ Requête envoyé => getByUserId profile, user_id :',
-      userId,
-    );
     return this.profileService.getByUserId(userId);
   }
 
@@ -121,7 +110,6 @@ export class ProfilesController {
   @ApiResponse({ status: 400, description: 'Données invalides' })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   createProfile(@Body() profile: ProfileCreateDto) {
-    this.logger.log('✅ Requête envoyé => create profile');
     return this.profileService.createProfile(profile);
   }
 
@@ -137,7 +125,6 @@ export class ProfilesController {
   @ApiResponse({ status: 404, description: 'Profil introuvable' })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   updateProfile(@Param('id') id: string, @Body() profile: ProfileUpdateDto) {
-    this.logger.log('✅ Requête envoyée => update profile, ID : ', { id });
     return this.profileService.updateProfile(id, profile);
   }
 
@@ -149,7 +136,6 @@ export class ProfilesController {
   @ApiResponse({ status: 404, description: 'Profil introuvable' })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   deleteProfile(@Param('id') id: string) {
-    this.logger.log('✅ Requête envoyée => delete profile, ID : ', { id });
     return this.profileService.deleteProfile(id);
   }
 
@@ -168,9 +154,6 @@ export class ProfilesController {
     @Param('id') profileId: string,
     @Body() profileBadge: ProfileBadgeDto,
   ) {
-    this.logger.log('✅ Requête envoyée => update badge in profile, ID : ', {
-      profileId,
-    });
     return this.profileService.addBadgeToProfile(profileId, profileBadge);
   }
 }

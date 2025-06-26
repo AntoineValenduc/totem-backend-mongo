@@ -22,9 +22,6 @@ describe('BadgeService', () => {
     name: 'Badge Test',
     description: 'Ceci est un badge de test',
     logo_url: 'https://example.com/logo.png',
-    progress: 75,
-    status: 'earned',
-    date_earned: new Date('2023-10-01'),
     save: jest.fn(),
   };
 
@@ -117,10 +114,7 @@ describe('BadgeService', () => {
     const invalidDto: BadgeCreateDto = {
       name: 'Created Name',
       description: 'Je suis une description de badge',
-      progress: 50,
       logo_url: 'urlLogo',
-      dateEarned: new Date('invalid-date'),
-      status: 'earned',
       branch: '',
     };
 
@@ -186,38 +180,5 @@ describe('BadgeService', () => {
     await expect(
       service.update(id, null as unknown as BadgeUpdateDto),
     ).rejects.toThrow(BadgeInterneErrorException);
-  });
-
-  it('Delete => OK', async () => {
-    jest.spyOn(mockBadgeDocument, 'save').mockResolvedValueOnce({
-      ...mockBadgeDocument,
-      is_deleted: true,
-      removed_at: new Date(),
-    } as BadgeDocument);
-
-    const result = await service.remove(mockBadgeDocument._id!.toString());
-    expect(result.is_deleted).toBe(true);
-    expect(result.removed_at).toBeDefined();
-    const findByIdSpy = jest.spyOn(badgeModel, 'findById');
-    expect(findByIdSpy).toHaveBeenCalledWith(mockBadgeDocument._id!.toString());
-    expect(mockBadgeDocument.save).toHaveBeenCalled();
-  });
-
-  it('Delete => Exception: Badge not found', async () => {
-    jest.spyOn(badgeModel, 'findById').mockReturnValueOnce({
-      exec: jest.fn().mockResolvedValue(null),
-    } as unknown as import('mongoose').Query<unknown, Badge>);
-
-    await expect(service.remove('111111111111111111111111')).rejects.toThrow(
-      BadgeNotFoundException,
-    );
-  });
-
-  it('Delete => Exception: ID null', async () => {
-    await expect(service.remove('')).rejects.toThrow(NullBadgeIdException);
-  });
-
-  it('Delete => Exception: ID vide', async () => {
-    await expect(service.remove('')).rejects.toThrow(NullBadgeIdException);
   });
 });

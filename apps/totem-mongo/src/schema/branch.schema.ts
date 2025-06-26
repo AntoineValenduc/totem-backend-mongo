@@ -1,20 +1,25 @@
 import { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Badge } from './badge.schema';
 
 export type BranchDocument = HydratedDocument<Branch>;
 
-@Schema({ timestamps: true })
+@Schema({
+  timestamps: true,
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true },
+})
 export class Branch {
-  @Prop()
+  @Prop({ required: true, trim: true })
   name: string;
 
-  @Prop()
+  @Prop({ required: true, trim: true })
   color: string;
 
-  @Prop()
+  @Prop({ required: true, trim: true })
   description: string;
 
-  @Prop()
+  @Prop({ required: true, trim: true })
   range_age: string;
 
   @Prop()
@@ -25,6 +30,8 @@ export class Branch {
 
   @Prop({ default: false })
   is_deleted: boolean;
+
+  badges?: Badge[];
 }
 
 export const BranchSchema = SchemaFactory.createForClass(Branch);

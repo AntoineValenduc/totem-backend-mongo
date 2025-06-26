@@ -19,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { BrancheCreateDto } from '../../../totem-mongo/src/shared/dto/branche-create.dto';
 import { BrancheUpdateDto } from '../../../totem-mongo/src/shared/dto/branche-update.dto';
+import { BranchExposeDto } from 'apps/totem-mongo/src/shared/dto/branche-expose.dto';
 
 @ApiTags('branches')
 @ApiBearerAuth()
@@ -34,7 +35,7 @@ export class BranchesController {
   @ApiResponse({
     status: 200,
     description: 'Liste des branches',
-    type: [BrancheCreateDto],
+    type: [BranchExposeDto],
   })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   findAll() {

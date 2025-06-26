@@ -14,10 +14,6 @@ export class BadgesService {
     return this.badgeClient.send(BADGE_PATTERNS.FIND_ALL, {});
   }
 
-  findAllSoftDeleted() {
-    return this.badgeClient.send(BADGE_PATTERNS.FIND_ALL_SOFT_DELETED, {});
-  }
-
   getById(id: string) {
     return this.badgeClient.send(BADGE_PATTERNS.GET_BY_ID, { id });
   }
@@ -34,12 +30,6 @@ export class BadgesService {
   ): Promise<BadgeUpdateDto> {
     return await firstValueFrom<BadgeUpdateDto>(
       this.badgeClient.send(BADGE_PATTERNS.UPDATE, { id, badge: badge }),
-    );
-  }
-
-  async deleteBadge(id: string): Promise<void> {
-    return await firstValueFrom<void>(
-      this.badgeClient.send(BADGE_PATTERNS.DELETE, { id }),
     );
   }
 }

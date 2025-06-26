@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, HydratedDocument, isValidObjectId } from 'mongoose';
+import { Model, isValidObjectId, Types } from 'mongoose';
 import { Badge, BadgeDocument } from '../schema/badge.schema';
 import {
   BadgeCreateException,
@@ -11,54 +11,33 @@ import {
 } from '../shared/exceptions/badge.exception';
 import { BadgeCreateDto } from '../shared/dto/badge-create.dto';
 import { BadgeUpdateDto } from '../shared/dto/badge-update.dto';
+import { BadgeExposeDto } from '../shared/dto/badge-expose.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class BadgeService {
   private readonly logger = new Logger(BadgeService.name);
 
   constructor(
-    @InjectModel(Badge.name) private readonly badgeModel: Model<Badge>,
+    @InjectModel(Badge.name) private readonly badgeModel: Model<BadgeDocument>,
   ) {}
 
   /**
-   * Afficher la liste des profiles
+   * Afficher la liste des badges
    */
-  async findAll(): Promise<BadgeDocument[]> {
-    this.logger.log('✅ Requête reçue => findAll profiles MongoDB');
+  async findAll(): Promise<BadgeExposeDto[]> {
     try {
-      return await this.badgeModel.find({ is_deleted: { $ne: true } }).exec();
-    } catch (err) {
-      this.logger.error('❌ Erreur lors du findAll() dans le service', err);
-      throw new BadgeInterneErrorException(
-        'Liste des Profils : ' +
-          (err && typeof err === 'object' && err !== null && 'message' in err
-            ? (err as { message?: string }).message
-            : String(err)) +
-          '',
-      );
-    }
-  }
+      //Recherche Mongoose
+      const badges = await this.badgeModel.find().populate('branch').exec();
 
-  /**
-   * Afficher la liste des profiles soft-deleted
-   */
-  async findAllSoftDeleted(): Promise<BadgeDocument[]> {
-    this.logger.log(
-      '✅ SERVICE Requête reçue => findAllSoftDeleted badges MongoDB',
-    );
-    try {
-      return this.badgeModel.find({ is_deleted: { $ne: false } }).exec();
+      //Transco en DTO Expose
+      return plainToInstance(BadgeExposeDto, badges, {
+        excludeExtraneousValues: true,
+      });
     } catch (err) {
-      this.logger.error(
-        '❌ Erreur lors du findAllSoftDeleted() dans le service',
-        err,
-      );
+      this.logger.error('Erreur lors du findAll() dans le service', err);
       throw new BadgeInterneErrorException(
-        'Liste des Badges Soft-Deleted: ' +
-          (err && typeof err === 'object' && err !== null && 'message' in err
-            ? (err as { message?: string }).message
-            : String(err)) +
-          '',
+        'Erreur lors de la récupération des badges',
       );
     }
   }
@@ -67,10 +46,7 @@ export class BadgeService {
    * Afficher un badge à partir de son ID
    * @param id
    */
-  async getById(id: string): Promise<BadgeDocument> {
-    this.logger.log(
-      "✅ Requête reçue => getById badges MongoDB, avec l'ID: " + id,
-    );
+  async getById(id: string): Promise<BadgeExposeDto> {
     if (!id) {
       throw new NullBadgeIdException();
     } else if (!isValidObjectId(id)) {
@@ -85,16 +61,20 @@ export class BadgeService {
    * @param dto
    */
   async create(dto: BadgeCreateDto): Promise<BadgeDocument> {
-    this.logger.log('✅ Requête reçue => create badges MongoDB');
     try {
-      return await this.badgeModel.create(dto);
+
+      //Conversion ID Branch en ObjectId Mongoose
+      const badgeToCreate = {
+        ...dto,
+        branch: new Types.ObjectId(dto.branch),
+      };
+
+      return await this.badgeModel.create(badgeToCreate);
     } catch (err) {
       this.logger.error('Erreur create()', err);
-      const message =
-        err && typeof err === 'object' && 'message' in err
-          ? String((err as { message?: unknown }).message)
-          : String(err);
-      throw new BadgeCreateException(message);
+      throw new BadgeCreateException(
+        err instanceof Error ? err.message : 'Erreur inconnue',
+      );
     }
   }
 
@@ -104,19 +84,12 @@ export class BadgeService {
    * @param badge
    */
   async update(id: string, badge: BadgeUpdateDto): Promise<BadgeDocument> {
-    this.logger.log(
-      `🔄 Mise à jour du badge ${id} avec : ${JSON.stringify(badge)}`,
-    );
-
     if (!id) {
       throw new NullBadgeIdException();
     }
-
     if (!isValidObjectId(id)) {
       throw new InvalidBadgeIdException(id);
     }
-
-    await this.findBadgeById(id); // Lève déjà une erreur si introuvable
 
     try {
       const updated = await this.badgeModel
@@ -124,18 +97,13 @@ export class BadgeService {
         .exec();
 
       if (!updated) {
-        this.logger.warn(`⚠️ Badge ${id} introuvable lors de l'update`);
         throw new BadgeNotFoundException(id);
       }
 
       return updated;
     } catch (err) {
       this.logger.error('Erreur update()', err);
-      const message =
-        err && typeof err === 'object' && 'message' in err
-          ? String((err as { message?: unknown }).message)
-          : String(err);
-      throw new BadgeInterneErrorException(message);
+      throw new BadgeInterneErrorException();
     }
   }
 
@@ -143,20 +111,21 @@ export class BadgeService {
    * Supprimer un badge existant à partir de son ID
    * @param id
    */
-  async remove(id: string): Promise<BadgeDocument> {
-    this.logger.log(
-      "✅ Requête reçue => remove badge MongoDB, avec l'ID: " + id,
-    );
-
+  async remove(id: string): Promise<void> {
     if (!id) {
       throw new NullBadgeIdException();
     } else if (!isValidObjectId(id)) {
       throw new InvalidBadgeIdException(id);
     } else {
-      const badge = await this.findBadgeById(id);
-      badge.is_deleted = true;
-      badge.removed_at = new Date();
-      return await badge.save();
+      await this.badgeModel
+        .findByIdAndDelete(id)
+        .exec()
+        .then((deletedBadge) => {
+          if (!deletedBadge) {
+            throw new BadgeNotFoundException(id);
+          }
+          return deletedBadge;
+        });
     }
   }
 
@@ -165,16 +134,18 @@ export class BadgeService {
    * @param id
    * @private
    */
-  private async findBadgeById(id: string): Promise<HydratedDocument<Badge>> {
+  private async findBadgeById(id: string): Promise<BadgeExposeDto> {
     if (!id) {
       throw new InvalidBadgeIdException(id);
     }
 
-    const badge = await this.badgeModel.findById(id).exec();
-    if (!badge || badge.is_deleted) {
+    const badge = await this.badgeModel.findById(id).populate('branch').exec();
+    if (!badge) {
       throw new BadgeNotFoundException(id);
     }
 
-    return badge;
+    return plainToInstance(BadgeExposeDto, badge, {
+      excludeExtraneousValues: true,
+    });
   }
 }

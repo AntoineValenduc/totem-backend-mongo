@@ -1,10 +1,15 @@
 import { Controller, Logger } from '@nestjs/common';
-import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
+import { MessagePattern, Payload } from '@nestjs/microservices';
 import { BadgeService } from '../services/badge.service';
 import { BADGE_PATTERNS } from '../shared/constants/patterns';
 import { BadgeDocument } from '../schema/badge.schema';
 import { BadgeCreateDto } from '../shared/dto/badge-create.dto';
 import { BadgeUpdateDto } from '../shared/dto/badge-update.dto';
+import { BadgeExposeDto } from '../shared/dto/badge-expose.dto';
+import {
+  BadgeInterneErrorException,
+  InvalidBadgeIdException,
+} from '../shared/exceptions/badge.exception';
 
 @Controller()
 export class BadgeController {
@@ -13,33 +18,20 @@ export class BadgeController {
   constructor(private readonly badgeService: BadgeService) {}
 
   @MessagePattern(BADGE_PATTERNS.FIND_ALL)
-  async findAll(): Promise<BadgeDocument[]> {
-    this.logger.log('✅ Requête reçue => findAll badges MongoDB');
+  async findAll(): Promise<BadgeExposeDto[]> {
     return this.badgeService.findAll();
   }
 
-  @MessagePattern(BADGE_PATTERNS.FIND_ALL_SOFT_DELETED)
-  async findAllSoftDeleted(): Promise<BadgeDocument[]> {
-    this.logger.log('✅ Requête reçue => findAll badges soft-deleted MongoDB');
-    return this.badgeService.findAllSoftDeleted();
-  }
-
   @MessagePattern(BADGE_PATTERNS.GET_BY_ID)
-  async getById(@Payload('id') id: string): Promise<BadgeDocument> {
-    this.logger.log(`✅ Requête reçue => getById badge MongoDB (ID: ${id})`);
+  async getById(@Payload('id') id: string): Promise<BadgeExposeDto> {
     if (!id) {
-      this.logger.error('❌ Requête reçue => ID is required');
-      throw new Error('❌ Requête reçue => ID is required');
+      throw new InvalidBadgeIdException('Requête reçue => ID is required');
     } else {
       try {
         return await this.badgeService.getById(id);
-      } catch (error: unknown) {
-        console.error('❌ Erreur dans getById:', error);
-        const message =
-          typeof error === 'object' && error !== null && 'message' in error
-            ? (error as { message?: string }).message
-            : undefined;
-        throw new RpcException(message ?? 'Erreur interne microservice');
+      } catch (err) {
+        console.error('Erreur dans getById:', err);
+        throw new BadgeInterneErrorException('Erreur interne microservice');
       }
     }
   }
@@ -48,7 +40,6 @@ export class BadgeController {
   async createBadge(
     @Payload() badgeDto: BadgeCreateDto,
   ): Promise<BadgeDocument> {
-    this.logger.log('✅ Requête reçue => create badge MongoDB');
     return this.badgeService.create(badgeDto);
   }
 
@@ -57,28 +48,6 @@ export class BadgeController {
     @Payload() data: { id: string; badge: BadgeUpdateDto },
   ): Promise<BadgeDocument> {
     const { id, badge } = data;
-    this.logger.log(`✅ Requête reçue => update badge MongoDB (ID: ${id})`);
-    this.logger.log(
-      `✅ Requête reçue => update badge MongoDB (Payload: ${JSON.stringify(badge)})`,
-    );
     return this.badgeService.update(id, badge);
-  }
-
-  @MessagePattern(BADGE_PATTERNS.DELETE)
-  async removeBadge(@Payload('id') id: string): Promise<BadgeDocument> {
-    if (!id) {
-      this.logger.error('❌ Requête reçue => ID is required');
-      throw new RpcException('❌ Requête reçue => ID is required');
-    }
-    try {
-      return await this.badgeService.remove(id);
-    } catch (error: unknown) {
-      console.error('❌ Erreur dans removeBadge:', error);
-      const message =
-        typeof error === 'object' && error !== null && 'message' in error
-          ? (error as { message?: string }).message
-          : undefined;
-      throw new RpcException(message ?? 'Erreur interne microservice');
-    }
   }
 }
