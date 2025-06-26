@@ -12,6 +12,7 @@ import {
 import { Branch, BranchDocument } from '../schema/branch.schema';
 import { BrancheCreateDto } from '../shared/dto/branche-create.dto';
 import { BrancheUpdateDto } from '../shared/dto/branche-update.dto';
+import { Badge } from '../schema/badge.schema';
 
 @Injectable()
 export class BranchService {
@@ -19,15 +20,30 @@ export class BranchService {
 
   constructor(
     @InjectModel(Branch.name) private readonly branchModel: Model<Branch>,
+    @InjectModel(Badge.name) private readonly badgeModel: Model<Badge>,
   ) {}
 
   /**
    * Afficher la liste des branchs
    */
-  async findAll(): Promise<BranchDocument[]> {
+  async findAll(): Promise<(Branch & { badges: Badge[] })[]> {
     this.logger.log('✅ Requête reçue => findAll branchs MongoDB');
     try {
-      return await this.branchModel.find({ is_deleted: { $ne: true } }).exec();
+      const branches = await this.branchModel
+        .find({ is_deleted: { $ne: true } })
+        .lean(); // lean() pour rendre les objets modifiables
+
+      // Pour chaque branche, on va chercher les badges liés
+      const branchesWithBadges = await Promise.all(
+        branches.map(async (branch) => {
+          const badges = await this.badgeModel
+            .find({ branch: branch._id, is_deleted: { $ne: true } })
+            .lean();
+          return { ...branch, badges };
+        }),
+      );
+
+      return branchesWithBadges;
     } catch (err) {
       this.logger.error('❌ Erreur lors du findAll() dans le service', err);
       throw new BranchInterneErrorException(
@@ -132,7 +148,10 @@ export class BranchService {
       throw new InvalidBranchIdException(id);
     }
 
-    const branch = await this.branchModel.findById(id).exec();
+    const branch = await this.branchModel
+      .findById(id)
+      .populate('badges')
+      .exec();
     if (!branch || branch.is_deleted) {
       throw new BranchNotFoundException(id);
     }

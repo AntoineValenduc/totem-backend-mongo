@@ -7,6 +7,7 @@ export const PROFILE_PATTERNS = {
   CREATE: 'profiles.create',
   UPDATE: 'profiles.update',
   DELETE: 'profiles.delete',
+  UPDATE_BADGES: 'profiles.addBadgeToProfile',
 };
 
 export const BRANCH_PATTERNS = {

@@ -112,12 +112,13 @@ export class AuthProxyController {
        * Recherche de l'utilisateur Mongo
        */
      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-     const profile = await firstValueFrom(this.profileService.getByUserId(userId));
+     const profile = await firstValueFrom(this.profileService.getById(userId));
 
       console.log('[Gateway] Profil utilisateur récupéré:', profile);
 
       return res.status(200).json({
-        ...profile,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        profile_id: profile._id?.toString() ?? profile.id?.toString(),
         email: payload.email ?? null,
         role: payload.role ?? null,
       });

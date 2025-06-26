@@ -4,6 +4,7 @@ import { HydratedDocument, isValidObjectId, Model, Types } from 'mongoose';
 import { Profile, ProfileDocument } from '../schema/profile.schema';
 import { ProfileCreateDto } from '../shared/dto/profile-create.dto';
 import { ProfileUpdateDto } from '../shared/dto/profile-update.dto';
+import { ProfileBadgeDto } from '../shared/dto/profileBadge.dto';
 import {
   InvalidProfilIdException,
   NullProfileIdException,
@@ -50,7 +51,10 @@ export class ProfileService {
       '✅ SERVICE Requête reçue => findAllSoftDeleted profiles MongoDB',
     );
     try {
-      return this.profileModel.find({ is_deleted: { $ne: false } }).exec();
+      return this.profileModel
+        .find({ is_deleted: true })
+        .populate({ path: 'branch', populate: { path: 'badge' } })
+        .exec();
     } catch (err) {
       this.logger.error(
         '❌ Erreur lors du findAllSoftDeleted() dans le service',
@@ -119,10 +123,12 @@ export class ProfileService {
     if (!userId) {
       throw new NullProfileIdException();
     }
+    this.logger.log("Recherche du profile pour l'utilisateur:", userId);
     const profile = await this.profileModel
-      .findOne({ user_id: userId, is_deleted: false })
+      .findOne({ user_id: userId.toString(), is_deleted: false })
       .populate('branch')
       .exec();
+    this.logger.log('Profile trouvé:', profile);
     if (!profile || profile.is_deleted) {
       throw new ProfileNotFoundException(userId);
     } else {
@@ -224,6 +230,37 @@ export class ProfileService {
   }
 
   /**
+   * Affecter un badge à un profile
+   */
+  async addBadgeToProfile(
+    profileId: string,
+    profileBadge: ProfileBadgeDto,
+  ): Promise<ProfileDocument> {
+    const profile = await this.profileModel.findById(profileId);
+    if (!profile) throw new Error('Profil non trouvé');
+
+    // Vérifie si déjà présent
+    const existing = profile.badges.find(
+      (pb) => pb.badge.toString() === profileBadge.badge.toString(),
+    );
+    if (existing) {
+      throw new Error('Badge déjà acquis par ce profil');
+    }
+
+    // Ajoute le badgeProfile avec le badge
+    profile.badges.push({
+      badge: new Types.ObjectId(profileBadge.badge),
+      date_earned: profileBadge.date_earned
+        ? new Date(profileBadge.date_earned)
+        : new Date(),
+      progress: profileBadge.progress ?? 0,
+      status: profileBadge.status ?? 'Non acquis',
+    });
+
+    return await profile.save();
+  }
+
+  /**
    * Méthode interne - Recherche Profile par ID
    * @param id
    * @private
@@ -235,8 +272,11 @@ export class ProfileService {
       throw new InvalidProfilIdException(id);
     }
 
-    const profile = await this.profileModel.findById(id).exec();
-    if (!profile || profile.is_deleted) {
+    const profile = await this.profileModel
+      .findById(id)
+      .populate({ path: 'branch', populate: { path: 'badges' } })
+      .exec();
+    if (!profile) {
       throw new ProfileNotFoundException(id);
     }
 

@@ -20,6 +20,7 @@ import {
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import { ProfileCreateDto } from '../../../totem-mongo/src/shared/dto/profile-create.dto';
 import { ProfileUpdateDto } from '../../../totem-mongo/src/shared/dto/profile-update.dto';
+import { ProfileBadgeDto } from 'apps/totem-mongo/src/shared/dto/profileBadge.dto';
 
 @ApiTags('profiles')
 @ApiBearerAuth()
@@ -150,5 +151,26 @@ export class ProfilesController {
   deleteProfile(@Param('id') id: string) {
     this.logger.log('✅ Requête envoyée => delete profile, ID : ', { id });
     return this.profileService.deleteProfile(id);
+  }
+
+  @Put(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Modifier un profil' })
+  @ApiResponse({
+    status: 200,
+    description: 'Profil mis à jour avec succès',
+    type: ProfileCreateDto,
+  })
+  @ApiResponse({ status: 400, description: 'Données invalides' })
+  @ApiResponse({ status: 404, description: 'Profil introuvable' })
+  @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
+  updateBadgeProfile(
+    @Param('id') profileId: string,
+    @Body() profileBadge: ProfileBadgeDto,
+  ) {
+    this.logger.log('✅ Requête envoyée => update badge in profile, ID : ', {
+      profileId,
+    });
+    return this.profileService.addBadgeToProfile(profileId, profileBadge);
   }
 }

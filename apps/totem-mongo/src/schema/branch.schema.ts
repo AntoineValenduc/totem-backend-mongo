@@ -1,6 +1,5 @@
-import mongoose, { HydratedDocument, Types } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Badge } from './badge.schema';
 
 export type BranchDocument = HydratedDocument<Branch>;
 
@@ -21,9 +20,6 @@ export class Branch {
   @Prop()
   is_active: boolean;
 
-  @Prop({ type: [mongoose.Schema.Types.ObjectId], ref: 'Badge' })
-  badges: Types.ObjectId[] | Badge[];
-
   @Prop({ default: null })
   removed_at: Date;
 
@@ -32,3 +28,10 @@ export class Branch {
 }
 
 export const BranchSchema = SchemaFactory.createForClass(Branch);
+
+// Champ virtuel pour les Badges
+BranchSchema.virtual('badges', {
+  ref: 'Badge',
+  localField: '_id',
+  foreignField: 'branch',
+});

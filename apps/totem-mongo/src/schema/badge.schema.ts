@@ -4,16 +4,7 @@ import { Branch } from './branch.schema';
 
 export type BadgeDocument = HydratedDocument<Badge>;
 
-@Schema({
-  timestamps: true,
-  toJSON: {
-    virtuals: true,
-    versionKey: false,
-    transform: (doc, ret) => {
-      delete ret._id;
-    },
-  },
-})
+@Schema({ timestamps: true })
 export class Badge {
   @Prop({ required: true, trim: true })
   name: string;
