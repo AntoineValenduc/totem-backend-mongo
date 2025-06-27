@@ -4,6 +4,7 @@ import { HydratedDocument, isValidObjectId, Model, Types } from 'mongoose';
 import { Profile, ProfileDocument } from '../schema/profile.schema';
 import { ProfileCreateDto } from '../shared/dto/profile-create.dto';
 import { ProfileUpdateDto } from '../shared/dto/profile-update.dto';
+import { ProfileBadgeExposeDto } from '../shared/dto/profileBadge-expose.dto';
 import {
   InvalidProfilIdException,
   NullProfileIdException,
@@ -11,33 +12,49 @@ import {
   ProfileInterneErrorException,
   ProfileNotFoundException,
 } from '../shared/exceptions/profile.exception';
+import { ProfileExposeDto } from '../shared/dto/profile-expose.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class ProfileService {
   private readonly logger = new Logger(ProfileService.name);
 
   constructor(
-    @InjectModel(Profile.name) private readonly profileModel: Model<Profile>,
+    @InjectModel(Profile.name)
+    private readonly profileModel: Model<ProfileDocument>,
   ) {}
 
   /**
    * Afficher la liste des profiles
    */
-  async findAll(): Promise<ProfileDocument[]> {
-    this.logger.log('✅ Requête reçue => findAll profiles MongoDB');
+  async findAll(): Promise<ProfileExposeDto[]> {
     try {
-      return await this.profileModel
+      const profiles = await this.profileModel
         .find({ is_deleted: false })
-        .populate({ path: 'branch', populate: { path: 'badges' } })
+        .populate([
+        {
+          path: 'branch',
+          populate: {
+            path: 'badges',
+          },
+        },
+        {
+          path: 'badges.badge',
+          populate: {
+            path: 'branch',
+          },
+        },
+        ])
+        .lean()
         .exec();
+
+      return plainToInstance(ProfileExposeDto, profiles, {
+        excludeExtraneousValues: true,
+      });
     } catch (err) {
-      this.logger.error('❌ Erreur lors du findAll() dans le service', err);
+      this.logger.error('Erreur lors du findAll() dans le service', err);
       throw new ProfileInterneErrorException(
-        'Liste des Profils : ' +
-          (err && typeof err === 'object' && err !== null && 'message' in err
-            ? (err as { message: string }).message
-            : String(err)) +
-          '',
+        'Erreur lors de la récupération des profils',
       );
     }
   }
@@ -45,23 +62,27 @@ export class ProfileService {
   /**
    * Afficher la liste des profiles soft-deleted
    */
-  async findAllSoftDeleted(): Promise<ProfileDocument[]> {
+  async findAllSoftDeleted(): Promise<ProfileExposeDto[]> {
     this.logger.log(
       '✅ SERVICE Requête reçue => findAllSoftDeleted profiles MongoDB',
     );
     try {
-      return this.profileModel.find({ is_deleted: { $ne: false } }).exec();
+      const profiles = await this.profileModel
+        .find({ is_deleted: true })
+        .populate('badges', { path: 'branch', populate: { path: 'badges' } })
+        .lean()
+        .exec();
+
+      return plainToInstance(ProfileExposeDto, profiles, {
+        excludeExtraneousValues: true,
+      });
     } catch (err) {
       this.logger.error(
-        '❌ Erreur lors du findAllSoftDeleted() dans le service',
+        'Erreur lors du findAllSoftDeleted() dans le service',
         err,
       );
       throw new ProfileInterneErrorException(
-        'Liste des Profils Soft-Deleted: ' +
-          (err && typeof err === 'object' && err !== null && 'message' in err
-            ? (err as { message: string }).message
-            : String(err)) +
-          '',
+        'Erreur lors de la récupération des profils supprimés',
       );
     }
   }
@@ -70,23 +91,24 @@ export class ProfileService {
    * Afficher tous les profiles d'une branche
    * @param branchId
    */
-  async getProfilesByBranch(branchId: string): Promise<ProfileDocument[]> {
-    this.logger.log(`✅ Requête reçue => getProfilesByBranch ${branchId}`);
+  async getProfilesByBranch(branchId: string): Promise<ProfileExposeDto[]> {
     if (!isValidObjectId(branchId)) {
       throw new InvalidProfilIdException(branchId);
     }
     try {
-      return await this.profileModel
+      const profiles = await this.profileModel
         .find({ branch: new Types.ObjectId(branchId), is_deleted: false })
-        .populate({ path: 'branch', populate: { path: 'badge' } })
+        .populate('badges', { path: 'branch', populate: { path: 'badge' } })
+        .lean()
         .exec();
+
+      return plainToInstance(ProfileExposeDto, profiles, {
+        excludeExtraneousValues: true,
+      });
     } catch (err) {
-      this.logger.error('❌ Erreur getProfilesByBranch()', err);
+      this.logger.error('Erreur getProfilesByBranch()', err);
       throw new ProfileInterneErrorException(
-        'Profils par branche : ' +
-          (err && typeof err === 'object' && err !== null && 'message' in err
-            ? (err as { message: string }).message
-            : String(err)),
+        'Erreur lors de la récupération des profils pour la branche',
       );
     }
   }
@@ -95,16 +117,37 @@ export class ProfileService {
    * Afficher un profile à partir de son ID
    * @param id
    */
-  async getById(id: string): Promise<ProfileDocument> {
-    this.logger.log(
-      "✅ Requête reçue => getById profiles MongoDB, avec l'ID: " + id,
-    );
+  async getById(id: string): Promise<ProfileExposeDto> {
     if (!id) {
       throw new NullProfileIdException();
     } else if (!isValidObjectId(id)) {
       throw new InvalidProfilIdException(id);
     } else {
-      return await this.findProfileById(id);
+      const profile = await this.findProfileById(id);
+
+      return plainToInstance(ProfileExposeDto, profile, {
+        excludeExtraneousValues: true,
+      });
+    }
+  }
+
+  /**
+   * Afficher un profile à partir de son user.id PostgreSQL
+   * @param userId
+   */
+  async getByUserId(userId: string): Promise<ProfileExposeDto> {
+    if (!userId) {
+      throw new NullProfileIdException();
+    }
+    const profile = await this.profileModel
+      .findOne({ user_id: userId.toString(), is_deleted: false })
+      .exec();
+    if (!profile || profile.is_deleted) {
+      throw new ProfileNotFoundException(userId);
+    } else {
+      return plainToInstance(ProfileExposeDto, profile, {
+        excludeExtraneousValues: true,
+      });
     }
   }
 
@@ -202,6 +245,37 @@ export class ProfileService {
   }
 
   /**
+   * Affecter un badge à un profile
+   */
+  async addBadgeToProfile(
+    profileId: string,
+    profileBadge: ProfileBadgeExposeDto,
+  ): Promise<ProfileDocument> {
+    const profile = await this.profileModel.findById(profileId);
+    if (!profile) throw new Error('Profil non trouvé');
+
+    // Vérifie si déjà présent
+    const existing = profile.badges.find(
+      (pb) => pb.badge.toString() === profileBadge.badge.toString(),
+    );
+    if (existing) {
+      throw new Error('Badge déjà acquis par ce profil');
+    }
+
+    // Ajoute le badgeProfile avec le badge
+    profile.badges.push({
+      badge: new Types.ObjectId(profileBadge.badge),
+      date_earned: profileBadge.date_earned
+        ? new Date(profileBadge.date_earned)
+        : new Date(),
+      progress: profileBadge.progress ?? 0,
+      status: profileBadge.status ?? 'Non acquis',
+    });
+
+    return await profile.save();
+  }
+
+  /**
    * Méthode interne - Recherche Profile par ID
    * @param id
    * @private
@@ -213,8 +287,25 @@ export class ProfileService {
       throw new InvalidProfilIdException(id);
     }
 
-    const profile = await this.profileModel.findById(id).exec();
-    if (!profile || profile.is_deleted) {
+    const profile = await this.profileModel
+      .findById(id)
+      .populate([
+        {
+          path: 'branch',
+          populate: {
+            path: 'badges',
+          },
+        },
+        {
+          path: 'badges.badge',
+          populate: {
+            path: 'branch',
+          },
+        },
+        ])
+      .lean()
+      .exec();
+    if (!profile) {
       throw new ProfileNotFoundException(id);
     }
 

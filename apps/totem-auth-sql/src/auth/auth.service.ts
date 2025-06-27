@@ -1,8 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from '../users/dto/login-user.dto';
+import { firstValueFrom } from 'rxjs';
+import { ClientProxy } from '@nestjs/microservices';
+import { PROFILE_PATTERNS } from '../../../totem-mongo/src/shared/constants/patterns';
 
 interface UserSafe {
   id: string;
@@ -16,11 +19,12 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    @Inject('TOTEM_MONGO_CLIENT') private readonly profilesClient: ClientProxy,
   ) {}
 
   async login(
     dto: LoginUserDto,
-  ): Promise<{ access_token: string; role: string }> {
+  ): Promise<{ access_token: string; role: string; user_id: string }> {
     console.log('[AuthService] DTO reçu:', dto);
 
     const user = (await this.usersService.findByEmail(
@@ -42,8 +46,16 @@ export class AuthService {
       throw new UnauthorizedException('Password invalides');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const profile = await firstValueFrom(
+      this.profilesClient.send(PROFILE_PATTERNS.GET_BY_USER_ID, {
+        userId: user.id,
+      }),
+    );
+
     const payload = {
-      sub: user.id,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+      sub: profile._id?.toString?.() ?? profile.id?.toString?.(),
       email: user.email,
       role: user.role,
     };
@@ -51,6 +63,7 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
       role: user.role,
+      user_id: user.id,
     };
   }
 }

@@ -5,6 +5,8 @@ import { ProfileCreateDto } from '../shared/dto/profile-create.dto';
 import { PROFILE_PATTERNS } from '../shared/constants/patterns';
 import { ProfileDocument } from '../schema/profile.schema';
 import { ProfileUpdateDto } from '../shared/dto/profile-update.dto';
+import { ProfileExposeDto } from '../shared/dto/profile-expose.dto';
+import { ProfileBadgeExposeDto } from '../shared/dto/profileBadge-expose.dto';
 
 @Controller()
 export class ProfileController {
@@ -13,34 +15,56 @@ export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
   @MessagePattern(PROFILE_PATTERNS.FIND_ALL)
-  async findAll(): Promise<ProfileDocument[]> {
-    this.logger.log('✅ Requête reçue => findAll profiles MongoDB');
+  async findAll(): Promise<ProfileExposeDto[]> {
     return await this.profileService.findAll();
   }
 
   @MessagePattern(PROFILE_PATTERNS.FIND_ALL_SOFT_DELETED)
-  async findAllSoftDeleted(): Promise<ProfileDocument[]> {
-    this.logger.log(
-      '✅ Requête reçue => findAll profiles soft-deleted MongoDB',
-    );
+  async findAllSoftDeleted(): Promise<ProfileExposeDto[]> {
     return this.profileService.findAllSoftDeleted();
   }
 
   @MessagePattern(PROFILE_PATTERNS.FIND_ALL_BY_BRANCH)
   async getProfilesByBranch(
     @Payload('branchId') branchId: string,
-  ): Promise<ProfileDocument[]> {
-    this.logger.log(
-      `✅ Requête reçue => getProfilesByBranch MongoDB (branchId: ${branchId})`,
-    );
+  ): Promise<ProfileExposeDto[]> {
     if (!branchId) {
-      this.logger.error('❌ Requête reçue => branchId is required');
+      this.logger.error('Requête reçue => branchId is required');
       throw new RpcException('Branch ID requis');
     }
     try {
       return await this.profileService.getProfilesByBranch(branchId);
     } catch (error) {
-      console.error('❌ Erreur dans getProfilesByBranch:', error);
+      console.error('Erreur dans getProfilesByBranch:', error);
+      throw new RpcException('Erreur interne microservice');
+    }
+  }
+
+  @MessagePattern(PROFILE_PATTERNS.GET_BY_ID)
+  async getById(@Payload('id') id: string): Promise<ProfileExposeDto> {
+    if (!id) {
+      this.logger.error('Requête reçue => ID is required');
+      throw new Error('Requête reçue => ID is required');
+    } else {
+      try {
+        return await this.profileService.getById(id);
+      } catch (error) {
+        console.error('Erreur dans getById:', error);
+        throw new RpcException('Erreur interne microservice');
+      }
+    }
+  }
+
+  @MessagePattern(PROFILE_PATTERNS.GET_BY_USER_ID)
+  async getByUserId(@Payload() data: { userId: string }) {
+    const userId = data.userId;
+    if (!userId) {
+      throw new RpcException('userId requis');
+    }
+    try {
+      const profile = await this.profileService.getByUserId(userId);
+      return profile;
+    } catch (error) {
       const message =
         error && typeof error === 'object' && 'message' in error
           ? (error as { message?: string }).message
@@ -49,31 +73,10 @@ export class ProfileController {
     }
   }
 
-  @MessagePattern(PROFILE_PATTERNS.GET_BY_ID)
-  async getById(@Payload('id') id: string): Promise<ProfileDocument> {
-    this.logger.log(`✅ Requête reçue => getById profile MongoDB (ID: ${id})`);
-    if (!id) {
-      this.logger.error('❌ Requête reçue => ID is required');
-      throw new Error('❌ Requête reçue => ID is required');
-    } else {
-      try {
-        return await this.profileService.getById(id);
-      } catch (error) {
-        console.error('❌ Erreur dans getById:', error);
-        const message =
-          error && typeof error === 'object' && 'message' in error
-            ? (error as { message?: string }).message
-            : undefined;
-        throw new RpcException(message ?? 'Erreur interne microservice');
-      }
-    }
-  }
-
   @MessagePattern(PROFILE_PATTERNS.CREATE)
   async createProfile(
     @Payload() profileDto: ProfileCreateDto,
   ): Promise<ProfileDocument> {
-    this.logger.log('✅ Requête reçue => create profile MongoDB');
     return this.profileService.create(profileDto);
   }
 
@@ -82,28 +85,34 @@ export class ProfileController {
     @Payload() data: { id: string; profile: ProfileUpdateDto },
   ): Promise<ProfileDocument> {
     const { id, profile } = data;
-    this.logger.log(`✅ Requête reçue => update profile MongoDB (ID: ${id})`);
-    this.logger.log(
-      `✅ Requête reçue => update profile MongoDB (Payload: ${JSON.stringify(profile)})`,
-    );
     return this.profileService.update(id, profile);
   }
 
   @MessagePattern(PROFILE_PATTERNS.DELETE)
   async removeProfile(@Payload('id') id: string): Promise<ProfileDocument> {
     if (!id) {
-      this.logger.error('❌ Requête reçue => ID is required');
-      throw new Error('❌ Requête reçue => ID is required');
+      throw new Error('Requête reçue => ID is required');
     }
     try {
       return await this.profileService.removeSoft(id);
     } catch (error) {
-      console.error('❌ Erreur dans removeProfile:', error);
-      const message =
-        error && typeof error === 'object' && 'message' in error
-          ? (error as { message?: string }).message
-          : undefined;
-      throw new RpcException(message ?? 'Erreur interne microservice');
+      console.error('Erreur dans removeProfile:', error);
+      throw new RpcException('Erreur interne microservice');
     }
+  }
+
+  @MessagePattern(PROFILE_PATTERNS.UPDATE_BADGES)
+  async addBadgeToProfile(
+    @Payload()
+    data: {
+      profileId: string;
+      profileBadge: ProfileBadgeExposeDto;
+    },
+  ): Promise<ProfileDocument> {
+    const { profileId, profileBadge } = data;
+    if (!profileId) {
+      throw new RpcException('profileId et badgeId requis');
+    }
+    return this.profileService.addBadgeToProfile(profileId, profileBadge);
   }
 }

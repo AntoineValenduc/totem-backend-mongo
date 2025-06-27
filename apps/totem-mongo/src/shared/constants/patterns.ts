@@ -1,12 +1,22 @@
+import e from "express";
+
 export const PROFILE_PATTERNS = {
   FIND_ALL: 'profiles.findAll',
   FIND_ALL_SOFT_DELETED: 'profiles.fildAllSoftDeleted',
   FIND_ALL_BY_BRANCH: 'profiles.findAllByBranch',
   GET_BY_ID: 'profiles.getById',
+  GET_BY_USER_ID: 'profiles.getByUserId',
   CREATE: 'profiles.create',
   UPDATE: 'profiles.update',
   DELETE: 'profiles.delete',
+  UPDATE_BADGES: 'profiles.addBadgeToProfile',
 };
+
+export const PROFILE_BADGE_PATTERNS = {
+  FIND_ALL: 'profileBadges.findAll',
+  CREATE: 'profileBadges.create',
+  UPDATE: 'profileBadges.update',
+}
 
 export const BRANCH_PATTERNS = {
   FIND_ALL: 'branches.findAll',

@@ -19,6 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { BrancheCreateDto } from '../../../totem-mongo/src/shared/dto/branche-create.dto';
 import { BrancheUpdateDto } from '../../../totem-mongo/src/shared/dto/branche-update.dto';
+import { BranchExposeDto } from '../../../totem-mongo/src/shared/dto/branche-expose.dto';
 
 @ApiTags('branches')
 @ApiBearerAuth()
@@ -34,11 +35,10 @@ export class BranchesController {
   @ApiResponse({
     status: 200,
     description: 'Liste des branches',
-    type: [BrancheCreateDto],
+    type: [BranchExposeDto],
   })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   findAll() {
-    this.logger.log('✅ Requête envoyé => findAll branche');
     return this.brancheService.findAll();
   }
 
@@ -48,15 +48,12 @@ export class BranchesController {
   @ApiResponse({
     status: 200,
     description: 'Branche trouvé',
-    type: BrancheCreateDto,
+    type: BranchExposeDto,
   })
   @ApiResponse({ status: 400, description: 'ID invalide' })
   @ApiResponse({ status: 404, description: 'Branche introuvable' })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   getById(@Param('id') id: string) {
-    this.logger.log('✅ Requête envoyé => getById branche MongoDB, ID : ', {
-      id,
-    });
     return this.brancheService.getById(id);
   }
 
@@ -71,7 +68,6 @@ export class BranchesController {
   @ApiResponse({ status: 400, description: 'Données invalides' })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   createBranch(@Body() branchDto: BrancheCreateDto) {
-    this.logger.log('✅ Requête envoyé => create branche');
     return this.brancheService.createBranche(branchDto);
   }
 
@@ -87,10 +83,6 @@ export class BranchesController {
   @ApiResponse({ status: 404, description: 'Branche introuvable' })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   updateBranch(@Param('id') id: string, @Body() branch: BrancheUpdateDto) {
-    this.logger.log('✅ Requête envoyée => update branche, ID : ', {
-      id,
-      branch,
-    });
     return this.brancheService.updateBranche(id, branch);
   }
 
@@ -102,7 +94,6 @@ export class BranchesController {
   @ApiResponse({ status: 404, description: 'Branche introuvable' })
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   deleteBranch(@Param('id') id: string) {
-    this.logger.log('✅ Requête envoyée => delete branchee, ID : ', { id });
     return this.brancheService.deleteBranche(id);
   }
 }

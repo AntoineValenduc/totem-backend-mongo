@@ -1,35 +1,40 @@
-# Utiliser une image Node légère
+# Étape builder
 FROM node:18-alpine AS builder
 
-# Définir le répertoire de travail
 WORKDIR /usr/src/app
 
-# Copier les fichiers package.json et package-lock.json
+# Copier package.json et package-lock.json d'abord (cache docker)
 COPY package*.json ./
 
-# Installer les dépendances
-RUN npm install
+# Installer les dépendances (dev + prod)
+RUN npm ci --ignore-scripts
 
-# Copier tout le projet
-COPY . .
+# Copier le code source (src + tsconfig)
+COPY src ./src/
+COPY tsconfig.app.json ./
 
-# Lancer le build de l'application
+# Builder l’application
 RUN npm run build
 
-# Utiliser une image légère pour l'exécution
+# Étape finale (runtime)
 FROM node:18-alpine
+
+# Créer un groupe et utilisateur non-root
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /usr/src/app
 
-# Copier les fichiers buildés de l'étape précédente
+# Copier les fichiers buildés depuis builder
 COPY --from=builder /usr/src/app/dist ./dist
-COPY package*.json ./
+COPY --from=builder /usr/src/app/package*.json ./
 
-# Installer uniquement les dépendances de production
-RUN npm install --production
+# Installer uniquement les dépendances de production en une seule commande RUN
+RUN npm ci --production --ignore-scripts \
+  && chown -R appuser:appgroup /usr/src/app
 
-# Exposer le port
-EXPOSE 3001
+# Passer à l’utilisateur non-root
+USER appuser
 
-# Démarrer l'application
-CMD ["node", "dist/apps/totem-mongo/main.js"]
+EXPOSE 3000
+
+CMD ["node", "dist/apps/totem-api-gateway/main.js"]

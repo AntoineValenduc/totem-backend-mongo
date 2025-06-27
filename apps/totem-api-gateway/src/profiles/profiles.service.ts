@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { PROFILE_PATTERNS } from '../../../totem-mongo/src/shared/constants/patterns';
 import { ProfileCreateDto } from '../../../totem-mongo/src/shared/dto/profile-create.dto';
 import { ProfileUpdateDto } from '../../../totem-mongo/src/shared/dto/profile-update.dto';
-
+import { ProfileBadgeExposeDto } from '../../../totem-mongo/src/shared/dto/profileBadge-expose.dto';
 @Injectable()
 export class ProfilesService {
   constructor(
@@ -29,6 +29,12 @@ export class ProfilesService {
     return this.profilesClient.send(PROFILE_PATTERNS.GET_BY_ID, { id });
   }
 
+  getByUserId(userId: string) {
+    return this.profilesClient.send(PROFILE_PATTERNS.GET_BY_USER_ID, {
+      userId,
+    });
+  }
+
   async createProfile(profile: ProfileCreateDto): Promise<ProfileCreateDto> {
     return await firstValueFrom<ProfileCreateDto>(
       this.profilesClient.send(PROFILE_PATTERNS.CREATE, profile),
@@ -50,6 +56,18 @@ export class ProfilesService {
   async deleteProfile(id: string): Promise<{ deleted: boolean }> {
     return await firstValueFrom<{ deleted: boolean }>(
       this.profilesClient.send(PROFILE_PATTERNS.DELETE, { id }),
+    );
+  }
+
+  async addBadgeToProfile(
+    profileId: string,
+    profileBadge: ProfileBadgeExposeDto,
+  ): Promise<ProfileBadgeExposeDto> {
+    return await firstValueFrom<ProfileBadgeExposeDto>(
+      this.profilesClient.send(PROFILE_PATTERNS.UPDATE_BADGES, {
+        profileId,
+        profileBadge: profileBadge,
+      }),
     );
   }
 }

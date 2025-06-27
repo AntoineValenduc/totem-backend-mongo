@@ -12,29 +12,36 @@ import {
 import { Branch, BranchDocument } from '../schema/branch.schema';
 import { BrancheCreateDto } from '../shared/dto/branche-create.dto';
 import { BrancheUpdateDto } from '../shared/dto/branche-update.dto';
+import { BranchExposeDto } from '../shared/dto/branche-expose.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class BranchService {
   private readonly logger = new Logger(BranchService.name);
 
   constructor(
-    @InjectModel(Branch.name) private readonly branchModel: Model<Branch>,
+    @InjectModel(Branch.name)
+    private readonly branchModel: Model<BranchDocument>,
   ) {}
 
   /**
    * Afficher la liste des branchs
    */
-  async findAll(): Promise<BranchDocument[]> {
-    this.logger.log('✅ Requête reçue => findAll branchs MongoDB');
+  async findAll(): Promise<BranchExposeDto[]> {
     try {
-      return await this.branchModel.find({ is_deleted: { $ne: true } }).exec();
+      const branches = await this.branchModel
+        .find({ is_deleted: false })
+        .populate('badges')
+        .lean()
+        .exec();
+
+      return plainToInstance(BranchExposeDto, branches, {
+        excludeExtraneousValues: true,
+      });
     } catch (err) {
       this.logger.error('❌ Erreur lors du findAll() dans le service', err);
       throw new BranchInterneErrorException(
-        'Liste des Branches : ' +
-          (err && typeof err === 'object' && 'message' in err
-            ? (err as { message: string }).message
-            : String(err)),
+        'Erreur interne lors de la récupération des branches',
       );
     }
   }
@@ -43,7 +50,7 @@ export class BranchService {
    * Afficher un branch à partir de son ID
    * @param id
    */
-  async getById(id: string): Promise<BranchDocument> {
+  async getById(id: string): Promise<BranchExposeDto> {
     this.logger.log(
       "✅ Requête reçue => getById branchs MongoDB, avec l'ID: " + id,
     );
@@ -52,7 +59,14 @@ export class BranchService {
     } else if (!isValidObjectId(id)) {
       throw new InvalidBranchIdException(id);
     } else {
-      return await this.findBranchById(id);
+      const branch = await this.branchModel
+        .findById(id)
+        .populate('badges')
+        .lean()
+        .exec();
+      return plainToInstance(BranchExposeDto, branch, {
+        excludeExtraneousValues: true,
+      });
     }
   }
 
@@ -132,7 +146,11 @@ export class BranchService {
       throw new InvalidBranchIdException(id);
     }
 
-    const branch = await this.branchModel.findById(id).exec();
+    const branch = await this.branchModel
+      .findById(id)
+      .populate('badges')
+      .lean()
+      .exec();
     if (!branch || branch.is_deleted) {
       throw new BranchNotFoundException(id);
     }

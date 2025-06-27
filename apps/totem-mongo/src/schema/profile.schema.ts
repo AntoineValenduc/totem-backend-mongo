@@ -1,6 +1,6 @@
 import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Branch } from './branch.schema';
+import { ProfileBadge, ProfileBadgeSchema } from './profileBadge.schema';
 
 export type ProfileDocument = HydratedDocument<Profile>;
 
@@ -34,8 +34,14 @@ export class Profile {
   removed_at: Date;
   @Prop({ default: false })
   is_deleted: boolean;
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Branch', required: true })
-  branch: Types.ObjectId | Branch;
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Branch',
+    required: false,
+  })
+  branch: Types.ObjectId;
+  @Prop({ type: [ProfileBadgeSchema], default: [] })
+  badges: ProfileBadge[];
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);

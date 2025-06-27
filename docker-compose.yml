@@ -59,5 +59,27 @@ services:
     ports:
       - '3000:3000'
 
+     
+  # BDD PostgreSQL
+  postgres:
+    image: postgres:15
+    container_name: totem-postgres
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env
+      
+  # Microservice Auth SQL
+  totem-auth-sql:
+    build:
+      context: .
+      dockerfile: apps/totem-auth-sql/Dockerfile
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - '3002:3002'
+
 volumes:
   mongo_data:

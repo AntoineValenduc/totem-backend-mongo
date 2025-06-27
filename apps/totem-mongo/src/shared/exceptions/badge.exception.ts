@@ -1,16 +1,12 @@
 import { AppException } from './app.exception';
-import { HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 /**
  * Erreur technique lors de la récupération des bagdes
  */
-export class BadgeInterneErrorException extends AppException {
-  constructor(source: string, details?: string) {
-    const message = details
-      ? `Erreur lors de la récupération des bagdes (${source}) : ${details}`
-      : `Erreur lors de la récupération des bagdes (${source})`;
-
-    super(message, 'BADGE_FETCH_FAILED', HttpStatus.INTERNAL_SERVER_ERROR);
+export class BadgeInterneErrorException extends HttpException {
+  constructor(message?: string) {
+    super(message ?? 'Erreur interne badge', HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 

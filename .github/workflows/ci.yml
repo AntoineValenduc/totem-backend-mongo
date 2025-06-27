@@ -75,7 +75,12 @@ jobs:
       - name: Generate coverage
         run: npm run test:coverage
 
+      - name: Skip SonarCloud analysis on non-main branches (free plan)
+        if: github.ref != 'refs/heads/main' && github.event_name != 'pull_request'
+        run: echo "Skipping SonarCloud analysis on non-main branches (free plan)" && exit 0
+
       - name: Upload coverage to SonarCloud
+        if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: npx sonar-scanner
