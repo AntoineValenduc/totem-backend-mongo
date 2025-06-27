@@ -4,8 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { PROFILE_PATTERNS } from '../../../totem-mongo/src/shared/constants/patterns';
 import { ProfileCreateDto } from '../../../totem-mongo/src/shared/dto/profile-create.dto';
 import { ProfileUpdateDto } from '../../../totem-mongo/src/shared/dto/profile-update.dto';
-import { ProfileBadgeDto } from 'apps/totem-mongo/src/shared/dto/profileBadge.dto';
-
+import { ProfileBadgeExposeDto } from 'apps/totem-mongo/src/shared/dto/profileBadge-expose.dto';
 @Injectable()
 export class ProfilesService {
   constructor(
@@ -62,9 +61,9 @@ export class ProfilesService {
 
   async addBadgeToProfile(
     profileId: string,
-    profileBadge: ProfileBadgeDto,
-  ): Promise<ProfileBadgeDto> {
-    return await firstValueFrom<ProfileBadgeDto>(
+    profileBadge: ProfileBadgeExposeDto,
+  ): Promise<ProfileBadgeExposeDto> {
+    return await firstValueFrom<ProfileBadgeExposeDto>(
       this.profilesClient.send(PROFILE_PATTERNS.UPDATE_BADGES, {
         profileId,
         profileBadge: profileBadge,

@@ -20,8 +20,8 @@ import {
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import { ProfileCreateDto } from '../../../totem-mongo/src/shared/dto/profile-create.dto';
 import { ProfileUpdateDto } from '../../../totem-mongo/src/shared/dto/profile-update.dto';
-import { ProfileBadgeDto } from 'apps/totem-mongo/src/shared/dto/profileBadge.dto';
 import { ProfileExposeDto } from 'apps/totem-mongo/src/shared/dto/profile-expose.dto';
+import { ProfileBadgeExposeDto } from 'apps/totem-mongo/src/shared/dto/profileBadge-expose.dto';
 
 @ApiTags('profiles')
 @ApiBearerAuth()
@@ -139,7 +139,7 @@ export class ProfilesController {
     return this.profileService.deleteProfile(id);
   }
 
-  @Put(':id')
+  @Put('addBadge/:id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Modifier un profil' })
   @ApiResponse({
@@ -152,7 +152,7 @@ export class ProfilesController {
   @ApiResponse({ status: 500, description: 'Erreur interne du serveur' })
   updateBadgeProfile(
     @Param('id') profileId: string,
-    @Body() profileBadge: ProfileBadgeDto,
+    @Body() profileBadge: ProfileBadgeExposeDto,
   ) {
     return this.profileService.addBadgeToProfile(profileId, profileBadge);
   }

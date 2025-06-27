@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Controller, Logger } from '@nestjs/common';
 import { MessagePattern, Payload, RpcException } from '@nestjs/microservices';
 import { ProfileService } from '../services/profile.service';
@@ -7,8 +5,8 @@ import { ProfileCreateDto } from '../shared/dto/profile-create.dto';
 import { PROFILE_PATTERNS } from '../shared/constants/patterns';
 import { ProfileDocument } from '../schema/profile.schema';
 import { ProfileUpdateDto } from '../shared/dto/profile-update.dto';
-import { ProfileBadgeDto } from '../shared/dto/profileBadge.dto';
 import { ProfileExposeDto } from '../shared/dto/profile-expose.dto';
+import { ProfileBadgeExposeDto } from '../shared/dto/profileBadge-expose.dto';
 
 @Controller()
 export class ProfileController {
@@ -108,7 +106,7 @@ export class ProfileController {
     @Payload()
     data: {
       profileId: string;
-      profileBadge: ProfileBadgeDto;
+      profileBadge: ProfileBadgeExposeDto;
     },
   ): Promise<ProfileDocument> {
     const { profileId, profileBadge } = data;

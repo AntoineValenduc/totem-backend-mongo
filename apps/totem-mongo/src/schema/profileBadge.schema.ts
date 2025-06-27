@@ -1,7 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Types } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 
+export type ProfileBadgeDocument = HydratedDocument<ProfileBadge>;
 @Schema()
 export class ProfileBadge {
   @Prop({ type: Types.ObjectId, ref: 'Badge', required: true })

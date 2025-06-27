@@ -4,7 +4,7 @@ import { HydratedDocument, isValidObjectId, Model, Types } from 'mongoose';
 import { Profile, ProfileDocument } from '../schema/profile.schema';
 import { ProfileCreateDto } from '../shared/dto/profile-create.dto';
 import { ProfileUpdateDto } from '../shared/dto/profile-update.dto';
-import { ProfileBadgeDto } from '../shared/dto/profileBadge.dto';
+import { ProfileBadgeExposeDto } from '../shared/dto/profileBadge-expose.dto';
 import {
   InvalidProfilIdException,
   NullProfileIdException,
@@ -31,7 +31,20 @@ export class ProfileService {
     try {
       const profiles = await this.profileModel
         .find({ is_deleted: false })
-        .populate({ path: 'branch', populate: { path: 'badges' } })
+        .populate([
+        {
+          path: 'branch',
+          populate: {
+            path: 'badges',
+          },
+        },
+        {
+          path: 'badges.badge',
+          populate: {
+            path: 'branch',
+          },
+        },
+        ])
         .lean()
         .exec();
 
@@ -56,7 +69,7 @@ export class ProfileService {
     try {
       const profiles = await this.profileModel
         .find({ is_deleted: true })
-        .populate({ path: 'branch', populate: { path: 'badges' } })
+        .populate('badges', { path: 'branch', populate: { path: 'badges' } })
         .lean()
         .exec();
 
@@ -85,7 +98,7 @@ export class ProfileService {
     try {
       const profiles = await this.profileModel
         .find({ branch: new Types.ObjectId(branchId), is_deleted: false })
-        .populate({ path: 'branch', populate: { path: 'badge' } })
+        .populate('badges', { path: 'branch', populate: { path: 'badge' } })
         .lean()
         .exec();
 
@@ -236,7 +249,7 @@ export class ProfileService {
    */
   async addBadgeToProfile(
     profileId: string,
-    profileBadge: ProfileBadgeDto,
+    profileBadge: ProfileBadgeExposeDto,
   ): Promise<ProfileDocument> {
     const profile = await this.profileModel.findById(profileId);
     if (!profile) throw new Error('Profil non trouvé');
@@ -276,7 +289,20 @@ export class ProfileService {
 
     const profile = await this.profileModel
       .findById(id)
-      .populate({ path: 'branch', populate: { path: 'badges' } })
+      .populate([
+        {
+          path: 'branch',
+          populate: {
+            path: 'badges',
+          },
+        },
+        {
+          path: 'badges.badge',
+          populate: {
+            path: 'branch',
+          },
+        },
+        ])
       .lean()
       .exec();
     if (!profile) {
