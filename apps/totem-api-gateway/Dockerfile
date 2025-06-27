@@ -11,7 +11,8 @@ COPY package*.json ./
 RUN npm install --ignore-scripts
 
 # Copier tout le projet
-COPY . .
+COPY src .src/
+COPY tsconfig.app.json ./
 
 # Lancer le build de l'application
 RUN npm run build
