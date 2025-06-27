@@ -56,14 +56,13 @@ export class BadgeService {
     } else if (!isValidObjectId(id)) {
       throw new InvalidBadgeIdException(id);
     } else {
-      const idObject = new Types.ObjectId(id);
       const badge = await this.badgeModel
-        .findById(idObject)
+        .findById(id)
         .populate('branch')
         .lean()
         .exec();
       if (!badge) {
-        throw new BadgeNotFoundException(idObject.toString());
+        throw new BadgeNotFoundException(id.toString());
       }
       return plainToInstance(BadgeExposeDto, badge, {
         excludeExtraneousValues: true,
