@@ -1,25 +1,47 @@
 import { NestFactory } from '@nestjs/core';
 import { TotemApiGatewayModule } from './totem-api-gateway.module';
-import { SwaggerModule } from '@nestjs/swagger/dist/swagger-module';
-import { DocumentBuilder } from '@nestjs/swagger';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { RpcToHttpInterceptor } from './interceptors/rpc-exception.interceptor';
+import * as cookieParser from 'cookie-parser';
+import { CustomHttpExceptionFilter } from '../../totem-mongo/src/shared/filters/CustomHttpExceptionFilter.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(TotemApiGatewayModule);
+  const app = await NestFactory.create(TotemApiGatewayModule, {
+    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+  });
 
-  // Swagger config
-  const config = new DocumentBuilder()
+  // Lecture des cookies
+  app.use(cookieParser());
+
+  // ✅ Active CORS pour autoriser ton frontend
+  app.enableCors({
+    origin: ['http://localhost:3000', 'http://localhost:3005'],
+    credentials: true,
+  });
+
+  // ➕ Connexion du microservice Kafka
+
+  //Interceptor API
+  app.useGlobalInterceptors(new RpcToHttpInterceptor());
+
+  // 📘 Swagger config
+  const swaggerConfig = new DocumentBuilder()
     .setTitle('Totem API Gateway')
     .setDescription('Documentation de l’API REST centrale de Totem')
     .setVersion('1.0')
-    .addTag('profiles')
-    .addTag('branches')
-    .addTag('badges')
+    .addBearerAuth()
     .build();
 
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document);
 
+  app.useGlobalFilters(new CustomHttpExceptionFilter());
+
+  // ⏯ Lancer HTTP + Kafka microservice
   await app.startAllMicroservices();
   await app.listen(3000);
+
+  console.log('🚀 API Gateway is running at http://localhost:3000');
+  console.log('📘 Swagger: http://localhost:3000/api/docs');
 }
-bootstrap();
+void bootstrap();

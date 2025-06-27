@@ -1,27 +1,24 @@
-import { HydratedDocument } from 'mongoose';
+import { HydratedDocument, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 export type BadgeDocument = HydratedDocument<Badge>;
 
 @Schema({ timestamps: true })
 export class Badge {
-  @Prop()
+  @Prop({ required: true, trim: true })
   name: string;
 
-  @Prop()
+  @Prop({ required: true, trim: true })
   description: string;
 
-  @Prop()
-  photo: string;
+  @Prop({ trim: true })
+  logo_url: string;
 
-  @Prop()
-  progress: number;
+  @Prop({ default: false })
+  is_deleted: boolean;
 
-  @Prop()
-  status: string;
-
-  @Prop()
-  dateEarned: Date;
+  @Prop({ type: Types.ObjectId, ref: 'Branch', required: true })
+  branch: Types.ObjectId;
 }
 
 export const BadgeSchema = SchemaFactory.createForClass(Badge);

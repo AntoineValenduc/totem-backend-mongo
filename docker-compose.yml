@@ -1,0 +1,85 @@
+version: '3.8'
+services:
+
+  #Gestionnaire des systèmes distribués (Kafka)
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: totem-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  #Messagerie de flux de données inter-appli
+  kafka:
+      image: confluentinc/cp-kafka:7.4.0
+      container_name: totem-kafka
+      ports:
+        - "9092:9092"
+      depends_on:
+        - zookeeper
+      environment:
+        KAFKA_BROKER_ID: 1
+        KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+        KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+        KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+        KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  #BDD MongoDB
+  mongo:
+    image: mongo
+    container_name: totem-mongo-db
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+
+  #Microservice services métier utilisant Mongo
+  totem-mongo:
+    build:
+      context: .
+      dockerfile: apps/totem-mongo/Dockerfile
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/totemDB
+    ports:
+      - '3001:3001'
+
+  #API back-end
+  api-gateway:
+    build:
+      context: .
+      dockerfile: apps/totem-api-gateway/Dockerfile
+    depends_on:
+      - totem-mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/totemDB
+    ports:
+      - '3000:3000'
+
+     
+  # BDD PostgreSQL
+  postgres:
+    image: postgres:15
+    container_name: totem-postgres
+    ports:
+      - '5432:5432'
+    env_file:
+      - .env
+      
+  # Microservice Auth SQL
+  totem-auth-sql:
+    build:
+      context: .
+      dockerfile: apps/totem-auth-sql/Dockerfile
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    ports:
+      - '3002:3002'
+
+volumes:
+  mongo_data:

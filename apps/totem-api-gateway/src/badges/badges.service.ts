@@ -1,21 +1,35 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { CreateBadgeDto } from '../../../totem-mongo/src/shared/dto/create-badge.dto';
-import {BADGE_PATTERNS} from "../../../totem-mongo/src/shared/constants/patterns";
-
+import { firstValueFrom } from 'rxjs';
+import { BADGE_PATTERNS } from '../../../totem-mongo/src/shared/constants/patterns';
+import { BadgeCreateDto } from '../../../totem-mongo/src/shared/dto/badge-create.dto';
+import { BadgeUpdateDto } from '../../../totem-mongo/src/shared/dto/badge-update.dto';
 @Injectable()
 export class BadgesService {
-  constructor(@Inject('TOTEM_MONGO_CLIENT') private profilesClient: ClientProxy) {}
+  constructor(
+    @Inject('TOTEM_MONGO_CLIENT') private readonly badgeClient: ClientProxy,
+  ) {}
 
   findAll() {
-    return this.profilesClient.send(BADGE_PATTERNS.FIND_ALL, {});
+    return this.badgeClient.send(BADGE_PATTERNS.FIND_ALL, {});
   }
 
   getById(id: string) {
-    return this.profilesClient.send(BADGE_PATTERNS.GET_BY_ID, { id });
+    return this.badgeClient.send(BADGE_PATTERNS.GET_BY_ID, { id });
   }
 
-  createBranch(badgeDto: CreateBadgeDto) {
-    return this.profilesClient.send(BADGE_PATTERNS.CREATE, badgeDto);
+  async createBadge(badge: BadgeCreateDto): Promise<BadgeCreateDto> {
+    return await firstValueFrom<BadgeCreateDto>(
+      this.badgeClient.send(BADGE_PATTERNS.CREATE, badge),
+    );
+  }
+
+  async updateBadge(
+    id: string,
+    badge: BadgeUpdateDto,
+  ): Promise<BadgeUpdateDto> {
+    return await firstValueFrom<BadgeUpdateDto>(
+      this.badgeClient.send(BADGE_PATTERNS.UPDATE, { id, badge: badge }),
+    );
   }
 }

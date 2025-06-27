@@ -3,11 +3,12 @@
   "compilerOptions": {
     "declaration": false,
     "outDir": "../../dist/apps/totem-api-gateway",
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
-      "@shared/interfaces/*": ["libs/shared/interfaces/*"],
-      "@shared/dto/*": ["libs/shared/dto/*"],
-      "@shared/schemas/*": ["libs/shared/schemas/*"]
+      "@shared/interfaces/*": ["../totem-mongo/src/shared/interfaces/*"],
+      "@shared/dto/*": ["../totem-mongo/src/shared/dto/*"],
+      "@shared/schemas/*": ["../totem-mongo/src/schema/*"],
+      "totem-mongo/*": ["../totem-mongo/src/*"]
     }
   },
   "include": ["src/**/*"],

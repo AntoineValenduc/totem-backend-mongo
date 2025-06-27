@@ -1,37 +1,47 @@
 import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Branch } from './branch.schema';
+import { ProfileBadge, ProfileBadgeSchema } from './profileBadge.schema';
 
 export type ProfileDocument = HydratedDocument<Profile>;
 
 @Schema({ timestamps: true })
 export class Profile {
-  @Prop()
-  firstName: string;
-
-  @Prop()
-  lastName: string;
-
-  @Prop()
-  dateOfBirth: Date;
-
-  @Prop()
+  @Prop({ required: true })
+  user_id: string;
+  @Prop({ required: true })
+  first_name: string;
+  @Prop({ required: true })
+  last_name: string;
+  @Prop({ required: true })
+  date_of_birth: Date;
+  @Prop({ required: true })
   address: string;
-
-  @Prop()
+  @Prop({ required: true })
   zipcode: string;
-
-  @Prop()
+  @Prop({ required: true })
   city: string;
-
+  @Prop({ required: true })
+  email: string;
   @Prop()
-  mail: string;
-
+  phone_number: string;
   @Prop()
-  phoneNumber: string;
-
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Branch' })
-  branch: Types.ObjectId | Branch;
+  photo_url: string;
+  @Prop()
+  created_at: Date;
+  @Prop()
+  updated_at: Date;
+  @Prop({ default: null })
+  removed_at: Date;
+  @Prop({ default: false })
+  is_deleted: boolean;
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Branch',
+    required: false,
+  })
+  branch: Types.ObjectId;
+  @Prop({ type: [ProfileBadgeSchema], default: [] })
+  badges: ProfileBadge[];
 }
 
 export const ProfileSchema = SchemaFactory.createForClass(Profile);

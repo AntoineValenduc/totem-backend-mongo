@@ -11,7 +11,9 @@ describe('TotemApiGatewayController', () => {
       providers: [TotemApiGatewayService],
     }).compile();
 
-    totemApiGatewayController = app.get<TotemApiGatewayController>(TotemApiGatewayController);
+    totemApiGatewayController = app.get<TotemApiGatewayController>(
+      TotemApiGatewayController,
+    );
   });
 
   describe('root', () => {

@@ -1,3 +1,18 @@
+Mettre Prisma => OK
+CI/CD => ESlint
+Actions
+Workflow
+Jenkins => PK
+Swagger => OK
+Sonar
+
+
+Jenkins
+cmd = java -jar jenkins.war
+SI >Jdk21 ajouter = --enable-future-java
+
+
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
 </p>
@@ -90,3 +105,24 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 ## License
 
 Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+
+## Docker Kafka
+kafka:
+image: bitnami/kafka:latest
+ports:
+- "9092:9092"
+environment:
+KAFKA_BROKER_ID: 1
+KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+depends_on:
+- zookeeper
+
+zookeeper:
+image: bitnami/zookeeper:latest
+ports:
+- "2181:2181"
+environment:
+ALLOW_ANONYMOUS_LOGIN: yes
