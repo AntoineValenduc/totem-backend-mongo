@@ -28,7 +28,11 @@ export class BadgeService {
   async findAll(): Promise<BadgeExposeDto[]> {
     try {
       //Recherche Mongoose
-      const badges = await this.badgeModel.find().populate('branch').exec();
+      const badges = await this.badgeModel
+        .find()
+        .populate('branch')
+        .lean()
+        .exec();
 
       //Transco en DTO Expose
       return plainToInstance(BadgeExposeDto, badges, {
@@ -52,7 +56,18 @@ export class BadgeService {
     } else if (!isValidObjectId(id)) {
       throw new InvalidBadgeIdException(id);
     } else {
-      return await this.findBadgeById(id);
+      const idObject = new Types.ObjectId(id);
+      const badge = await this.badgeModel
+        .findById(idObject)
+        .populate('branch')
+        .lean()
+        .exec();
+      if (!badge) {
+        throw new BadgeNotFoundException(idObject.toString());
+      }
+      return plainToInstance(BadgeExposeDto, badge, {
+        excludeExtraneousValues: true,
+      });
     }
   }
 
@@ -62,7 +77,6 @@ export class BadgeService {
    */
   async create(dto: BadgeCreateDto): Promise<BadgeDocument> {
     try {
-
       //Conversion ID Branch en ObjectId Mongoose
       const badgeToCreate = {
         ...dto,
@@ -127,25 +141,5 @@ export class BadgeService {
           return deletedBadge;
         });
     }
-  }
-
-  /**
-   * Mérhode interne - Recherche Badge par ID
-   * @param id
-   * @private
-   */
-  private async findBadgeById(id: string): Promise<BadgeExposeDto> {
-    if (!id) {
-      throw new InvalidBadgeIdException(id);
-    }
-
-    const badge = await this.badgeModel.findById(id).populate('branch').exec();
-    if (!badge) {
-      throw new BadgeNotFoundException(id);
-    }
-
-    return plainToInstance(BadgeExposeDto, badge, {
-      excludeExtraneousValues: true,
-    });
   }
 }

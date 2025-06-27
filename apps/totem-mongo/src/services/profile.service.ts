@@ -277,6 +277,7 @@ export class ProfileService {
     const profile = await this.profileModel
       .findById(id)
       .populate({ path: 'branch', populate: { path: 'badges' } })
+      .lean()
       .exec();
     if (!profile) {
       throw new ProfileNotFoundException(id);

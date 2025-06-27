@@ -50,7 +50,7 @@ export class BranchService {
    * Afficher un branch à partir de son ID
    * @param id
    */
-  async getById(id: string): Promise<BranchDocument> {
+  async getById(id: string): Promise<BranchExposeDto> {
     this.logger.log(
       "✅ Requête reçue => getById branchs MongoDB, avec l'ID: " + id,
     );
@@ -59,7 +59,14 @@ export class BranchService {
     } else if (!isValidObjectId(id)) {
       throw new InvalidBranchIdException(id);
     } else {
-      return await this.findBranchById(id);
+      const branch = await this.branchModel
+        .findById(id)
+        .populate('badges')
+        .lean()
+        .exec();
+      return plainToInstance(BranchExposeDto, branch, {
+        excludeExtraneousValues: true,
+      });
     }
   }
 
@@ -142,6 +149,7 @@ export class BranchService {
     const branch = await this.branchModel
       .findById(id)
       .populate('badges')
+      .lean()
       .exec();
     if (!branch || branch.is_deleted) {
       throw new BranchNotFoundException(id);

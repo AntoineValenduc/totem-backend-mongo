@@ -15,13 +15,11 @@ export class BranchController {
 
   @MessagePattern(BRANCH_PATTERNS.FIND_ALL)
   async findAll(): Promise<BranchExposeDto[]> {
-    this.logger.log('✅ Requête reçue => findAll branchs MongoDB');
     return this.branchService.findAll();
   }
 
   @MessagePattern(BRANCH_PATTERNS.GET_BY_ID)
-  async getById(@Payload('id') id: string): Promise<BranchDocument> {
-    this.logger.log(`✅ Requête reçue => getById branch MongoDB (ID: ${id})`);
+  async getById(@Payload('id') id: string): Promise<BranchExposeDto> {
     return this.branchService.getById(id);
   }
 
@@ -29,7 +27,6 @@ export class BranchController {
   async createBranch(
     @Payload() branchDto: BrancheCreateDto,
   ): Promise<BranchDocument> {
-    this.logger.log('✅ Requête reçue => create branch MongoDB');
     return this.branchService.create(branchDto);
   }
 
@@ -38,16 +35,11 @@ export class BranchController {
     @Payload() data: { id: string; branch: BrancheUpdateDto },
   ): Promise<BranchDocument> {
     const { id, branch } = data;
-    this.logger.log(`✅ Requête reçue => update branche MongoDB (ID: ${id})`);
-    this.logger.log(
-      `✅ Requête reçue => update branche MongoDB (Payload: ${JSON.stringify(branch)})`,
-    );
     return this.branchService.update(id, branch);
   }
 
   @MessagePattern(BRANCH_PATTERNS.DELETE)
   async removeBranch(@Payload('id') id: string): Promise<BranchDocument> {
-    this.logger.log(`✅ Requête reçue => remove branch MongoDB (ID: ${id})`);
     return this.branchService.remove(id);
   }
 }
