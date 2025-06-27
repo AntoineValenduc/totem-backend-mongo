@@ -5,7 +5,7 @@ import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from '../users/dto/login-user.dto';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
-import { PROFILE_PATTERNS } from 'apps/totem-mongo/src/shared/constants/patterns';
+import { PROFILE_PATTERNS } from '../../../totem-mongo/src/shared/constants/patterns';
 
 interface UserSafe {
   id: string;

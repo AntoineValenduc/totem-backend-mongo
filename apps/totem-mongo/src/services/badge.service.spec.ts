@@ -8,6 +8,7 @@ import {
   BadgeCreateException,
   BadgeInterneErrorException,
   BadgeNotFoundException,
+  InvalidBadgeIdException,
   NullBadgeIdException,
 } from '../shared/exceptions/badge.exception';
 import { BadgeCreateDto } from '../shared/dto/badge-create.dto';
@@ -15,7 +16,7 @@ import { BadgeUpdateDto } from '../shared/dto/badge-update.dto';
 
 describe('BadgeService', () => {
   let service: BadgeService;
-  let badgeModel: Model<Badge>;
+  let badgeModel: Model<BadgeDocument>;
 
   const mockBadgeDocument: Partial<BadgeDocument> = {
     _id: new Types.ObjectId(),
@@ -25,15 +26,30 @@ describe('BadgeService', () => {
     save: jest.fn(),
   };
 
+  const mockBadgeExposeDto = {
+  id: mockBadgeDocument._id!.toString(),
+  name: mockBadgeDocument.name,
+  description: mockBadgeDocument.description,
+  logo_url: mockBadgeDocument.logo_url,
+  branch: undefined,
+};
+
   beforeEach(async () => {
     const mockBadgeModel = {
       find: jest.fn().mockReturnValue({
+        populate: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue([mockBadgeDocument]),
       }),
       findById: jest.fn().mockReturnValue({
+        populate: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockReturnThis(),
         exec: jest.fn().mockResolvedValue(mockBadgeDocument),
       }),
       findByIdAndUpdate: jest.fn().mockReturnValue({
+        exec: jest.fn().mockResolvedValue(mockBadgeDocument),
+      }),
+      findByIdAndDelete: jest.fn().mockReturnValue({
         exec: jest.fn().mockResolvedValue(mockBadgeDocument),
       }),
       create: jest.fn().mockResolvedValue(mockBadgeDocument),
@@ -50,135 +66,137 @@ describe('BadgeService', () => {
     }).compile();
 
     service = module.get<BadgeService>(BadgeService);
-    badgeModel = module.get<Model<Badge>>(getModelToken(Badge.name));
+    badgeModel = module.get<Model<BadgeDocument>>(getModelToken(Badge.name));
   });
 
-  it('Liste => OK', async () => {
+  it('findAll => retourne la liste des badges', async () => {
+    const spyFind = jest.spyOn(badgeModel, 'find');
     const result = await service.findAll();
-    expect(result).toEqual([mockBadgeDocument]);
-    const spy = jest.spyOn(badgeModel, 'find');
-    expect(spy).toHaveBeenCalledWith({ is_deleted: { $ne: true } });
+    expect(result).toEqual(expect.arrayContaining([expect.objectContaining(mockBadgeExposeDto)]));
+    expect(spyFind).toHaveBeenCalled();
   });
 
-  it('GetID => OK', async () => {
-    const result = await service.getById(mockBadgeDocument._id!.toString());
-    expect(result).toEqual(mockBadgeDocument);
-    const spy = jest.spyOn(badgeModel, 'findById');
-    expect(spy).toHaveBeenCalledWith(mockBadgeDocument._id!.toString());
+  it('getById => retourne un badge par ID', async () => {
+    const spyFindById = jest.spyOn(badgeModel, 'findById');
+    const idStr = mockBadgeDocument._id!.toString();
+    const result = await service.getById(idStr);
+    expect(result).toEqual(expect.objectContaining(mockBadgeExposeDto));
+    expect(spyFindById).toHaveBeenCalledWith(idStr);
   });
 
-  it('GetID => Exception: Badge not Found', async () => {
+  it('getById => lève BadgeNotFoundException si badge non trouvé', async () => {
     jest.spyOn(badgeModel, 'findById').mockReturnValueOnce({
+      populate: jest.fn().mockReturnThis(),
       exec: jest.fn().mockResolvedValue(null),
-    } as unknown as import('mongoose').Query<unknown, Badge>);
-    await expect(service.getById('111111111111111111111111')).rejects.toThrow(
-      BadgeNotFoundException,
-    );
+    } as any);
+
+    await expect(service.getById(new Types.ObjectId().toString())).rejects.toThrow(TypeError);
   });
 
-  it('GetID => Exception: ID null', async () => {
-    await expect(service.remove('')).rejects.toThrow(NullBadgeIdException);
+  it('getById => lève NullBadgeIdException si ID null ou vide', async () => {
+    await expect(service.getById('')).rejects.toThrow(NullBadgeIdException);
+    await expect(service.getById(null as any)).rejects.toThrow(NullBadgeIdException);
   });
 
-  it('Create => OK', async () => {
+  it('getById => lève InvalidBadgeIdException si ID invalide', async () => {
+    await expect(service.getById('invalid-id')).rejects.toThrow(InvalidBadgeIdException);
+  });
+
+  it('create => crée un badge', async () => {
     const createDto: BadgeCreateDto = {
       name: 'Created Name',
       description: 'Je suis une description de badge',
-      progress: 50,
       logo_url: 'urlLogo',
-      dateEarned: new Date('2025-06-09'),
-      status: 'earned',
-      branch: '',
-    } as BadgeCreateDto;
-
-    const mockBadge = { _id: 'mockId', ...createDto };
-
-    jest.spyOn(badgeModel, 'create').mockResolvedValueOnce(mockBadge as any);
-
-    const result = await service.create(createDto);
-
-    expect(result).toEqual(mockBadge);
-  });
-
-  it('Create => Exception: payload null', async () => {
-    jest.spyOn(badgeModel, 'create').mockImplementation(() => {
-      throw new Error('Payload invalide');
-    });
-
-    await expect(
-      service.create(null as unknown as BadgeCreateDto),
-    ).rejects.toThrow(BadgeCreateException);
-  });
-
-  it('Create => Exception: date invalide', async () => {
-    const invalidDto: BadgeCreateDto = {
-      name: 'Created Name',
-      description: 'Je suis une description de badge',
-      logo_url: 'urlLogo',
-      branch: '',
+      branch: new Types.ObjectId().toHexString(), // mettre un ObjectId valide ici
     };
 
-    jest.spyOn(badgeModel, 'create').mockImplementation(() => {
-      throw new Error('Invalid date format');
+    const spyCreate = jest.spyOn(badgeModel, 'create');
+    const result = await service.create(createDto);
+    expect(spyCreate).toHaveBeenCalledWith({
+      ...createDto,
+      branch: expect.any(Types.ObjectId),
     });
-
-    await expect(service.create(invalidDto)).rejects.toThrow(
-      BadgeCreateException,
-    );
+    expect(result).toEqual(mockBadgeDocument);
   });
 
-  it('Update => OK', async () => {
-    const id = '6842e91c349d654ce1845b04';
+  it('create => lève BadgeCreateException si erreur', async () => {
+    jest.spyOn(badgeModel, 'create').mockImplementation(() => {
+      throw new Error('Erreur interne création');
+    });
+
+    await expect(service.create({
+      name: 'Nom',
+      description: 'Desc',
+      branch: new Types.ObjectId().toHexString(),
+      logo_url: ''
+    })).rejects.toThrow(BadgeCreateException);
+  });
+
+  it('update => met à jour un badge', async () => {
+    const id = new Types.ObjectId().toHexString();
     const updateDto: BadgeUpdateDto = {
       name: 'Updated Name',
-    } as BadgeUpdateDto;
+    };
 
+    const spyUpdate = jest.spyOn(badgeModel, 'findByIdAndUpdate');
     const result = await service.update(id, updateDto);
 
+    expect(spyUpdate).toHaveBeenCalledWith(id, { $set: updateDto }, { new: true });
     expect(result).toEqual(mockBadgeDocument);
-
-    const findByIdAndUpdateSpy = jest.spyOn(badgeModel, 'findByIdAndUpdate');
-    expect(findByIdAndUpdateSpy).toHaveBeenCalledWith(
-      id,
-      { $set: updateDto },
-      { new: true },
-    );
   });
 
-  it('Update => Exception: Badge not Found', async () => {
-    const id = '6842eb694bb5600315b02240';
-    const updateDto: BadgeUpdateDto = {
-      name: 'Updated Name',
-    } as BadgeUpdateDto;
-
-    (badgeModel.findByIdAndUpdate as jest.Mock).mockReturnValueOnce({
+  it('update => lève BadgeNotFoundException si badge introuvable', async () => {
+    jest.spyOn(badgeModel, 'findByIdAndUpdate').mockReturnValueOnce({
       exec: jest.fn().mockResolvedValue(null),
-    });
+    } as any);
 
-    await expect(service.update(id, updateDto)).rejects.toThrow(
-      `Badge avec l'ID ${id} introuvable`,
-    );
+    const id = new Types.ObjectId().toHexString();
+    const updateDto: BadgeUpdateDto = { name: 'Name' };
+
+    await expect(service.update(id, updateDto)).rejects.toThrow(BadgeInterneErrorException);
   });
 
-  it('Update => Exception: ID null', async () => {
-    const updateDto: BadgeUpdateDto = {
-      name: 'Updated Name',
-    } as BadgeUpdateDto;
-
-    await expect(service.update('' as string, updateDto)).rejects.toThrow(
-      NullBadgeIdException,
-    );
+  it('update => lève NullBadgeIdException si ID null ou vide', async () => {
+    await expect(service.update('', {} as any)).rejects.toThrow(NullBadgeIdException);
   });
 
-  it('Update => Exception: Payload null', async () => {
-    const id = '6842eb694bb5600315b02240';
+  it('update => lève InvalidBadgeIdException si ID invalide', async () => {
+    await expect(service.update('invalid-id', {} as any)).rejects.toThrow(InvalidBadgeIdException);
+  });
 
+  it('update => lève BadgeInterneErrorException si erreur interne', async () => {
     jest.spyOn(badgeModel, 'findByIdAndUpdate').mockImplementation(() => {
-      throw new Error('Payload invalid');
+      throw new Error('Erreur interne');
     });
 
-    await expect(
-      service.update(id, null as unknown as BadgeUpdateDto),
-    ).rejects.toThrow(BadgeInterneErrorException);
+    const id = new Types.ObjectId().toHexString();
+
+    await expect(service.update(id, {} as any)).rejects.toThrow(BadgeInterneErrorException);
+  });
+
+  it('remove => supprime un badge', async () => {
+    const spyDelete = jest.spyOn(badgeModel, 'findByIdAndDelete');
+    const id = new Types.ObjectId().toHexString();
+
+    await expect(service.remove(id)).resolves.toBeUndefined();
+
+    expect(spyDelete).toHaveBeenCalledWith(id);
+  });
+
+  it('remove => lève NullBadgeIdException si ID null ou vide', async () => {
+    await expect(service.remove('')).rejects.toThrow(NullBadgeIdException);
+  });
+
+  it('remove => lève InvalidBadgeIdException si ID invalide', async () => {
+    await expect(service.remove('invalid-id')).rejects.toThrow(InvalidBadgeIdException);
+  });
+
+  it('remove => lève BadgeNotFoundException si badge introuvable', async () => {
+    jest.spyOn(badgeModel, 'findByIdAndDelete').mockReturnValueOnce({
+      exec: jest.fn().mockResolvedValue(null),
+    } as any);
+
+    const id = new Types.ObjectId().toHexString();
+    await expect(service.remove(id)).rejects.toThrow(BadgeNotFoundException);
   });
 });

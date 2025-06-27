@@ -18,7 +18,7 @@ import {
 } from '@nestjs/swagger';
 import { BadgeCreateDto } from '../../../totem-mongo/src/shared/dto/badge-create.dto';
 import { BadgeUpdateDto } from '../../../totem-mongo/src/shared/dto/badge-update.dto';
-import { BadgeExposeDto } from 'apps/totem-mongo/src/shared/dto/badge-expose.dto';
+import { BadgeExposeDto } from '../../../totem-mongo/src/shared/dto/badge-expose.dto';
 
 @ApiTags('badges')
 @ApiBearerAuth()

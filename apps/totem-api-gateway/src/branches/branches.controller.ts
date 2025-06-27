@@ -19,7 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { BrancheCreateDto } from '../../../totem-mongo/src/shared/dto/branche-create.dto';
 import { BrancheUpdateDto } from '../../../totem-mongo/src/shared/dto/branche-update.dto';
-import { BranchExposeDto } from 'apps/totem-mongo/src/shared/dto/branche-expose.dto';
+import { BranchExposeDto } from '../../../totem-mongo/src/shared/dto/branche-expose.dto';
 
 @ApiTags('branches')
 @ApiBearerAuth()

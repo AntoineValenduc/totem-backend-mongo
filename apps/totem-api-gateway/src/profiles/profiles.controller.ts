@@ -20,8 +20,8 @@ import {
 import { ParseObjectIdPipe } from '@nestjs/mongoose';
 import { ProfileCreateDto } from '../../../totem-mongo/src/shared/dto/profile-create.dto';
 import { ProfileUpdateDto } from '../../../totem-mongo/src/shared/dto/profile-update.dto';
-import { ProfileExposeDto } from 'apps/totem-mongo/src/shared/dto/profile-expose.dto';
-import { ProfileBadgeExposeDto } from 'apps/totem-mongo/src/shared/dto/profileBadge-expose.dto';
+import { ProfileExposeDto } from '../../../totem-mongo/src/shared/dto/profile-expose.dto';
+import { ProfileBadgeExposeDto } from '../../../totem-mongo/src/shared/dto/profileBadge-expose.dto';
 
 @ApiTags('profiles')
 @ApiBearerAuth()

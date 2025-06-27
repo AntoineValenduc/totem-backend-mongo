@@ -38,7 +38,7 @@ describe('ProfileController', () => {
 
   it('should throw an error if ID is missing in getById', async () => {
     return await expect(profileController.getById('')).rejects.toThrow(
-      '❌ Requête reçue => ID is required',
+      'Requête reçue => ID is required',
     );
   });
 

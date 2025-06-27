@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { PROFILE_PATTERNS } from '../../../totem-mongo/src/shared/constants/patterns';
 import { ProfileCreateDto } from '../../../totem-mongo/src/shared/dto/profile-create.dto';
 import { ProfileUpdateDto } from '../../../totem-mongo/src/shared/dto/profile-update.dto';
-import { ProfileBadgeExposeDto } from 'apps/totem-mongo/src/shared/dto/profileBadge-expose.dto';
+import { ProfileBadgeExposeDto } from '../../../totem-mongo/src/shared/dto/profileBadge-expose.dto';
 @Injectable()
 export class ProfilesService {
   constructor(
