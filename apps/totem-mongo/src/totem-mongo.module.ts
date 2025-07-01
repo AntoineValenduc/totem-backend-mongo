@@ -37,13 +37,13 @@ const resolvedEnvFilePath = existsSync(envFilePath)
         validationSchema: Joi.object({
           TCP_HOST: Joi.string().required(),
           TCP_PORT: Joi.number().required(),
-          MONGO_URI: Joi.string().required(),
+          MONGO_URL: Joi.string().required(),
           NODE_ENV: Joi.string().default('development'),
         }),
       }),
     }),
     MongooseModule.forRoot(
-      process.env.MONGO_URI ?? 'mongodb://127.0.0.1:27017/totemDB',
+      process.env.MONGO_URL ?? 'mongodb://127.0.0.1:27017/totemDB',
     ),
     MongooseModule.forFeature([
       { name: Profile.name, schema: ProfileSchema },

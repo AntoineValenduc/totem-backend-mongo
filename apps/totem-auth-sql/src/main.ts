@@ -8,13 +8,11 @@ async function bootstrap() {
 
   const config = app.get(ConfigService);
 
-  // 🔐 Ajoute cookie-parser
   app.use(cookieParser());
 
-  // 🌐 Active les CORS pour accepter les cookies cross-origin
   app.enableCors({
-    origin: 'http://localhost:3005', // ton front Next.js
-    credentials: true, // important pour les cookies
+    origin: 'http://localhost:3005',
+    credentials: true,
   });
 
   await app.listen(config.get('PORT_TOTEM_AUTH') ?? 3002);

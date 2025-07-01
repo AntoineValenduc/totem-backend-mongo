@@ -24,7 +24,6 @@ export class InvitationsService {
    * @param dto
    */
   async registerNewUser(dto: RegisterNewUserDto) {
-    console.log('DTO reçu', dto);
     if (!dto.email) {
       throw new BadRequestException('Email manquant');
     }
@@ -33,7 +32,6 @@ export class InvitationsService {
     const existing: User | null = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
-
     if (existing) {
       throw new BadRequestException(`L'email ${dto.email} est déjà utilisé.`);
     }
@@ -60,8 +58,7 @@ export class InvitationsService {
         user_id: user.id.toString(),
         date_of_birth: new Date(dto.date_of_birth), // obligation de le respécifier
       });
-    } catch (err: unknown) {
-      // Only log the error, don't try to access properties
+    } catch (err) {
       console.error(err);
       throw err;
     }
@@ -69,7 +66,7 @@ export class InvitationsService {
     // Génère Token JWT unique pour la session first-login (premier login avec création premier mdp)
     const token = this.jwtService.sign(
       { sub: user.id, purpose: 'first-login' },
-      { expiresIn: '2d' },
+      { expiresIn: '7d' },
     );
 
     // Envoi du email avec Token + mdp temp

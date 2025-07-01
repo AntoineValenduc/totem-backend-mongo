@@ -4,7 +4,7 @@ import { TotemMongoModule } from './totem-mongo.module';
 import { CustomRpcExceptionFilter } from './shared/filters/CustomRpcExceptionFilter.filter';
 
 async function bootstrap() {
-  console.log('MONGO_URI:', process.env.MONGO_URI);
+  console.log('MONGO_URL:', process.env.MONGO_URL);
   console.log('JWT_SECRET:', process.env.JWT_SECRET);
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     TotemMongoModule,

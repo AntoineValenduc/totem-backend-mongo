@@ -16,7 +16,7 @@ export class InvitationsProxyController {
   @Post('register')
   async registerFromToken(@Body() body: RegisterNewUserDto): Promise<unknown> {
     return this.http.axiosRef
-      .post<unknown>('http://totem-auth-sql:3002/invitations/register', body)
+      .post<RegisterNewUserDto>('http://totem-auth-sql:3002/invitations/register', body)
       .then((res) => res.data);
   }
 }

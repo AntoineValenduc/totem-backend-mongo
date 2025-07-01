@@ -1,40 +1,35 @@
-# Étape builder
+# Utiliser une image Node légère
 FROM node:18-alpine AS builder
 
+# Définir le répertoire de travail
 WORKDIR /usr/src/app
 
-# Copier package.json et package-lock.json d'abord (cache docker)
+# Copier les fichiers package.json et package-lock.json
 COPY package*.json ./
 
-# Installer les dépendances (dev + prod)
-RUN npm ci --ignore-scripts
+# Installer les dépendances
+RUN npm install
 
-# Copier le code source (src + tsconfig)
-COPY src ./src/
-COPY tsconfig.app.json ./
+# Copier tout le projet
+COPY . .
 
-# Builder l’application
+# Lancer le build de l'application
 RUN npm run build
 
-# Étape finale (runtime)
+# Utiliser une image légère pour l'exécution
 FROM node:18-alpine
-
-# Créer un groupe et utilisateur non-root
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
 WORKDIR /usr/src/app
 
-# Copier les fichiers buildés depuis builder
+# Copier les fichiers buildés de l'étape précédente
 COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/package*.json ./
+COPY package*.json ./
 
-# Installer uniquement les dépendances de production en une seule commande RUN
-RUN npm ci --production --ignore-scripts \
-  && chown -R appuser:appgroup /usr/src/app
+# Installer uniquement les dépendances de production
+RUN npm install --production
 
-# Passer à l’utilisateur non-root
-USER appuser
+# Exposer le port
+EXPOSE 3001
 
-EXPOSE 3000
-
+# Démarrer l'application
 CMD ["node", "dist/apps/totem-api-gateway/main.js"]

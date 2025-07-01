@@ -1,5 +1,3 @@
-import e from "express";
-
 export const PROFILE_PATTERNS = {
   FIND_ALL: 'profiles.findAll',
   FIND_ALL_SOFT_DELETED: 'profiles.fildAllSoftDeleted',

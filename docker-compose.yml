@@ -34,6 +34,7 @@ services:
       - '27017:27017'
     volumes:
       - mongo_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d
 
   #Microservice services métier utilisant Mongo
   totem-mongo:
@@ -68,6 +69,7 @@ services:
       - '5432:5432'
     env_file:
       - .env
+    
       
   # Microservice Auth SQL
   totem-auth-sql:

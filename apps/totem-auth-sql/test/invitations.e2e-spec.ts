@@ -6,9 +6,9 @@ import { TotemAuthSqlModule } from '../src/totem-auth-sql.module';
 import { MailService } from '../src/mail/mail.service';
 import { ProfileService } from '../../totem-mongo/src/services/profile.service';
 
-process.env.JWT_SECRET = process.env.JWT_SECRET || 'test_secret';
-process.env.POSTGRES_URL =
-  process.env.POSTGRES_URL ||
+process.env.JWT_SECRET_TEST = process.env.JWT_SECRET_TEST ?? 'test_secret';
+process.env.POSTGRES_URL_TEST =
+  process.env.POSTGRES_URL_TEST ??
   'postgresql://postgres:postgres@localhost:5432/totem_auth_sql_test?schema=public';
 
 const mockProfileService: Partial<ProfileService> = {
@@ -27,6 +27,7 @@ describe('Invitations E2E', () => {
 
   const testEmail = 'test@example.com';
 
+  const newLocal = 'temp123';
   const dto = {
     first_name: 'Test',
     last_name: 'User',
@@ -38,7 +39,7 @@ describe('Invitations E2E', () => {
     email: testEmail,
     branch: 'BR001',
     role: 'JEUNE',
-    password: 'temp123',
+    password: newLocal,
   };
 
   beforeAll(async () => {
