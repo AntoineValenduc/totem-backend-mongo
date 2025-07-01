@@ -6,8 +6,8 @@ import { TotemAuthSqlModule } from '../src/totem-auth-sql.module';
 import { MailService } from '../src/mail/mail.service';
 import { ProfileService } from '../../totem-mongo/src/services/profile.service';
 
-process.env.JWT_SECRET_TEST = process.env.JWT_SECRET ?? 'test_secret';
-process.env.POSTGRES_URL =
+process.env.JWT_SECRET_TEST = process.env.JWT_SECRET_TEST ?? 'test_secret';
+process.env.POSTGRES_URL_TEST =
   process.env.POSTGRES_URL_TEST ??
   'postgresql://postgres:postgres@localhost:5432/totem_auth_sql_test?schema=public';
 
