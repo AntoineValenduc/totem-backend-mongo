@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
@@ -107,7 +106,7 @@ describe('BadgeService', () => {
       name: 'Created Name',
       description: 'Je suis une description de badge',
       logo_url: 'urlLogo',
-      branch: new Types.ObjectId().toHexString(), // mettre un ObjectId valide ici
+      branch: new Types.ObjectId().toHexString(),
     };
 
     const spyCreate = jest.spyOn(badgeModel, 'create');
