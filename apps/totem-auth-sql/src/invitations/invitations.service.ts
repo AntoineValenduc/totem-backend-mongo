@@ -9,6 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service';
 import { ProfileService } from '../../../totem-mongo/src/services/profile.service';
 import { User } from '@prisma/client';
+import { ProfileCreateException } from 'apps/totem-mongo/src/shared/exceptions/profile.exception';
 
 @Injectable()
 export class InvitationsService {
@@ -54,9 +55,8 @@ export class InvitationsService {
     // Crée Profil (MONGO), avec liaison Id User (SQL)
     try {
       await this.profileService.create({
-        ...dto,
-        user_id: user.id.toString(),
-        date_of_birth: new Date(dto.date_of_birth), // obligation de le respécifier
+        ...dto.profile,
+        user_id: user.id.toString()
       });
     } catch (err) {
       console.error(err);

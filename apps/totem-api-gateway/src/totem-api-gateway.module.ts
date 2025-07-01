@@ -19,6 +19,7 @@ import { HttpModule } from '@nestjs/axios';
 import { AuthProxyController } from './auth/login-proxy.controller';
 import { AuthGatewayModule } from './auth/login-proxy.module';
 import { JwtSharedModule } from '../../totem-auth-sql/src/libs/shared/jwt/jwt.module';
+import { InvitationProxyService } from '../../totem-api-gateway/src/invitations/invitation-proxy.service';
 
 const env = process.env.NODE_ENV ?? 'development';
 const envPath = join(process.cwd(), `.env.${env}`);
@@ -73,6 +74,7 @@ dotenv.config({ path: resolvedPath });
     ProfilesService,
     BranchesService,
     BadgesService,
+    InvitationProxyService
   ],
 })
 export class TotemApiGatewayModule {}

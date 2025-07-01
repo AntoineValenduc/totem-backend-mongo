@@ -14,7 +14,7 @@ export class MailService {
   });
 
   async sendInvitation(email: string, tempPassword: string, token: string) {
-    const link = `https://monapp.com/first-login?token=${token}`;
+    const link = `http://localhost:3005/first-login?token=${token}`;
 
     await this.transporter.sendMail({
       from: '"Totem Support" <no-reply@totem.fr>',
