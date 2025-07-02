@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="4" failures="0" errors="0" time="15.978">
-  <testsuite name="TotemAuthSqlController (e2e)" errors="0" failures="0" skipped="0" timestamp="2025-07-02T08:52:25" time="12.302" tests="1">
-    <testcase classname="TotemAuthSqlController (e2e)" name="works" time="0.677">
+<testsuites name="jest tests" tests="4" failures="0" errors="0" time="28.833">
+  <testsuite name="TotemAuthSqlController (e2e)" errors="0" failures="0" skipped="0" timestamp="2025-07-02T10:01:26" time="26.924" tests="1">
+    <testcase classname="TotemAuthSqlController (e2e)" name="works" time="1.677">
     </testcase>
   </testsuite>
-  <testsuite name="Invitations E2E" errors="0" failures="0" skipped="0" timestamp="2025-07-02T08:52:25" time="14.812" tests="3">
-    <testcase classname="Invitations E2E" name="✅ devrait créer un utilisateur et un profil" time="0.179">
+  <testsuite name="Invitations E2E" errors="0" failures="0" skipped="0" timestamp="2025-07-02T10:01:26" time="27.677" tests="3">
+    <testcase classname="Invitations E2E" name="Créer un utilisateur et un profil" time="0.752">
     </testcase>
-    <testcase classname="Invitations E2E" name="🚫 devrait échouer si l’email existe déjà" time="0.01">
+    <testcase classname="Invitations E2E" name="Echec si email existe déjà" time="0.017">
     </testcase>
-    <testcase classname="Invitations E2E" name="✅ devrait envoyer un mail avec un lien de première connexion" time="0.132">
+    <testcase classname="Invitations E2E" name="Envoie et réception du mail avec un lien de première connexion" time="0.179">
     </testcase>
   </testsuite>
 </testsuites>

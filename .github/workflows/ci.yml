@@ -48,21 +48,21 @@ jobs:
       JWT_SECRET_TEST: test_secret
 
     steps:
-      - name: 📦 Checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🔧 Setup Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: 📥 Install dependencies
+      - name: Install dependencies
         run: npm ci
 
-      - name: ⚙️ Generate Prisma Client
+      - name: Generate Prisma Client
         run: npx prisma generate --schema=apps/totem-auth-sql/src/prisma/schema.prisma
 
-      - name: 🕒 Wait for PostgreSQL
+      - name: Wait for PostgreSQL
         run: |
           for i in {1..10}; do
             nc -z localhost 5432 && echo "Postgres is up" && exit 0
@@ -71,22 +71,22 @@ jobs:
           done
           echo "Postgres did not start in time" && exit 1
 
-      - name: 📂 Run Prisma migrations
+      - name: Run Prisma migrations
         run: npx prisma migrate deploy --schema=apps/totem-auth-sql/src/prisma/schema.prisma
 
-      - name: 🧪 Run unit tests
+      - name: Run unit tests
         run: npm run test
 
-      - name: 🧪 Run E2E tests (API)
+      - name: Run E2E tests (API)
         run: npm run test:e2eApi
 
-      - name: 🧪 Run E2E tests (SQL)
+      - name: Run E2E tests (SQL)
         run: npm run test:e2eSql
 
-      - name: 🧪 Run E2E tests (Mongo)
+      - name: Run E2E tests (Mongo)
         run: npm run test:e2eMongo
 
-      - name: 🕒 Wait for MailHog
+      - name: Wait for MailHog
         run: |
           for i in {1..10}; do
             nc -z 127.0.0.1 1025 && echo "Mailhog is up" && exit 0
@@ -94,14 +94,7 @@ jobs:
             sleep 2
           done
           echo "Mailhog did not start in time" && exit 1
-
-      - name: 🧪 Run E2E tests (Mail)
-        run: npm run test:e2eSql
-
-      - name: 📊 Generate coverage
-        run: npm run test:coverage
-
-      - name: ☁️ Skip SonarCloud on non-main branches
+      - name: Skip SonarCloud on non-main branches
         if: github.ref != 'refs/heads/main' && github.event_name != 'pull_request'
         run: echo "Skipping SonarCloud analysis"
 
@@ -117,7 +110,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      - name: 🗂️ Archive test reports
+      - name: Archive test reports
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
