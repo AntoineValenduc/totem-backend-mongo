@@ -27,8 +27,10 @@ describe('Invitations E2E', () => {
 
   const testEmail = 'test@example.com';
 
-  const newLocal = 'temp123';
   const dto = {
+  email: testEmail,
+  role: 'JEUNE',
+  profile: {
     first_name: 'Test',
     last_name: 'User',
     date_of_birth: '2000-01-01',
@@ -36,11 +38,9 @@ describe('Invitations E2E', () => {
     zipcode: '75000',
     city: 'Paris',
     phone_number: '0600000000',
-    email: testEmail,
-    branch: 'BR001',
-    role: 'JEUNE',
-    password: newLocal,
-  };
+    branch: '',
+  },
+};
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -78,7 +78,7 @@ describe('Invitations E2E', () => {
     expect(body.message).toBe('Invitation envoyée');
   });
 
-  it('🚫 devrait échouer si l’mail existe déjà', async () => {
+  it('🚫 devrait échouer si l’email existe déjà', async () => {
     const res = await request(app.getHttpServer())
       .post('/invitations/register')
       .send(dto)

@@ -1,4 +1,4 @@
-import { ProfileCreateDto } from 'apps/totem-mongo/src/shared/dto/profile-create.dto';
+import { ProfileCreateDto } from '../../../../totem-mongo/src/shared/dto/profile-create.dto';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class RegisterNewUserDto {
@@ -10,7 +10,7 @@ export class RegisterNewUserDto {
   @IsNotEmpty()
   role: string;
 
-  @IsString()
+  //@IsString()
   @IsNotEmpty()
   profile: ProfileCreateDto;
 }
