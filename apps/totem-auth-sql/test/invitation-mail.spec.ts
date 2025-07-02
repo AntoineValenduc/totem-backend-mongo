@@ -28,6 +28,7 @@ describe('Invitations (e2e)', () => {
           address: 'Rue Test',
           zipcode: '75000',
           city: 'Paris',
+          email: 'test@mailhog.local',
           phone_number: '0600000000',
         },
       })
