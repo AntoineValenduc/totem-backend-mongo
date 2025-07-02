@@ -1,4 +1,3 @@
-/* eslint-disable */
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RegisterNewUserDto } from '../users/dto/register-from-invitation.dto';
@@ -9,7 +8,6 @@ import { JwtService } from '@nestjs/jwt';
 import { MailService } from '../mail/mail.service';
 import { ProfileService } from '../../../totem-mongo/src/services/profile.service';
 import { User } from '@prisma/client';
-
 @Injectable()
 export class InvitationsService {
   constructor(
@@ -54,9 +52,8 @@ export class InvitationsService {
     // Crée Profil (MONGO), avec liaison Id User (SQL)
     try {
       await this.profileService.create({
-        ...dto,
-        user_id: user.id.toString(),
-        date_of_birth: new Date(dto.date_of_birth), // obligation de le respécifier
+        ...dto.profile,
+        user_id: user.id.toString()
       });
     } catch (err) {
       console.error(err);

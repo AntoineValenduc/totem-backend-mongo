@@ -26,6 +26,13 @@ services:
         KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
         KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
+  #MailHog
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"  # port SMTP
+      - "8025:8025"  # interface web
+
   #BDD MongoDB
   mongo:
     image: mongo

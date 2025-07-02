@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
@@ -14,27 +14,27 @@ export class MailService {
   });
 
   async sendInvitation(email: string, tempPassword: string, token: string) {
-    const link = `https://monapp.com/first-login?token=${token}`;
+    const link = `http://localhost:3005/first-login?token=${token}`;
 
-    await this.transporter.sendMail({
-      from: '"Totem Support" <no-reply@totem.fr>',
-      to: email,
-      subject: '🎉 Invitation à rejoindre Totem',
-      html: `
-    <p>Bonjour,</p>
-    <p>Un compte a été créé pour vous sur notre application <strong>Totem</strong>.</p>
-    <p><strong>Identifiants temporaires :</strong><br />
-    ✉️ <strong>Email :</strong> ${email}<br />
-    🔑 <strong>Mot de passe temporaire :</strong> ${tempPassword}</p>
-    <p>👉 <a href="${link}">Cliquez ici pour vous connecter et définir votre mot de passe</a></p>
-    <p><em>Ce lien est valable pendant 48 heures.</em></p>
-    <p>À bientôt,<br />L'équipe Totem.</p>
-  `,
-    });
+    try {
+      await this.transporter.sendMail({
+        from: '"Totem Support" <no-reply@totem.fr>',
+        to: email,
+        subject: '🎉 Invitation à rejoindre Totem',
+        html: `
+          <p>Bonjour,</p>
+          <p>Un compte a été créé pour vous sur notre application <strong>Totem</strong>.</p>
+          <p><strong>Identifiants temporaires :</strong><br />
+          ✉️ <strong>Email :</strong> ${email}<br />
+          🔑 <strong>Mot de passe temporaire :</strong> ${tempPassword}</p>
+          <p>👉 <a href="${link}">Cliquez ici pour vous connecter et définir votre mot de passe</a></p>
+          <p><em>Ce lien est valable pendant 48 heures.</em></p>
+          <p>À bientôt,<br />L'équipe Totem.</p>
+        `,
+      });
+    } catch (error) {
+      console.error('Erreur envoi mail:', error);
+      throw new InternalServerErrorException('Échec envoi mail');
+    }
   }
-
-  /*async sendMail(to: string, subject: string, body: string) {
-    console.log(`Mock mail sent to ${to} with subject "${subject}"`);
-    return true;
-  }*/
 }

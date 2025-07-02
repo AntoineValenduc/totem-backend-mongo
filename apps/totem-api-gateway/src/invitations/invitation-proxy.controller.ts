@@ -5,18 +5,17 @@ import { JwtAuthGuard } from '../../../totem-auth-sql/src/auth/guards/jwt-auth.g
 import { RolesGuard } from '../../../totem-auth-sql/src/auth/guards/roles.guard';
 import { Roles } from '../../../totem-auth-sql/src/auth/decorators/roles.decorator';
 import { RegisterNewUserDto } from '../../../totem-auth-sql/src/users/dto/register-from-invitation.dto';
+import { InvitationProxyService } from './invitation-proxy.service';
 
 @ApiTags('invitations')
-@Controller('api/invitations')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('ADMIN', 'CHEF')
+@Controller('invitations')
+//@UseGuards(JwtAuthGuard, RolesGuard)
+//@Roles('ADMIN', 'CHEF')
 export class InvitationsProxyController {
-  constructor(private readonly http: LegacyHttpService) {}
+  constructor(private readonly invitationProxyService: InvitationProxyService) {}
 
-  @Post('register')
-  async registerFromToken(@Body() body: RegisterNewUserDto): Promise<unknown> {
-    return this.http.axiosRef
-      .post<RegisterNewUserDto>('http://totem-auth-sql:3002/invitations/register', body)
-      .then((res) => res.data);
+  @Post('/register')
+  async registerFromToken(@Body() body: RegisterNewUserDto) {
+    return this.invitationProxyService.registerNewUser(body);
   }
 }
