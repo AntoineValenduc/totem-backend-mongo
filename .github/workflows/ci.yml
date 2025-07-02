@@ -96,7 +96,7 @@ jobs:
           echo "Mailhog did not start in time" && exit 1
 
       - name: 🧪 Run E2E tests (Mail)
-        run: npm run test:e2eMail
+        run: npm run test:e2eSql
 
       - name: 📊 Generate coverage
         run: npm run test:coverage
