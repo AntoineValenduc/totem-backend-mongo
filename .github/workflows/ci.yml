@@ -38,7 +38,7 @@ jobs:
 
     env:
       NODE_ENV: test
-      MAIL_HOST: mailhog
+      MAIL_HOST: 127.0.0.1
       MAIL_PORT: 1025
       MAIL_USER: test
       MAIL_PASS: test
@@ -85,6 +85,15 @@ jobs:
 
       - name: 🧪 Run E2E tests (Mongo)
         run: npm run test:e2eMongo
+
+      - name: 🕒 Wait for MailHog
+        run: |
+          for i in {1..10}; do
+            nc -z 127.0.0.1 1025 && echo "Mailhog is up" && exit 0
+            echo "Waiting for Mailhog..."
+            sleep 2
+          done
+          echo "Mailhog did not start in time" && exit 1
 
       - name: 🧪 Run E2E tests (Mail)
         run: npm run test:e2eMail

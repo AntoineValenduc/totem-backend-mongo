@@ -31,10 +31,13 @@ describe('Invitations (e2e)', () => {
           email: 'test@mailhog.local',
           phone_number: '0600000000',
         },
-      })
-      .expect(201);
+      });
 
+    expect(res.status).toBe(201);
     expect(res.body).toHaveProperty('message', 'Invitation envoyée');
+    if (res.status !== 201) {
+      console.error(res.body);
+    }
   });
 
   afterAll(async () => {
