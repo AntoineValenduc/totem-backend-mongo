@@ -17,8 +17,6 @@ jobs:
           POSTGRES_DB: totem_auth_sql_test
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: admin
-          #TotemBddSqlPw
-
         ports:
           - 5432:5432
         options: >-
@@ -26,29 +24,45 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
       mongo:
         image: mongo:6
         ports:
           - 27017:27017
 
+      mailhog:
+        image: mailhog/mailhog
+        ports:
+          - 1025:1025
+          - 8025:8025
+
+    env:
+      NODE_ENV: test
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+      MAIL_USER: test
+      MAIL_PASS: test
+      DATABASE_URL: postgresql://postgres:admin@localhost:5432/totem_auth_sql_test
+      POSTGRES_URL_TEST: postgresql://postgres:admin@localhost:5432/totem_auth_sql_test
+      MONGO_URL: mongodb://localhost:27017/testdb
+      JWT_SECRET_TEST: test_secret
+
     steps:
-      - name: Checkout code
+      - name: 📦 Checkout code
         uses: actions/checkout@v4
 
-      - name: Use Node.js 20
+      - name: 🔧 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Install dependencies
+      - name: 📥 Install dependencies
         run: npm ci
-        
-      - name: Generate Prisma Client
-        run: npx prisma generate --schema=apps/totem-auth-sql/src/prisma/schema.prisma
-        env:
-          DATABASE_URL: postgresql://postgres:admin@localhost:5432/totem_auth_sql_test
 
-      - name: Wait for PostgreSQL
+      - name: ⚙️ Generate Prisma Client
+        run: npx prisma generate --schema=apps/totem-auth-sql/src/prisma/schema.prisma
+
+      - name: 🕒 Wait for PostgreSQL
         run: |
           for i in {1..10}; do
             nc -z localhost 5432 && echo "Postgres is up" && exit 0
@@ -57,37 +71,44 @@ jobs:
           done
           echo "Postgres did not start in time" && exit 1
 
-      - name: Run migrations
+      - name: 📂 Run Prisma migrations
         run: npx prisma migrate deploy --schema=apps/totem-auth-sql/src/prisma/schema.prisma
-        env:
-          DATABASE_URL: postgresql://postgres:admin@localhost:5432/totem_auth_sql_test
 
-      - name: Run unit tests
+      - name: 🧪 Run unit tests
         run: npm run test
 
-      - name: Run E2E tests (API)
+      - name: 🧪 Run E2E tests (API)
         run: npm run test:e2eApi
-      - name: Run E2E tests (SQL)
-        run: npm run test:e2eSql
-        env:
-          DATABASE_URL: postgresql://postgres:admin@localhost:5432/totem_auth_sql_test
 
-      - name: Run E2E tests (Mongo)
+      - name: 🧪 Run E2E tests (SQL)
+        run: npm run test:e2eSql
+
+      - name: 🧪 Run E2E tests (Mongo)
         run: npm run test:e2eMongo
-      - name: Generate coverage
+
+      - name: 🧪 Run E2E tests (Mail)
+        run: npm run test:e2eMail
+
+      - name: 📊 Generate coverage
         run: npm run test:coverage
 
-      - name: Skip SonarCloud analysis on non-main branches (free plan)
+      - name: ☁️ Skip SonarCloud on non-main branches
         if: github.ref != 'refs/heads/main' && github.event_name != 'pull_request'
-        run: echo "Skipping SonarCloud analysis on non-main branches (free plan)" && exit 0
+        run: echo "Skipping SonarCloud analysis"
 
-      - name: Upload coverage to SonarCloud
+      - name: ☁️ Upload coverage to SonarCloud
         if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: npx sonar-scanner
 
-      - name: Archive test reports
+      - name: 🛡️ Run Snyk security analysis
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: 🗂️ Archive test reports
         uses: actions/upload-artifact@v4
         with:
           name: test-reports
