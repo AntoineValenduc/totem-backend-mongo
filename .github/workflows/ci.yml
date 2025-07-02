@@ -7,8 +7,9 @@ on:
     branches: ['**']
 
 jobs:
-  setup:
+  build-test:
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:15
@@ -23,98 +24,96 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
       mongo:
         image: mongo:6
         ports:
           - 27017:27017
+
       mailhog:
         image: mailhog/mailhog
         ports:
           - 1025:1025
           - 8025:8025
 
-    outputs:
-      node-version: 20
+    env:
+      NODE_ENV: test
+      MAIL_HOST: localhost
+      MAIL_PORT: 1025
+      MAIL_USER: test
+      MAIL_PASS: test
+      DATABASE_URL: postgresql://postgres:admin@localhost:5432/totem_auth_sql_test
+      POSTGRES_URL_TEST: postgresql://postgres:admin@localhost:5432/totem_auth_sql_test
+      MONGO_URL: mongodb://localhost:27017/testdb
+      JWT_SECRET_TEST: test_secret
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: 📦 Checkout code
+        uses: actions/checkout@v4
 
-      - name: Install & Prepare
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📥 Install dependencies
+        run: npm ci
+
+      - name: ⚙️ Generate Prisma Client
         run: |
-          npm ci
-          npx prisma generate --schema=apps/totem-auth-sql/src/prisma/schema.prisma
-          npx prisma migrate deploy --schema=apps/totem-auth-sql/src/prisma/schema.prisma
+          DATABASE_URL=${{ env.DATABASE_URL }} npx prisma generate --schema=apps/totem-auth-sql/src/prisma/schema.prisma
 
-  unit-tests:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run test
+      - name: 🕒 Wait for PostgreSQL
+        run: |
+          for i in {1..10}; do
+            nc -z localhost 5432 && echo "Postgres is up" && exit 0
+            echo "Waiting for Postgres..."
+            sleep 3
+          done
+          echo "Postgres did not start in time" && exit 1
 
-  e2e-tests-api:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run test:e2eApi
+      - name: 📂 Run Prisma migrations
+        run: |
+          DATABASE_URL=${{ env.DATABASE_URL }} npx prisma migrate deploy --schema=apps/totem-auth-sql/src/prisma/schema.prisma
 
-  e2e-tests-sql:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run test:e2eSql
+      - name: 🧪 Run unit tests
+        run: npm run test
 
-  e2e-tests-mail:
-    runs-on: ubuntu-latest
-    needs: setup
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run test:e2eMail
+      - name: 🧪 Run E2E tests (API)
+        run: npm run test:e2eApi
 
-  coverage:
-    runs-on: ubuntu-latest
-    needs: [unit-tests, e2e-tests-api, e2e-tests-sql, e2e-tests-mail]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run test:coverage
-      - name: Upload to SonarCloud
+      - name: 🧪 Run E2E tests (SQL)
+        run: npm run test:e2eSql
+
+      - name: 🧪 Run E2E tests (Mongo)
+        run: npm run test:e2eMongo
+
+      - name: 🧪 Run E2E tests (Mail)
+        run: npm run test:e2eMail
+
+      - name: 📊 Generate coverage
+        run: npm run test:coverage
+
+      - name: ☁️ Skip SonarCloud on non-main branches
+        if: github.ref != 'refs/heads/main' && github.event_name != 'pull_request'
+        run: echo "Skipping SonarCloud analysis"
+
+      - name: ☁️ Upload coverage to SonarCloud
         if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: npx sonar-scanner
 
-  snyk-security:
-    runs-on: ubuntu-latest
-    needs: [unit-tests]
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run Snyk
+      - name: 🛡️ Run Snyk security analysis
         uses: snyk/actions/node@master
         continue-on-error: true
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: 🗂️ Archive test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            coverage/
+            reports/
